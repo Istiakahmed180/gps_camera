@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/widgets.dart';
@@ -8,6 +9,7 @@ import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
 import 'package:gps_camera/features/camera/models/camera_status.dart';
 import 'package:gps_camera/features/camera/models/capture_assignment.dart';
+import 'package:gps_camera/features/camera/models/capture_post_processing.dart';
 import 'package:gps_camera/features/camera/models/capture_feedback.dart';
 import 'package:gps_camera/features/camera/services/capture_saver.dart';
 import 'package:gps_camera/features/location/controllers/location_controller.dart';
@@ -31,11 +33,17 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     this._location, {
     CameraLoader cameraLoader = availableCameras,
     this._assigner,
+    this._postProcessor,
   }) : _loadCameras = cameraLoader;
 
   /// Files new captures into the active project. Optional: the camera works
   /// the same without it, and its failures never fail a capture.
   final CaptureAssigner? _assigner;
+
+  /// Map snapshot, address and automatic watermarked copy, done after the
+  /// photo is saved. Optional; never delays or fails a capture.
+  final CapturePostProcessor? _postProcessor;
+  Future<void> _postQueue = Future<void>.value();
 
   static const List<FlashMode> flashModes = [
     FlashMode.off,
@@ -191,6 +199,8 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     isCapturing.value = true;
     final capturedAt = DateTime.now();
     final location = _location.snapshotAt(capturedAt);
+    // The map is grabbed at the shutter, while it still shows this spot.
+    final map = _postProcessor?.grabMap();
 
     try {
       final saved = await _serial(() async {
@@ -208,6 +218,7 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
         captureFeedbackMessage(saved, assignment),
         isError: !saved.hasMetadataFile || assignment is AssignmentFailed,
       );
+      _postProcess(saved, map);
     } on CameraException catch (e) {
       _showFeedback('Capture failed: ${_describe(e)}', isError: true);
     } on FileSystemException catch (e) {
@@ -217,6 +228,22 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     } finally {
       isCapturing.value = false;
     }
+  }
+
+  /// Runs post-processing one capture at a time, in capture order.
+  void _postProcess(SavedCapture saved, Future<Uint8List?>? map) {
+    final processor = _postProcessor;
+    if (processor == null) return;
+    _postQueue = _postQueue.then((_) async {
+      try {
+        final message = await processor.process(saved, await map);
+        if (message != null && !_isClosed) {
+          _showFeedback(message, isError: message.contains('not saved'));
+        }
+      } catch (_) {
+        // Post-processing is best effort; the photo is already saved.
+      }
+    });
   }
 
   Future<void> _checkPermissionAndStart({required bool requestIfNeeded}) async {

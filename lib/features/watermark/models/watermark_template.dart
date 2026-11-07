@@ -1,4 +1,7 @@
 enum WatermarkTemplate {
+  /// Map snapshot beside the address, coordinates and time.
+  map(label: 'Map', description: 'Map, address, coordinates and time'),
+
   /// White text on a dark translucent panel, compact.
   classic(label: 'Classic', description: 'Compact panel with clean white text'),
 

@@ -25,6 +25,9 @@ class WatermarkContent {
     this.accuracyLevel,
     this.fixAge,
     this.address,
+    this.placeTitle,
+    this.flag,
+    this.plusCode,
   });
 
   factory WatermarkContent.from(
@@ -40,7 +43,8 @@ class WatermarkContent {
     final showsLocation =
         config.showCoordinates ||
         config.showAccuracy ||
-        (config.showAddress && fix?.address != null);
+        (config.showAddress &&
+            (fix?.address != null || metadata.place?.hasAddress == true));
 
     final state = switch (location.status) {
       _ when !showsLocation => null,
@@ -51,7 +55,8 @@ class WatermarkContent {
       _ => WatermarkLocationState.unavailable,
     };
     final hasFix = fix != null && state != WatermarkLocationState.unavailable;
-    final address = fix?.address?.trim();
+    final place = metadata.place;
+    final address = (place?.addressLine ?? fix?.address)?.trim();
 
     return WatermarkContent(
       date: config.showDate ? CaptureTimeFormatter.date(wallClock) : null,
@@ -79,6 +84,9 @@ class WatermarkContent {
           hasFix && config.showAddress && address != null && address.isNotEmpty
           ? address
           : null,
+      placeTitle: hasFix && config.showAddress ? place?.title : null,
+      flag: hasFix && config.showAddress ? place?.flag : null,
+      plusCode: hasFix && config.showCoordinates ? place?.plusCode : null,
     );
   }
 
@@ -96,6 +104,20 @@ class WatermarkContent {
   /// How long before capture the last known fix was taken.
   final Duration? fixAge;
   final String? address;
+
+  /// `Tongi, Dhaka Division, Bangladesh`, from the looked-up place.
+  final String? placeTitle;
+
+  /// Country flag emoji for [placeTitle].
+  final String? flag;
+
+  /// Offline Plus Code for the capture location.
+  final String? plusCode;
+
+  /// True when a map of the capture location may be shown.
+  bool get canShowMap =>
+      locationState != null &&
+      locationState != WatermarkLocationState.unavailable;
 
   bool get hasDateTime => date != null || time != null;
 

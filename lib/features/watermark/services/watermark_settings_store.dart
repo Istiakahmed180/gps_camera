@@ -18,4 +18,11 @@ class WatermarkSettingsStore {
 
   Future<void> save(WatermarkConfig config) =>
       _storage.write(StorageKeys.watermarkConfig, config.toJson());
+
+  /// Whether each capture also saves a watermarked copy. On by default.
+  bool loadAutoWatermark() =>
+      _storage.read<bool>(StorageKeys.autoWatermark) ?? true;
+
+  Future<void> saveAutoWatermark(bool enabled) =>
+      _storage.write(StorageKeys.autoWatermark, enabled);
 }

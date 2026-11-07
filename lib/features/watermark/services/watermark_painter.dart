@@ -37,9 +37,22 @@ class WatermarkPainter {
     required this.content,
     required this.config,
     required this.imageSize,
+    this.mapImage,
+    this.reserveMapSlot = false,
   }) {
     _layout();
   }
+
+  /// Map snapshot drawn by the Map template. Without it (and without
+  /// [reserveMapSlot]) the template simply has no map column.
+  final ui.Image? mapImage;
+
+  /// Leaves the map square empty so a live map widget can sit on top of it
+  /// (camera preview). Ignored when there is no location to map.
+  final bool reserveMapSlot;
+
+  /// Where the map square is, in image pixels; null when there is none.
+  Rect? mapRect;
 
   static const String brand = 'GPS CAMERA';
 
@@ -61,6 +74,8 @@ class WatermarkPainter {
   double _bar = 0;
   double _radius = 0;
   Color? _background;
+  double _mapSide = 0;
+  double _mapGap = 0;
 
   WatermarkTemplate get _template => config.template;
 
@@ -90,7 +105,31 @@ class WatermarkPainter {
         ..restore();
     }
 
-    final textLeft = bounds.left + _bar + _padH;
+    final map = mapRect;
+    if (map != null) {
+      final clip = RRect.fromRectAndRadius(map, Radius.circular(_radius * 0.6));
+      final image = mapImage;
+      canvas.save();
+      canvas.clipRRect(clip);
+      if (image != null) {
+        final src = _coverSquare(
+          image.width.toDouble(),
+          image.height.toDouble(),
+        );
+        canvas.drawImageRect(
+          image,
+          src,
+          map,
+          Paint()..filterQuality = FilterQuality.medium,
+        );
+      } else {
+        canvas.drawRect(map, Paint()..color = const Color(0x33FFFFFF));
+      }
+      canvas.restore();
+    }
+
+    final textLeft =
+        bounds.left + _bar + _padH + (map == null ? 0 : _mapSide + _mapGap);
     var y = bounds.top + _padV;
     for (final (index, row) in _rows.indexed) {
       if (index > 0) y += _gap;
@@ -148,6 +187,20 @@ class WatermarkPainter {
         _padH = 6 * _unit;
         _padV = 6 * _unit;
         _gap = 3 * _unit;
+      case WatermarkTemplate.map:
+        _padH = 16 * _unit;
+        _padV = 14 * _unit;
+        _gap = 4 * _unit;
+        _radius = 12 * _unit;
+        _background = const Color(0xB3000000);
+    }
+    final withMap =
+        _template == WatermarkTemplate.map &&
+        content.canShowMap &&
+        (mapImage != null || reserveMapSlot);
+    if (withMap) {
+      _mapSide = 190 * _unit;
+      _mapGap = 14 * _unit;
     }
 
     final maxBlockWidth = imageSize.width - margin * 2;
@@ -159,7 +212,7 @@ class WatermarkPainter {
     _labelWidth = labels.fold(0, (w, p) => math.max(w, p.width));
     final labelColumn = _labelWidth == 0 ? 0 : _labelWidth + _labelGap;
 
-    final chrome = _bar + _padH * 2;
+    final chrome = _bar + _padH * 2 + (withMap ? _mapSide + _mapGap : 0);
     var labelIndex = 0;
     for (final line in lines) {
       final label = line.label == null ? null : labels[labelIndex++];
@@ -183,7 +236,7 @@ class WatermarkPainter {
     }
 
     final width = math.min(contentWidth + chrome, maxBlockWidth);
-    final height = contentHeight + _padV * 2;
+    final height = math.max(contentHeight, withMap ? _mapSide : 0) + _padV * 2;
     final left = switch (config.position) {
       WatermarkPosition.bottomLeft => margin,
       WatermarkPosition.bottomCenter => (imageSize.width - width) / 2,
@@ -191,6 +244,14 @@ class WatermarkPainter {
     };
     final top = math.max(0.0, imageSize.height - margin - height);
     bounds = Rect.fromLTWH(left, top, width, height);
+    if (withMap) {
+      mapRect = Rect.fromLTWH(
+        left + _padH,
+        top + (height - _mapSide) / 2,
+        _mapSide,
+        _mapSide,
+      );
+    }
   }
 
   List<_Line> _lines() {
@@ -226,6 +287,24 @@ class WatermarkPainter {
           ),
         if (c.address != null)
           _Line(c.address!, _Role.secondary, label: 'ADDR'),
+      ],
+      WatermarkTemplate.map => [
+        const _Line(brand, _Role.brand),
+        if (c.placeTitle != null)
+          _Line(
+            c.flag == null ? c.placeTitle! : '${c.placeTitle}  ${c.flag}',
+            _Role.primary,
+          ),
+        if (c.locationNotice != null) _Line(c.locationNotice!, _Role.notice),
+        if (c.address != null) _Line(c.address!, _Role.secondary),
+        if (c.coordinatesLine != null)
+          _Line(c.coordinatesLine!, _Role.secondary),
+        if (c.dateTimeLine != null)
+          _Line(c.dateTimeLine!.replaceAll('  |  ', '  ·  '), _Role.secondary),
+        if (c.accuracyValue != null)
+          _Line('GPS Accuracy: ${c.accuracyValue}', _accuracyRole),
+        if (c.plusCode != null)
+          _Line('Plus Code ${c.plusCode}', _Role.secondary),
       ],
       WatermarkTemplate.minimal => [
         if (c.dateTimeLine != null)
@@ -301,6 +380,12 @@ class WatermarkPainter {
             ]
           : null,
     );
+  }
+
+  /// Centre square of an image, so maps fill the square without stretching.
+  static Rect _coverSquare(double width, double height) {
+    final side = math.min(width, height);
+    return Rect.fromLTWH((width - side) / 2, (height - side) / 2, side, side);
   }
 
   TextStyle _labelStyle() => TextStyle(

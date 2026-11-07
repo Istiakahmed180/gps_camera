@@ -38,6 +38,7 @@ dependencies:
   pdf: ^3.13.1
   drift: ^2.35.3
   drift_flutter: ^0.3.1
+  geocoding: ^5.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

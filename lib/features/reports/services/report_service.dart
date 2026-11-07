@@ -50,8 +50,7 @@ class ReportService extends GetxService {
     MethodChannel? channel,
   }) : _runner = runner ?? runInIsolate,
        _fonts = fonts ?? loadBundledFonts,
-       _channel =
-           channel ?? const MethodChannel('co.tdevs.gps_camera/report_files');
+       _channel = channel ?? const MethodChannel('co.tdevs.gps_camera/native');
 
   /// Keeps memory and file size reasonable on phones.
   static const int maxPhotos = 300;

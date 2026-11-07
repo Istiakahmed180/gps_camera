@@ -1,4 +1,5 @@
 import 'package:gps_camera/features/location/models/location_snapshot.dart';
+import 'package:gps_camera/features/location/models/place_info.dart';
 
 /// Sidecar data stored next to each photo as `<photo name>.json`.
 class PhotoMetadata {
@@ -8,6 +9,8 @@ class PhotoMetadata {
     required this.timeZoneOffset,
     required this.timeZoneName,
     required this.location,
+    this.place,
+    this.mapImageFileName,
     this.schemaVersion = currentSchemaVersion,
   });
 
@@ -36,10 +39,29 @@ class PhotoMetadata {
       location: LocationSnapshot.fromJson(
         json['location'] as Map<String, dynamic>,
       ),
+      place: switch (json['place']) {
+        final Map<String, dynamic> place => PlaceInfo.fromJson(place),
+        _ => null,
+      },
+      mapImageFileName: json['mapImageFileName'] as String?,
     );
   }
 
-  static const int currentSchemaVersion = 1;
+  /// Adds the looked-up place and map image. Capture time and GPS values
+  /// are never changed.
+  PhotoMetadata withPlace({PlaceInfo? place, String? mapImageFileName}) =>
+      PhotoMetadata(
+        imageFileName: imageFileName,
+        capturedAt: capturedAt,
+        timeZoneOffset: timeZoneOffset,
+        timeZoneName: timeZoneName,
+        location: location,
+        place: place ?? this.place,
+        mapImageFileName: mapImageFileName ?? this.mapImageFileName,
+      );
+
+  /// 2 adds [place] and [mapImageFileName]; version 1 files still load.
+  static const int currentSchemaVersion = 2;
 
   final int schemaVersion;
   final String imageFileName;
@@ -52,6 +74,12 @@ class PhotoMetadata {
   final String timeZoneName;
   final LocationSnapshot location;
 
+  /// Address and Plus Code for the capture location, when looked up.
+  final PlaceInfo? place;
+
+  /// File in `GPSCamera/Maps/` with the map shown at capture, if any.
+  final String? mapImageFileName;
+
   Map<String, dynamic> toJson() => {
     'schemaVersion': schemaVersion,
     'imageFileName': imageFileName,
@@ -59,5 +87,7 @@ class PhotoMetadata {
     'timeZoneOffsetMinutes': timeZoneOffset.inMinutes,
     'timeZoneName': timeZoneName,
     'location': location.toJson(),
+    'place': place?.toJson(),
+    'mapImageFileName': mapImageFileName,
   };
 }

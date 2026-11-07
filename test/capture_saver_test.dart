@@ -144,7 +144,7 @@ void main() {
     );
     final json = metadata.toJson();
 
-    expect(json['schemaVersion'], 1);
+    expect(json['schemaVersion'], PhotoMetadata.currentSchemaVersion);
     expect(
       json['timeZoneOffsetMinutes'],
       capturedAt.toLocal().timeZoneOffset.inMinutes,

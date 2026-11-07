@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
@@ -12,11 +14,13 @@ class WatermarkPreview extends StatelessWidget {
     required this.image,
     required this.content,
     required this.config,
+    this.mapImage,
   });
 
   final PreviewImage image;
   final WatermarkContent content;
   final WatermarkConfig config;
+  final ui.Image? mapImage;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +45,7 @@ class WatermarkPreview extends StatelessWidget {
                   content: content,
                   config: config,
                   imageSize: size,
+                  mapImage: mapImage,
                 ),
               ),
             ],
@@ -57,11 +62,15 @@ class WatermarkCanvasPainter extends CustomPainter {
     required this.content,
     required this.config,
     required this.imageSize,
+    this.mapImage,
+    this.reserveMapSlot = false,
   });
 
   final WatermarkContent content;
   final WatermarkConfig config;
   final Size imageSize;
+  final ui.Image? mapImage;
+  final bool reserveMapSlot;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -70,6 +79,8 @@ class WatermarkCanvasPainter extends CustomPainter {
       content: content,
       config: config,
       imageSize: imageSize,
+      mapImage: mapImage,
+      reserveMapSlot: reserveMapSlot,
     );
     canvas
       ..save()
@@ -84,5 +95,7 @@ class WatermarkCanvasPainter extends CustomPainter {
   bool shouldRepaint(WatermarkCanvasPainter old) =>
       old.config != config ||
       old.imageSize != imageSize ||
+      old.mapImage != mapImage ||
+      old.reserveMapSlot != reserveMapSlot ||
       !identical(old.content, content);
 }

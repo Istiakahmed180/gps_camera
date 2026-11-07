@@ -96,6 +96,13 @@ class GalleryService {
           deleted,
           failures,
         );
+        if (photo.isOriginal) {
+          await _remove(
+            await _storage.mapImageFor(photo.file),
+            deleted,
+            failures,
+          );
+        }
       }
     }
     return DeleteResult(

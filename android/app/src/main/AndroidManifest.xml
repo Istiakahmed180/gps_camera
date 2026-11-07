@@ -50,6 +50,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Geoapify static map key, injected from local.properties. -->
+        <meta-data
+            android:name="co.tdevs.gps_camera.GEOAPIFY_API_KEY"
+            android:value="${geoapifyApiKey}" />
         <!-- Shares only the cache folder that report PDFs are copied into
              when the user opens one in another app. -->
         <provider

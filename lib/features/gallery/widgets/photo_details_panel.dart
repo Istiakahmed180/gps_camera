@@ -7,6 +7,7 @@ import 'package:gps_camera/features/gallery/utils/photo_info_formatter.dart';
 import 'package:gps_camera/features/location/models/gps_accuracy_level.dart';
 import 'package:gps_camera/features/location/models/location_fix.dart';
 import 'package:gps_camera/features/location/models/location_snapshot.dart';
+import 'package:gps_camera/features/location/models/place_info.dart';
 import 'package:gps_camera/features/watermark/utils/capture_time_formatter.dart';
 import 'package:gps_camera/shared/widgets/section_header.dart';
 
@@ -43,7 +44,8 @@ class PhotoDetailsPanel extends StatelessWidget {
                   _Row('Time zone', metadata.timeZoneName),
                 ],
         ),
-        if (metadata != null) _LocationSection(location: metadata.location),
+        if (metadata != null)
+          _LocationSection(location: metadata.location, place: metadata.place),
         if (record != null)
           _Section(
             title: 'Watermark',
@@ -80,9 +82,10 @@ class PhotoDetailsPanel extends StatelessWidget {
 }
 
 class _LocationSection extends StatelessWidget {
-  const _LocationSection({required this.location});
+  const _LocationSection({required this.location, required this.place});
 
   final LocationSnapshot location;
+  final PlaceInfo? place;
 
   @override
   Widget build(BuildContext context) {
@@ -117,11 +120,27 @@ class _LocationSection extends StatelessWidget {
               'Direction of travel',
               '${PhotoInfoFormatter.measured(fix.heading!, maxDecimals: 1)}°',
             ),
-          if (fix.address != null) _Row('Address', fix.address!),
+          ..._placeRows(place, fix),
           if (fix.isMocked) const _Row('Source', 'Mock location provider'),
         ],
       ],
     );
+  }
+
+  /// Address rows only when stored; the Plus Code is always derivable.
+  static List<_Row> _placeRows(PlaceInfo? place, LocationFix fix) {
+    if (place == null) {
+      return [if (fix.address != null) _Row('Address', fix.address!)];
+    }
+    return [
+      if (place.title != null) _Row('Place', place.title!),
+      _Row('Address', place.addressLine ?? 'Unavailable (no address found)'),
+      _Row('Plus Code', place.plusCode),
+      _Row(
+        'Address source',
+        'Device geocoder · ${PhotoInfoFormatter.instant(place.resolvedAt)}',
+      ),
+    ];
   }
 
   static String _altitude(LocationFix fix) {

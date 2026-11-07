@@ -6,6 +6,7 @@ import 'package:gps_camera/features/gallery/utils/photo_info_formatter.dart';
 import 'package:gps_camera/features/location/models/gps_accuracy_level.dart';
 import 'package:gps_camera/features/location/models/location_fix.dart';
 import 'package:gps_camera/features/location/models/location_snapshot.dart';
+import 'package:gps_camera/features/location/models/place_info.dart';
 import 'package:gps_camera/features/reports/models/report_models.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 import 'package:gps_camera/features/watermark/utils/capture_time_formatter.dart';
@@ -509,7 +510,7 @@ List<(String, String, bool)> _locationRows(PhotoMetadata metadata) {
           '${PhotoInfoFormatter.measured(fix.heading!, maxDecimals: 1)}°',
           false,
         ),
-      if (fix.address != null) ('Address', fix.address!, false),
+      ..._placeRows(metadata.place, fix),
       if (fix.isMocked) ('Source', 'Mock location provider', true),
     ],
   ];
@@ -532,6 +533,21 @@ List<(String, String, bool)> _watermarkRows(ReportEntry entry) {
       config == null ? 'Unavailable (render record missing)' : _config(config),
       config == null,
     ),
+  ];
+}
+
+List<(String, String, bool)> _placeRows(PlaceInfo? place, LocationFix fix) {
+  if (place == null) {
+    return [if (fix.address != null) ('Address', fix.address!, false)];
+  }
+  return [
+    if (place.title != null) ('Place', place.title!, false),
+    (
+      'Address',
+      place.addressLine ?? 'Unavailable (no address found)',
+      place.addressLine == null,
+    ),
+    ('Plus Code', place.plusCode, false),
   ];
 }
 

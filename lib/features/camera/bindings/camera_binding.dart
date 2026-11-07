@@ -5,7 +5,13 @@ import 'package:gps_camera/core/services/storage_service.dart';
 import 'package:gps_camera/features/camera/controllers/capture_controller.dart';
 import 'package:gps_camera/features/camera/services/capture_saver.dart';
 import 'package:gps_camera/features/location/controllers/location_controller.dart';
+import 'package:gps_camera/features/camera/services/capture_enricher.dart';
+import 'package:gps_camera/features/location/controllers/live_map_controller.dart';
+import 'package:gps_camera/features/location/controllers/place_controller.dart';
 import 'package:gps_camera/features/location/services/location_service.dart';
+import 'package:gps_camera/features/location/services/place_service.dart';
+import 'package:gps_camera/features/watermark/services/watermark_renderer.dart';
+import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
 import 'package:gps_camera/features/projects/controllers/active_project_controller.dart';
 import 'package:gps_camera/features/projects/services/active_project_store.dart';
 import 'package:gps_camera/features/projects/services/project_repository.dart';
@@ -27,12 +33,27 @@ class CameraBinding extends Bindings {
       ),
     );
     Get.lazyPut(
-      () => CaptureController(
+      () => PlaceController(Get.find<LocationController>(), PlaceService()),
+    );
+    Get.lazyPut(() => LiveMapController(Get.find<LocationController>()));
+    Get.lazyPut(() => WatermarkSettingsStore(Get.find<StorageService>()));
+    Get.lazyPut(() {
+      final storage = Get.find<PhotoStorageService>();
+      final place = Get.find<PlaceController>();
+      final map = Get.find<LiveMapController>();
+      return CaptureController(
         Get.find<PermissionService>(),
-        CaptureSaver(Get.find<PhotoStorageService>()),
+        CaptureSaver(storage),
         Get.find<LocationController>(),
         assigner: Get.find<ActiveProjectController>(),
-      ),
-    );
+        postProcessor: CaptureEnricher(
+          storage: storage,
+          renderer: WatermarkRenderer(storage),
+          settings: Get.find<WatermarkSettingsStore>(),
+          placeFor: place.placeFor,
+          grabMap: map.snapshot,
+        ),
+      );
+    });
   }
 }

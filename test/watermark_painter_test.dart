@@ -81,7 +81,7 @@ void main() {
       for (final t in WatermarkTemplate.values)
         t: painterFor(WatermarkConfig(template: t)).bounds.size,
     };
-    expect(sizes.values.toSet(), hasLength(3));
+    expect(sizes.values.toSet(), hasLength(WatermarkTemplate.values.length));
     expect(
       sizes[WatermarkTemplate.minimal]!.height,
       lessThan(sizes[WatermarkTemplate.professional]!.height),

@@ -10,7 +10,11 @@ import 'package:gps_camera/features/camera/widgets/capture_toast.dart';
 import 'package:gps_camera/features/camera/widgets/last_photo_thumbnail.dart';
 import 'package:gps_camera/features/camera/widgets/shutter_button.dart';
 import 'package:gps_camera/features/location/controllers/location_controller.dart';
+import 'package:gps_camera/features/location/controllers/live_map_controller.dart';
+import 'package:gps_camera/features/location/controllers/place_controller.dart';
 import 'package:gps_camera/features/location/widgets/gps_status_panel.dart';
+import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
+import 'package:gps_camera/features/watermark/widgets/live_watermark_overlay.dart';
 import 'package:gps_camera/features/projects/controllers/active_project_controller.dart';
 import 'package:gps_camera/features/projects/widgets/active_project_chip.dart';
 
@@ -67,6 +71,12 @@ class CameraView extends GetView<CaptureController> {
                                     controller.requestPermission,
                                 onOpenSettings: controller.openSettings,
                                 onRetry: controller.retry,
+                                overlay: LiveWatermarkOverlay(
+                                  location: location,
+                                  place: Get.find<PlaceController>(),
+                                  map: Get.find<LiveMapController>(),
+                                  settings: Get.find<WatermarkSettingsStore>(),
+                                ),
                               ),
                             ),
                           ),

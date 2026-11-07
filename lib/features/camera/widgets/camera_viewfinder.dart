@@ -15,7 +15,11 @@ class CameraViewfinder extends StatelessWidget {
     required this.onRequestPermission,
     required this.onOpenSettings,
     required this.onRetry,
+    this.overlay,
   });
+
+  /// Drawn over the live preview, sized exactly to it.
+  final Widget? overlay;
 
   final CameraStatus status;
   final CameraController? camera;
@@ -37,7 +41,7 @@ class CameraViewfinder extends StatelessWidget {
       child: ColoredBox(
         color: AppColors.viewfinderSurface,
         child: showPreview
-            ? Center(child: CameraPreview(controller))
+            ? Center(child: CameraPreview(controller, child: overlay))
             : _buildMessage(),
       ),
     );

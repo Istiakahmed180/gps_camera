@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:gps_camera/core/services/photo_storage_service.dart';
@@ -52,6 +53,7 @@ class WatermarkRenderer {
     required PhotoMetadata metadata,
     required WatermarkConfig config,
     required Size imageSize,
+    Uint8List? mapImage,
   }) async {
     if (_storage.isWatermarkedFile(original)) {
       throw const WatermarkException(
@@ -63,10 +65,12 @@ class WatermarkRenderer {
       throw const WatermarkException('Choose at least one detail to show.');
     }
 
+    final map = mapImage == null ? null : await decodeMapImage(mapImage);
     final painter = WatermarkPainter(
       content: content,
       config: config,
       imageSize: imageSize,
+      mapImage: map,
     );
     OverlayBitmap? overlay;
     try {
@@ -75,6 +79,7 @@ class WatermarkRenderer {
       throw WatermarkException('The watermark could not be drawn: $e');
     } finally {
       painter.dispose();
+      map?.dispose();
     }
     if (overlay == null) {
       throw const WatermarkException('The watermark could not be drawn.');
@@ -131,5 +136,18 @@ class WatermarkRenderer {
       config: config,
       sourceMetadata: metadata,
     );
+  }
+}
+
+/// Decodes a stored map snapshot; null if it is unreadable, so a damaged
+/// map file never blocks a watermark.
+Future<Image?> decodeMapImage(Uint8List bytes) async {
+  try {
+    final codec = await instantiateImageCodec(bytes);
+    final frame = await codec.getNextFrame();
+    codec.dispose();
+    return frame.image;
+  } catch (_) {
+    return null;
   }
 }

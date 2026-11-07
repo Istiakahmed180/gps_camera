@@ -3,6 +3,7 @@ package co.tdevs.gps_camera
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -16,6 +17,7 @@ class MainActivity : FlutterActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "openPdf" -> result.success(openPdf(call.argument<String>("path")))
+                    "mapKey" -> result.success(mapKey())
                     else -> result.notImplemented()
                 }
             }
@@ -51,7 +53,14 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    /** The Geoapify key provided at build time, or null. */
+    private fun mapKey(): String? {
+        val info = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+        return info.metaData?.getString("co.tdevs.gps_camera.GEOAPIFY_API_KEY")
+            ?.takeIf { it.isNotBlank() }
+    }
+
     companion object {
-        private const val CHANNEL = "co.tdevs.gps_camera/report_files"
+        private const val CHANNEL = "co.tdevs.gps_camera/native"
     }
 }

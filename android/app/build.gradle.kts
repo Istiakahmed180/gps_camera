@@ -1,3 +1,15 @@
+import java.util.Properties
+
+// The Geoapify map key is read from android/local.properties (git-ignored):
+//   GEOAPIFY_API_KEY=your-key
+// Without it the app still builds and shows a "map unavailable" placeholder.
+val geoapifyApiKey: String =
+    Properties().run {
+        val file = rootProject.file("local.properties")
+        if (file.exists()) file.inputStream().use { load(it) }
+        getProperty("GEOAPIFY_API_KEY")?.trim().orEmpty()
+    }
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -28,6 +40,7 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["geoapifyApiKey"] = geoapifyApiKey
     }
 
     buildTypes {

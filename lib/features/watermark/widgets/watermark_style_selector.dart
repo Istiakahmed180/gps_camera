@@ -158,6 +158,7 @@ class _TemplateSamplePainter extends CustomPainter {
       content: content,
       config: config,
       imageSize: _canvas,
+      reserveMapSlot: true,
     );
     final bounds = painter.bounds;
     if (!bounds.isEmpty) {

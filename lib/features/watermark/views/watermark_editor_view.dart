@@ -104,6 +104,7 @@ class _Stage extends GetView<WatermarkController> {
             image: image,
             content: content,
             config: controller.config.value,
+            mapImage: controller.mapImage.value,
           );
         }),
       ),

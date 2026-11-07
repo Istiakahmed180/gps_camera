@@ -16,6 +16,7 @@ class PhotoStorageService extends GetxService {
   static const String _photosFolder = 'Photos';
   static const String _watermarkedFolder = 'Watermarked';
   static const String _reportsFolder = 'Reports';
+  static const String _mapsFolder = 'Maps';
 
   /// `<ApplicationDocuments>/GPSCamera`. Database rows store photo paths
   /// relative to this folder.
@@ -27,6 +28,29 @@ class PhotoStorageService extends GetxService {
   Future<Directory> photosDirectory() => _directory(_photosFolder);
 
   Future<Directory> watermarkedDirectory() => _directory(_watermarkedFolder);
+
+  /// Map snapshots taken at capture, `<photo base>_map.png`.
+  Future<Directory> mapsDirectory() => _directory(_mapsFolder);
+
+  /// Saves the capture-time map for [photo] (temp file, then rename).
+  Future<File> saveMapImage(File photo, List<int> png) async {
+    final directory = await mapsDirectory();
+    final target = File('${directory.path}/${mapImageNameFor(photo.path)}');
+    final temp = File('${target.path}.tmp');
+    await temp.writeAsBytes(png, flush: true);
+    return temp.rename(target.path);
+  }
+
+  /// `IMG_x.jpg` → `IMG_x_map.png`. Pure, usable from isolates.
+  static String mapImageNameFor(String photoPath) {
+    final name = photoPath.substring(photoPath.lastIndexOf('/') + 1);
+    final dot = name.lastIndexOf('.');
+    return '${dot > 0 ? name.substring(0, dot) : name}_map.png';
+  }
+
+  /// The map snapshot file for [photo], whether or not it exists.
+  Future<File> mapImageFor(File photo) async =>
+      File('${(await mapsDirectory()).path}/${mapImageNameFor(photo.path)}');
 
   /// Generated PDF reports, each with a `.json` record.
   Future<Directory> reportsDirectory() => _directory(_reportsFolder);

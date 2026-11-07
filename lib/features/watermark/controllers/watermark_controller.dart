@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:get/get.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
+import 'package:gps_camera/features/camera/services/capture_enricher.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 import 'package:gps_camera/features/watermark/models/watermark_content.dart';
 import 'package:gps_camera/features/watermark/services/image_processor.dart';
@@ -33,6 +35,10 @@ class WatermarkController extends GetxController {
   final RxnString loadError = RxnString();
   final Rxn<PhotoMetadata> metadata = Rxn<PhotoMetadata>();
   final Rxn<PreviewImage> preview = Rxn<PreviewImage>();
+
+  /// The map stored at capture (Map template), if any.
+  final Rxn<ui.Image> mapImage = Rxn<ui.Image>();
+  Uint8List? _mapBytes;
   final Rx<WatermarkConfig> config = const WatermarkConfig().obs;
   final RxBool isSaving = false.obs;
   final Rxn<WatermarkResult> lastResult = Rxn<WatermarkResult>();
@@ -78,6 +84,13 @@ class WatermarkController extends GetxController {
       ]);
       metadata.value = results[0]! as PhotoMetadata;
       preview.value = results[1]! as PreviewImage;
+      _mapBytes = await CaptureEnricher.storedMap(
+        _storage,
+        photo,
+        metadata.value!,
+      );
+      final map = _mapBytes;
+      mapImage.value = map == null ? null : await decodeMapImage(map);
       status.value = WatermarkEditorStatus.ready;
     } on _LoadException catch (e) {
       _fail(e.message);
@@ -109,7 +122,8 @@ class WatermarkController extends GetxController {
         original: photo,
         metadata: current,
         config: config.value,
-        imageSize: Size(image.width.toDouble(), image.height.toDouble()),
+        imageSize: ui.Size(image.width.toDouble(), image.height.toDouble()),
+        mapImage: _mapBytes,
       );
     } on WatermarkException catch (e) {
       saveError.value = e.message;
@@ -139,6 +153,12 @@ class WatermarkController extends GetxController {
     } catch (_) {
       throw const _LoadException('This photo\'s metadata is not recognised.');
     }
+  }
+
+  @override
+  void onClose() {
+    mapImage.value?.dispose();
+    super.onClose();
   }
 
   void _fail(String message) {
