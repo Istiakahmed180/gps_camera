@@ -5,5 +5,9 @@ abstract final class StorageKeys {
   static const String autoWatermark = 'camera.auto_watermark';
   static const String displayFormat = 'settings.display_format';
   static const String photoQuality = 'camera.photo_quality';
+  static const String cameraGrid = 'camera.grid';
+  static const String captureTimer = 'camera.timer';
+  static const String volumeShutter = 'camera.volume_shutter';
+  static const String captureNote = 'camera.note';
   static const String gallerySaveMode = 'export.gallery_save_mode';
 }

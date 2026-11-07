@@ -33,7 +33,24 @@ class WatermarkConfig {
     this.textSize = WatermarkTextSize.medium,
     this.opacity = 1,
     this.position = WatermarkPosition.bottomLeft,
+    this.brandText = defaultBrand,
+    this.customText = '',
+    this.showLogo = false,
+    this.showNote = true,
   });
+
+  static const String defaultBrand = 'GPS CAMERA';
+  static const int maxBrandLength = 40;
+  static const int maxCustomTextLength = 120;
+
+  /// Trims and limits user-typed watermark text.
+  static String cleanText(Object? value, int maxLength, String orElse) {
+    if (value is! String) return orElse;
+    final text = value.trim().replaceAll(RegExp(r'\s+'), ' ');
+    return text.length > maxLength
+        ? text.substring(0, maxLength).trimRight()
+        : text;
+  }
 
   /// Restores saved settings. Unknown or invalid values fall back to the
   /// defaults instead of failing, so an old or corrupted entry never blocks
@@ -72,6 +89,10 @@ class WatermarkConfig {
         json['position'],
         fallback.position,
       ),
+      brandText: cleanText(json['brandText'], maxBrandLength, defaultBrand),
+      customText: cleanText(json['customText'], maxCustomTextLength, ''),
+      showLogo: flag('showLogo', fallback.showLogo),
+      showNote: flag('showNote', fallback.showNote),
     );
   }
 
@@ -92,6 +113,18 @@ class WatermarkConfig {
   final double opacity;
   final WatermarkPosition position;
 
+  /// Heading line, e.g. a company name. Empty hides it.
+  final String brandText;
+
+  /// An extra line under the heading, e.g. "Site: Block C · Inspector: Rahim".
+  final String customText;
+
+  /// Draws the logo chosen in the editor next to the heading.
+  final bool showLogo;
+
+  /// Shows the photo's note.
+  final bool showNote;
+
   WatermarkConfig copyWith({
     WatermarkTemplate? template,
     bool? showDate,
@@ -102,6 +135,10 @@ class WatermarkConfig {
     WatermarkTextSize? textSize,
     double? opacity,
     WatermarkPosition? position,
+    String? brandText,
+    String? customText,
+    bool? showLogo,
+    bool? showNote,
   }) {
     return WatermarkConfig(
       template: template ?? this.template,
@@ -113,6 +150,14 @@ class WatermarkConfig {
       textSize: textSize ?? this.textSize,
       opacity: opacity == null ? this.opacity : clampOpacity(opacity),
       position: position ?? this.position,
+      brandText: brandText == null
+          ? this.brandText
+          : cleanText(brandText, maxBrandLength, ''),
+      customText: customText == null
+          ? this.customText
+          : cleanText(customText, maxCustomTextLength, ''),
+      showLogo: showLogo ?? this.showLogo,
+      showNote: showNote ?? this.showNote,
     );
   }
 
@@ -126,6 +171,10 @@ class WatermarkConfig {
     'textSize': textSize.name,
     'opacity': opacity,
     'position': position.name,
+    'brandText': brandText,
+    'customText': customText,
+    'showLogo': showLogo,
+    'showNote': showNote,
   };
 
   @override
@@ -139,7 +188,11 @@ class WatermarkConfig {
       other.showAddress == showAddress &&
       other.textSize == textSize &&
       other.opacity == opacity &&
-      other.position == position;
+      other.position == position &&
+      other.brandText == brandText &&
+      other.customText == customText &&
+      other.showLogo == showLogo &&
+      other.showNote == showNote;
 
   @override
   int get hashCode => Object.hash(
@@ -152,5 +205,9 @@ class WatermarkConfig {
     textSize,
     opacity,
     position,
+    brandText,
+    customText,
+    showLogo,
+    showNote,
   );
 }

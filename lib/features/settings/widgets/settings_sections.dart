@@ -64,6 +64,17 @@ class CameraSettings extends StatelessWidget {
             value: controller.autoWatermark.value,
             onChanged: controller.setAutoWatermark,
           ),
+          const Divider(height: 1),
+          SwitchListTile(
+            secondary: const Icon(Icons.volume_up_outlined),
+            title: const Text('Volume buttons take photos'),
+            subtitle: const Text(
+              'While the camera is open. Volume works normally everywhere '
+              'else.',
+            ),
+            value: controller.volumeShutter.value,
+            onChanged: controller.setVolumeShutter,
+          ),
         ],
       ),
     );

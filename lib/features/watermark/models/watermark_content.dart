@@ -28,6 +28,9 @@ class WatermarkContent {
     this.placeTitle,
     this.flag,
     this.plusCode,
+    this.brand,
+    this.customText,
+    this.note,
   });
 
   factory WatermarkContent.from(
@@ -87,6 +90,9 @@ class WatermarkContent {
       placeTitle: hasFix && config.showAddress ? place?.title : null,
       flag: hasFix && config.showAddress ? place?.flag : null,
       plusCode: hasFix && config.showCoordinates ? place?.plusCode : null,
+      brand: config.brandText.isEmpty ? null : config.brandText,
+      customText: config.customText.isEmpty ? null : config.customText,
+      note: config.showNote ? metadata.note : null,
     );
   }
 
@@ -114,6 +120,15 @@ class WatermarkContent {
   /// Offline Plus Code for the capture location.
   final String? plusCode;
 
+  /// Heading text; null when the user cleared it.
+  final String? brand;
+
+  /// The user's extra line, e.g. site or inspector name.
+  final String? customText;
+
+  /// The photo's own note.
+  final String? note;
+
   /// True when a map of the capture location may be shown.
   bool get canShowMap =>
       locationState != null &&
@@ -123,7 +138,9 @@ class WatermarkContent {
 
   bool get hasCoordinates => latitude != null && longitude != null;
 
-  bool get isEmpty => !hasDateTime && locationState == null;
+  /// Nothing about the photo itself to show. A heading or extra line alone
+  /// is not a watermark worth saving.
+  bool get isEmpty => !hasDateTime && locationState == null && note == null;
 
   /// `07 Nov 2026 | 10:02 AM UTC+06:00`
   String? get dateTimeLine {

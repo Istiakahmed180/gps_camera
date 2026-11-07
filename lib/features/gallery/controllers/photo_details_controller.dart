@@ -30,6 +30,25 @@ class PhotoDetailsController extends GetxController {
   final ProjectRepository _projects;
 
   final Rxn<ImageDimensions> dimensions = Rxn<ImageDimensions>();
+
+  /// The note as currently saved. A copy shows the note it was made with.
+  late final RxnString note = RxnString(photo.metadata?.note);
+
+  /// Only an original with metadata keeps an editable note.
+  bool get canEditNote => photo.isOriginal && photo.metadata != null;
+
+  /// Saves [value] as the note; returns an error message or null.
+  Future<String?> saveNote(String? value) async {
+    if (!canEditNote) return 'This photo has no editable note.';
+    try {
+      note.value = await _service.updateNote(photo, value);
+      unawaited(_library.reload());
+      return null;
+    } catch (_) {
+      return 'The note could not be saved.';
+    }
+  }
+
   final RxBool isBusy = false.obs;
 
   /// Watermarked copies of this original, kept current as the library

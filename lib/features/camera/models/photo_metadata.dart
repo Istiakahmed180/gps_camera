@@ -11,13 +11,27 @@ class PhotoMetadata {
     required this.location,
     this.place,
     this.mapImageFileName,
+    this.note,
     this.schemaVersion = currentSchemaVersion,
   });
+
+  /// Longest note kept; longer text is cut.
+  static const int maxNoteLength = 300;
+
+  /// Trims [value], cuts it to [maxNoteLength] and turns blank into null.
+  static String? cleanNote(String? value) {
+    final text = value?.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (text == null || text.isEmpty) return null;
+    return text.length > maxNoteLength
+        ? text.substring(0, maxNoteLength).trimRight()
+        : text;
+  }
 
   factory PhotoMetadata.create({
     required String imageFileName,
     required DateTime capturedAt,
     required LocationSnapshot location,
+    String? note,
   }) {
     final local = capturedAt.toLocal();
     return PhotoMetadata(
@@ -26,6 +40,7 @@ class PhotoMetadata {
       timeZoneOffset: local.timeZoneOffset,
       timeZoneName: local.timeZoneName,
       location: location,
+      note: cleanNote(note),
     );
   }
 
@@ -44,6 +59,7 @@ class PhotoMetadata {
         _ => null,
       },
       mapImageFileName: json['mapImageFileName'] as String?,
+      note: cleanNote(json['note'] as String?),
     );
   }
 
@@ -58,7 +74,22 @@ class PhotoMetadata {
         location: location,
         place: place ?? this.place,
         mapImageFileName: mapImageFileName ?? this.mapImageFileName,
+        note: note,
       );
+
+  /// The same photo with a new note (null or blank removes it). Nothing
+  /// else changes.
+  PhotoMetadata withNote(String? value) => PhotoMetadata(
+    schemaVersion: schemaVersion,
+    imageFileName: imageFileName,
+    capturedAt: capturedAt,
+    timeZoneOffset: timeZoneOffset,
+    timeZoneName: timeZoneName,
+    location: location,
+    place: place,
+    mapImageFileName: mapImageFileName,
+    note: cleanNote(value),
+  );
 
   /// 2 adds [place] and [mapImageFileName]; version 1 files still load.
   static const int currentSchemaVersion = 2;
@@ -80,6 +111,9 @@ class PhotoMetadata {
   /// File in `GPSCamera/Maps/` with the map shown at capture, if any.
   final String? mapImageFileName;
 
+  /// The user's own description of the photo, e.g. "Crack on pillar 3".
+  final String? note;
+
   Map<String, dynamic> toJson() => {
     'schemaVersion': schemaVersion,
     'imageFileName': imageFileName,
@@ -89,5 +123,7 @@ class PhotoMetadata {
     'location': location.toJson(),
     'place': place?.toJson(),
     'mapImageFileName': mapImageFileName,
+    // Written only when set, so older files stay unchanged until edited.
+    if (note != null) 'note': note,
   };
 }

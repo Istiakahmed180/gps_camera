@@ -15,12 +15,14 @@ class WatermarkPreview extends StatelessWidget {
     required this.content,
     required this.config,
     this.mapImage,
+    this.logoImage,
   });
 
   final PreviewImage image;
   final WatermarkContent content;
   final WatermarkConfig config;
   final ui.Image? mapImage;
+  final ui.Image? logoImage;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +48,7 @@ class WatermarkPreview extends StatelessWidget {
                   config: config,
                   imageSize: size,
                   mapImage: mapImage,
+                  logoImage: logoImage,
                 ),
               ),
             ],
@@ -64,6 +67,7 @@ class WatermarkCanvasPainter extends CustomPainter {
     required this.imageSize,
     this.mapImage,
     this.reserveMapSlot = false,
+    this.logoImage,
   });
 
   final WatermarkContent content;
@@ -71,6 +75,7 @@ class WatermarkCanvasPainter extends CustomPainter {
   final Size imageSize;
   final ui.Image? mapImage;
   final bool reserveMapSlot;
+  final ui.Image? logoImage;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -81,6 +86,7 @@ class WatermarkCanvasPainter extends CustomPainter {
       imageSize: imageSize,
       mapImage: mapImage,
       reserveMapSlot: reserveMapSlot,
+      logoImage: logoImage,
     );
     canvas
       ..save()
@@ -97,5 +103,6 @@ class WatermarkCanvasPainter extends CustomPainter {
       old.imageSize != imageSize ||
       old.mapImage != mapImage ||
       old.reserveMapSlot != reserveMapSlot ||
+      old.logoImage != logoImage ||
       !identical(old.content, content);
 }

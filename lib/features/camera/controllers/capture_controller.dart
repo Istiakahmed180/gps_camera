@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/features/camera/models/capture_timer.dart';
 import 'package:gps_camera/features/camera/models/photo_quality.dart';
+import 'package:gps_camera/features/camera/services/volume_shutter.dart';
 import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
 import 'package:gps_camera/features/camera/models/camera_status.dart';
@@ -36,8 +39,43 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     this._assigner,
     this._postProcessor,
     PhotoQuality Function()? quality,
+    CaptureTimer Function()? timer,
+    this._volume,
+    bool Function()? volumeEnabled,
+    String? Function()? note,
   }) : _loadCameras = cameraLoader,
-       _quality = quality ?? (() => PhotoQuality.fallback);
+       _note = note ?? (() => null),
+       _quality = quality ?? (() => PhotoQuality.fallback),
+       _timer = timer ?? (() => CaptureTimer.off),
+       _volumeEnabled = volumeEnabled ?? (() => true);
+
+  final CaptureTimer Function() _timer;
+
+  /// The note added to new photos, read at the shutter.
+  final String? Function() _note;
+
+  /// Volume buttons as a shutter; null disables the feature.
+  final VolumeShutter? _volume;
+  final bool Function() _volumeEnabled;
+
+  /// Highest zoom offered. Beyond this, digital zoom only adds blur.
+  static const double maxUsefulZoom = 10;
+
+  final RxDouble zoom = 1.0.obs;
+  final RxDouble minZoom = 1.0.obs;
+  final RxDouble maxZoom = 1.0.obs;
+  double? _zoomTarget;
+  bool _zoomBusy = false;
+
+  /// Where the user tapped to focus, as a fraction of the preview, and a
+  /// counter that changes on every tap so the ring animates again.
+  final Rxn<Offset> focusPoint = Rxn<Offset>();
+  final RxInt focusTaps = 0.obs;
+  Timer? _focusReset;
+
+  /// Seconds left before a timed photo, or null when no timer is running.
+  final RxnInt countdown = RxnInt();
+  Timer? _countdownTimer;
 
   /// Read each time the camera opens, so a change in Settings applies the
   /// next time the camera screen is used.
@@ -99,6 +137,7 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
+    _setVolumeShutter(true);
     unawaited(_initialSetup());
   }
 
@@ -114,6 +153,9 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     _isClosed = true;
     WidgetsBinding.instance.removeObserver(this);
     _feedbackTimer?.cancel();
+    _focusReset?.cancel();
+    _cancelCountdown();
+    _setVolumeShutter(false);
     unawaited(_serial(_disposeCamera));
     super.onClose();
   }
@@ -126,6 +168,7 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
+        _cancelCountdown();
         unawaited(_serial(_disposeCamera));
       case AppLifecycleState.resumed:
         unawaited(_checkPermissionAndStart(requestIfNeeded: false));
@@ -152,6 +195,8 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     if (path == null || isCapturing.value || _isSuspended) return;
 
     _isSuspended = true;
+    _cancelCountdown();
+    _setVolumeShutter(false);
     _location.suspend();
     await _serial(_disposeCamera);
     try {
@@ -159,6 +204,7 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     } finally {
       _isSuspended = false;
       if (!_isClosed) {
+        _setVolumeShutter(true);
         unawaited(_location.resume());
         await _checkPermissionAndStart(requestIfNeeded: false);
       }
@@ -201,11 +247,150 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     });
   }
 
+  /// The shutter button and volume keys: takes a photo now, starts the
+  /// timer, or cancels a running timer.
+  void shutter() {
+    if (countdown.value != null) {
+      _cancelCountdown();
+      return;
+    }
+    if (!canCapture) return;
+    final seconds = _timer().seconds;
+    if (seconds == 0) {
+      unawaited(capture());
+      return;
+    }
+    countdown.value = seconds;
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      final left = (countdown.value ?? 1) - 1;
+      if (left > 0) {
+        countdown.value = left;
+        return;
+      }
+      _cancelCountdown();
+      unawaited(capture());
+    });
+  }
+
+  void _cancelCountdown() {
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+    countdown.value = null;
+  }
+
+  void _setVolumeShutter(bool on) {
+    final volume = _volume;
+    if (volume == null) return;
+    if (on && _volumeEnabled()) {
+      unawaited(volume.enable(shutter));
+    } else {
+      unawaited(volume.disable());
+    }
+  }
+
+  /// Zoom presets the phone supports, e.g. 0.6×, 1×, 2×, 5×, 10×.
+  List<double> get zoomPresets {
+    final min = minZoom.value;
+    final max = maxZoom.value;
+    return [
+      if (min < 0.95) (min * 10).ceil() / 10,
+      for (final z in const [1.0, 2.0, 5.0, 10.0])
+        if (z >= min && z <= max + 0.01) z,
+    ];
+  }
+
+  /// Applies the latest requested zoom; pinch updates arriving faster than
+  /// the camera can follow are merged.
+  void setZoom(double value) {
+    if (camera.value == null || status.value != CameraStatus.ready) return;
+    final next = value.clamp(minZoom.value, maxZoom.value).toDouble();
+    zoom.value = next;
+    _zoomTarget = next;
+    if (!_zoomBusy) unawaited(_applyZoom());
+  }
+
+  Future<void> _applyZoom() async {
+    _zoomBusy = true;
+    try {
+      while (_zoomTarget != null) {
+        final target = _zoomTarget!;
+        _zoomTarget = null;
+        final controller = camera.value;
+        if (controller == null) break;
+        try {
+          await controller.setZoomLevel(target);
+        } on CameraException {
+          // Keep the last zoom the camera accepted.
+        }
+      }
+    } finally {
+      _zoomBusy = false;
+    }
+  }
+
+  Future<void> _readZoomRange(CameraController controller) async {
+    try {
+      minZoom.value = await controller.getMinZoomLevel();
+      maxZoom.value = math.max(
+        minZoom.value,
+        math.min(await controller.getMaxZoomLevel(), maxUsefulZoom),
+      );
+    } catch (_) {
+      minZoom.value = 1;
+      maxZoom.value = 1;
+    }
+    // A new session starts at 1× (or the nearest zoom the lens allows).
+    zoom.value = 1.0.clamp(minZoom.value, maxZoom.value).toDouble();
+  }
+
+  /// Focuses and meters on [point], given as a fraction of the preview
+  /// (0,0 top-left). Returns to automatic after a few seconds.
+  Future<void> focusAt(Offset point) async {
+    final controller = camera.value;
+    if (controller == null || status.value != CameraStatus.ready) return;
+    final value = controller.value;
+    if (!value.focusPointSupported && !value.exposurePointSupported) return;
+    final p = Offset(
+      point.dx.clamp(0.0, 1.0).toDouble(),
+      point.dy.clamp(0.0, 1.0).toDouble(),
+    );
+    focusPoint.value = p;
+    focusTaps.value++;
+    _focusReset?.cancel();
+    try {
+      if (value.exposurePointSupported) await controller.setExposurePoint(p);
+      if (value.focusPointSupported) {
+        await controller.setFocusMode(FocusMode.auto);
+        await controller.setFocusPoint(p);
+      }
+    } on CameraException {
+      // The tap still shows; the camera keeps its own focus.
+    }
+    _focusReset = Timer(const Duration(seconds: 6), _resetFocus);
+  }
+
+  Future<void> _resetFocus() async {
+    focusPoint.value = null;
+    final controller = camera.value;
+    if (controller == null) return;
+    try {
+      if (controller.value.exposurePointSupported) {
+        await controller.setExposurePoint(null);
+      }
+      if (controller.value.focusPointSupported) {
+        await controller.setFocusPoint(null);
+      }
+    } on CameraException {
+      // Already back to automatic or closed.
+    }
+  }
+
   Future<void> capture() async {
     if (!canCapture) return;
     isCapturing.value = true;
     final capturedAt = DateTime.now();
     final location = _location.snapshotAt(capturedAt);
+    final note = _note();
     // The map is grabbed at the shutter, while it still shows this spot.
     final map = _postProcessor?.grabMap();
 
@@ -216,7 +401,12 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
           throw CameraException('CameraClosed', 'The camera is not ready.');
         }
         final image = await controller.takePicture();
-        return _saver.save(image, capturedAt: capturedAt, location: location);
+        return _saver.save(
+          image,
+          capturedAt: capturedAt,
+          location: location,
+          note: note,
+        );
       });
       lastCapture.value = saved;
       lastPhotoPath.value = saved.photo.path;
@@ -340,6 +530,8 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     }
 
     isFlashSupported.value = await _applyFlash(controller);
+    await _readZoomRange(controller);
+    focusPoint.value = null;
     camera.value = controller;
     errorMessage.value = null;
     status.value = CameraStatus.ready;

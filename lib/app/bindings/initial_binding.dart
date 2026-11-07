@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gps_camera/core/database/database_service.dart';
@@ -12,6 +14,8 @@ import 'package:gps_camera/features/export/services/gallery_export_service.dart'
 import 'package:gps_camera/features/export/services/phone_gallery.dart';
 import 'package:gps_camera/features/gallery/services/gallery_service.dart';
 import 'package:gps_camera/features/location/services/map_cache.dart';
+import 'package:gps_camera/features/watermark/services/logo_service.dart';
+import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
 import 'package:gps_camera/features/projects/services/project_repository.dart';
 import 'package:gps_camera/features/reports/services/report_service.dart';
 
@@ -27,6 +31,15 @@ class InitialBinding extends Bindings {
     Get.lazyPut(PhotoStorageService.new, fenix: true);
     Get.lazyPut(ShareService.new, fenix: true);
     Get.lazyPut(MapCache.new, fenix: true);
+    Get.lazyPut(() {
+      final logo = LogoService(Get.find<PhotoStorageService>());
+      // A logo recovered after a restart should also be switched on.
+      logo.onRecovered = () {
+        final settings = WatermarkSettingsStore(storage);
+        unawaited(settings.save(settings.load().copyWith(showLogo: true)));
+      };
+      return logo;
+    }, fenix: true);
 
     // The database opens lazily on a background isolate at the first query,
     // so registering it here never delays the first screen.

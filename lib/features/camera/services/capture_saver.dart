@@ -33,12 +33,14 @@ class CaptureSaver {
     XFile image, {
     required DateTime capturedAt,
     required LocationSnapshot location,
+    String? note,
   }) async {
     final photo = await _storage.savePhoto(image, capturedAt: capturedAt);
     final metadata = PhotoMetadata.create(
       imageFileName: photo.uri.pathSegments.last,
       capturedAt: capturedAt,
       location: location,
+      note: note,
     );
 
     File? metadataFile;

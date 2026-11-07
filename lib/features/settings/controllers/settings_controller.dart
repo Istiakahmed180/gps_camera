@@ -69,6 +69,11 @@ class SettingsController extends GetxController {
     unawaited(refreshUsage());
   }
 
+  RxBool get volumeShutter => _preferences.volumeShutter;
+
+  Future<void> setVolumeShutter(bool value) =>
+      _preferences.setVolumeShutter(value);
+
   Future<void> setPhotoQuality(PhotoQuality quality) =>
       _preferences.setPhotoQuality(quality);
 

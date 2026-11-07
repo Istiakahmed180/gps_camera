@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:gps_camera/core/services/photo_storage_service.dart';
+import 'package:gps_camera/features/camera/models/photo_metadata.dart';
 import 'package:gps_camera/features/gallery/models/gallery_index.dart';
 import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
 import 'package:gps_camera/features/gallery/services/gallery_scanner.dart';
@@ -52,6 +53,19 @@ class GalleryService {
 
   final PhotoStorageService _storage;
   final FileDeleter _deleteFile;
+
+  /// Sets or clears an original's note, re-reading the sidecar first so no
+  /// other change is lost. Only the note changes. Throws on failure.
+  Future<String?> updateNote(GalleryPhoto photo, String? note) async {
+    if (!photo.isOriginal) {
+      throw StateError('Notes belong to originals');
+    }
+    final json = await _storage.readMetadata(photo.file);
+    if (json == null) throw StateError('This photo has no metadata');
+    final next = PhotoMetadata.fromJson(json).withNote(note);
+    await _storage.saveMetadata(photo.file, next.toJson());
+    return next.note;
+  }
 
   /// Scans both folders in a background isolate.
   Future<GalleryIndex> scan() async {

@@ -67,11 +67,14 @@ class WatermarkRenderer {
     }
 
     final map = mapImage == null ? null : await decodeMapImage(mapImage);
+    final logoBytes = config.showLogo ? await _storage.readLogo() : null;
+    final logo = logoBytes == null ? null : await decodeMapImage(logoBytes);
     final painter = WatermarkPainter(
       content: content,
       config: config,
       imageSize: imageSize,
       mapImage: map,
+      logoImage: logo,
     );
     OverlayBitmap? overlay;
     try {
@@ -81,6 +84,7 @@ class WatermarkRenderer {
     } finally {
       painter.dispose();
       map?.dispose();
+      logo?.dispose();
     }
     if (overlay == null) {
       throw const WatermarkException('The watermark could not be drawn.');

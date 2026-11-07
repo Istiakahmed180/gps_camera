@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
+import 'package:gps_camera/core/settings/app_preferences.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
 import 'package:gps_camera/features/location/controllers/live_map_controller.dart';
 import 'package:gps_camera/features/location/controllers/location_controller.dart';
@@ -13,6 +14,7 @@ import 'package:gps_camera/features/location/utils/plus_code.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 import 'package:gps_camera/features/watermark/models/watermark_content.dart';
 import 'package:gps_camera/features/watermark/models/watermark_template.dart';
+import 'package:gps_camera/features/watermark/services/logo_service.dart';
 import 'package:gps_camera/features/watermark/services/watermark_painter.dart';
 import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
 import 'package:gps_camera/features/watermark/widgets/watermark_preview.dart';
@@ -91,12 +93,16 @@ class _LiveWatermarkOverlayState extends State<LiveWatermarkOverlay> {
         return Obx(() {
           final content = _liveContent();
           final mapImage = widget.map.image.value;
+          final logo = Get.isRegistered<LogoService>()
+              ? Get.find<LogoService>().image.value
+              : null;
           final layout = WatermarkPainter(
             content: content,
             config: _config,
             imageSize: virtual,
             mapImage: mapImage,
             reserveMapSlot: true,
+            logoImage: logo,
           );
           final mapRect = layout.mapRect;
           final bounds = layout.bounds;
@@ -113,6 +119,7 @@ class _LiveWatermarkOverlayState extends State<LiveWatermarkOverlay> {
                       imageSize: virtual,
                       mapImage: mapImage,
                       reserveMapSlot: true,
+                      logoImage: logo,
                     ),
                   ),
                 ),
@@ -163,6 +170,9 @@ class _LiveWatermarkOverlayState extends State<LiveWatermarkOverlay> {
           imageFileName: 'live',
           capturedAt: now,
           location: location,
+          note: Get.isRegistered<AppPreferences>()
+              ? Get.find<AppPreferences>().captureNote.value
+              : null,
         ).withPlace(
           place: fix == null || place == null
               ? null

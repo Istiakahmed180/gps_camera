@@ -8,7 +8,11 @@ class CameraIconButton extends StatelessWidget {
     required this.icon,
     required this.tooltip,
     required this.onPressed,
+    this.active = false,
   });
+
+  /// Highlights a toggle that is on.
+  final bool active;
 
   final IconData icon;
   final String tooltip;
@@ -21,7 +25,7 @@ class CameraIconButton extends StatelessWidget {
       onPressed: onPressed,
       icon: Icon(icon),
       style: IconButton.styleFrom(
-        foregroundColor: AppColors.onViewfinder,
+        foregroundColor: active ? AppColors.accent : AppColors.onViewfinder,
         backgroundColor: AppColors.viewfinderSurface,
         disabledForegroundColor: AppColors.onViewfinderMuted.withValues(
           alpha: 0.5,

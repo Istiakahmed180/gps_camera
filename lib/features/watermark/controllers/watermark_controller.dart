@@ -11,6 +11,7 @@ import 'package:gps_camera/features/export/services/gallery_export_service.dart'
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 import 'package:gps_camera/features/watermark/models/watermark_content.dart';
 import 'package:gps_camera/features/watermark/services/image_processor.dart';
+import 'package:gps_camera/features/watermark/services/logo_service.dart';
 import 'package:gps_camera/features/watermark/services/watermark_renderer.dart';
 import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
 
@@ -33,6 +34,11 @@ class WatermarkController extends GetxController {
   final WatermarkSettingsStore _settings;
   final ImageProcessor _processor;
   final GalleryExportService? _gallery;
+
+  /// The watermark logo for the preview; null when none is set.
+  Rxn<ui.Image> get logo =>
+      Get.isRegistered<LogoService>() ? Get.find<LogoService>().image : _noLogo;
+  final Rxn<ui.Image> _noLogo = Rxn<ui.Image>();
 
   /// False when the saved copy should have reached the phone gallery but
   /// did not.

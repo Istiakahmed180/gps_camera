@@ -6,6 +6,8 @@ import 'package:gps_camera/features/location/models/location_snapshot.dart';
 import 'package:gps_camera/features/watermark/controllers/watermark_controller.dart';
 import 'package:gps_camera/features/watermark/utils/capture_time_formatter.dart';
 import 'package:gps_camera/features/watermark/widgets/watermark_preview.dart';
+import 'package:gps_camera/features/watermark/services/logo_service.dart';
+import 'package:gps_camera/features/watermark/widgets/watermark_branding_section.dart';
 import 'package:gps_camera/features/watermark/widgets/watermark_settings_panel.dart';
 import 'package:gps_camera/features/watermark/widgets/watermark_style_selector.dart';
 import 'package:gps_camera/shared/widgets/app_button.dart';
@@ -105,6 +107,7 @@ class _Stage extends GetView<WatermarkController> {
             content: content,
             config: controller.config.value,
             mapImage: controller.mapImage.value,
+            logoImage: controller.logo.value,
           );
         }),
       ),
@@ -140,7 +143,16 @@ class _Controls extends GetView<WatermarkController> {
           WatermarkSettingsPanel(
             config: config,
             hasAddress: controller.hasAddress,
+            hasNote: controller.metadata.value?.note != null,
             onChanged: controller.updateConfig,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          WatermarkBrandingSection(
+            config: config,
+            onChanged: controller.updateConfig,
+            logo: Get.isRegistered<LogoService>()
+                ? Get.find<LogoService>()
+                : null,
           ),
         ],
       );

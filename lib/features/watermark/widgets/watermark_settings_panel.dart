@@ -11,10 +11,14 @@ class WatermarkSettingsPanel extends StatelessWidget {
     required this.config,
     required this.hasAddress,
     required this.onChanged,
+    this.hasNote = false,
   });
 
   final WatermarkConfig config;
   final bool hasAddress;
+
+  /// Whether this photo has a note to show.
+  final bool hasNote;
   final ValueChanged<WatermarkConfig> onChanged;
 
   @override
@@ -56,6 +60,15 @@ class WatermarkSettingsPanel extends StatelessWidget {
                 config.showAddress && hasAddress,
                 (v) => config.copyWith(showAddress: v),
                 enabled: hasAddress,
+              ),
+            ),
+            Tooltip(
+              message: hasNote ? '' : 'This photo has no note',
+              child: _toggle(
+                'Note',
+                config.showNote && hasNote,
+                (v) => config.copyWith(showNote: v),
+                enabled: hasNote,
               ),
             ),
           ],

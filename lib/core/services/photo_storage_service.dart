@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:get/get.dart';
@@ -17,6 +18,7 @@ class PhotoStorageService extends GetxService {
   static const String _watermarkedFolder = 'Watermarked';
   static const String _reportsFolder = 'Reports';
   static const String _mapsFolder = 'Maps';
+  static const String _brandingFolder = 'Branding';
 
   /// `<ApplicationDocuments>/GPSCamera`. Database rows store photo paths
   /// relative to this folder.
@@ -28,6 +30,20 @@ class PhotoStorageService extends GetxService {
   Future<Directory> photosDirectory() => _directory(_photosFolder);
 
   Future<Directory> watermarkedDirectory() => _directory(_watermarkedFolder);
+
+  /// The watermark logo, `Branding/logo.png`, whether or not it exists.
+  Future<File> logoFile() async =>
+      File('${(await _directory(_brandingFolder)).path}/logo.png');
+
+  /// The logo's PNG bytes, or null when none was chosen.
+  Future<Uint8List?> readLogo() async {
+    try {
+      final file = await logoFile();
+      return await file.exists() ? await file.readAsBytes() : null;
+    } catch (_) {
+      return null;
+    }
+  }
 
   /// Map snapshots taken at capture, `<photo base>_map.png`.
   Future<Directory> mapsDirectory() => _directory(_mapsFolder);

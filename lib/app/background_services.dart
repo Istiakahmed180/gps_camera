@@ -8,6 +8,7 @@ import 'package:gps_camera/features/location/services/details_backfill_scheduler
 import 'package:gps_camera/features/location/services/map_cache.dart';
 import 'package:gps_camera/features/location/services/place_service.dart';
 import 'package:gps_camera/features/location/services/static_map_service.dart';
+import 'package:gps_camera/features/watermark/services/logo_service.dart';
 import 'package:gps_camera/features/watermark/services/watermark_renderer.dart';
 
 /// Work that runs while the app is open, outside any screen. Kept out of
@@ -24,6 +25,9 @@ abstract final class BackgroundServices {
     final maps = key == null || key.isEmpty
         ? null
         : StaticMapService(key, cache: Get.find<MapCache>());
+
+    // Loads the logo and applies one picked just before a restart.
+    Get.find<LogoService>();
 
     final storage = Get.find<PhotoStorageService>();
     final places = PlaceService();

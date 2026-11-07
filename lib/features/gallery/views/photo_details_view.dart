@@ -13,6 +13,7 @@ import 'package:gps_camera/features/gallery/widgets/photo_action_menu.dart';
 import 'package:gps_camera/features/gallery/widgets/photo_details_panel.dart';
 import 'package:gps_camera/features/projects/models/project.dart';
 import 'package:gps_camera/features/projects/widgets/project_picker_sheet.dart';
+import 'package:gps_camera/shared/widgets/note_dialog.dart';
 import 'package:gps_camera/shared/widgets/section_header.dart';
 
 class PhotoDetailsView extends GetView<PhotoDetailsController> {
@@ -45,16 +46,22 @@ class PhotoDetailsView extends GetView<PhotoDetailsController> {
           final wide = constraints.maxWidth >= AppBreakpoints.medium;
           final preview = _Preview(photo: photo);
           final details = Obx(
-            () => PhotoDetailsPanel(
-              photo: photo,
-              dimensions: controller.dimensions.value,
-              related: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _ProjectSection(controller: controller),
-                  _Related(controller: controller),
-                ],
-              ),
+            () => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _NoteSection(controller: controller),
+                PhotoDetailsPanel(
+                  photo: photo,
+                  dimensions: controller.dimensions.value,
+                  related: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _ProjectSection(controller: controller),
+                      _Related(controller: controller),
+                    ],
+                  ),
+                ),
+              ],
             ),
           );
 
@@ -391,6 +398,70 @@ class _Related extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// The photo's note, with an edit button on originals.
+class _NoteSection extends StatelessWidget {
+  const _NoteSection({required this.controller});
+
+  final PhotoDetailsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final note = controller.note.value;
+    if (note == null && !controller.canEditNote) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionHeader('Note'),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.sticky_note_2_outlined),
+              title: Text(
+                note ?? 'Add a note',
+                style: note == null
+                    ? context.text.bodyLarge?.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                      )
+                    : null,
+              ),
+              subtitle: controller.canEditNote
+                  ? null
+                  : const Text('Saved with this copy'),
+              trailing: controller.canEditNote
+                  ? const Icon(Icons.edit_outlined)
+                  : null,
+              onTap: controller.canEditNote ? () => _edit(context) : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _edit(BuildContext context) async {
+    final result = await showNoteDialog(
+      context,
+      initial: controller.note.value,
+      title: 'Photo note',
+      helper:
+          'Shown in reports and on new watermarked copies. Copies already '
+          'made keep their old note.',
+    );
+    if (result == null || !context.mounted) return;
+    final error = await controller.saveNote(result.isEmpty ? null : result);
+    if (!context.mounted) return;
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(
+        content: Text(error ?? 'Note saved'),
+        backgroundColor: error == null ? null : context.colors.error,
+      ),
     );
   }
 }

@@ -99,6 +99,7 @@ class BackupService {
     'Watermarked',
     'Maps',
     'Reports',
+    'Branding',
   ];
 
   final PhotoStorageService _storage;

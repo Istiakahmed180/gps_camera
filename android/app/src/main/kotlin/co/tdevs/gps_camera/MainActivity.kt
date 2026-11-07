@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.view.KeyEvent
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -25,6 +26,10 @@ class MainActivity : FlutterActivity() {
     /** The Dart call waiting for a document picker, if any. */
     private var pending: MethodChannel.Result? = null
     private var pendingBackup: File? = null
+
+    /** Set by Dart while the camera screen is open. */
+    private var volumeShutter = false
+    private var volumeChannel: MethodChannel? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -43,10 +48,38 @@ class MainActivity : FlutterActivity() {
                     }
                     "saveBackup" -> saveBackup(call.argument<String>("path"), result)
                     "pickBackup" -> pickBackup(result)
+                    "pickImage" -> pickImage(result)
+                    "pendingImage" -> result.success(pendingImage())
                     else -> result.notImplemented()
                 }
             }
+        volumeChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, VOLUME_CHANNEL)
+            .apply {
+                setMethodCallHandler { call, result ->
+                    if (call.method == "setEnabled") {
+                        volumeShutter = call.arguments == true
+                        result.success(null)
+                    } else {
+                        result.notImplemented()
+                    }
+                }
+            }
     }
+
+    /** Handled before Flutter sees the key, so volume does not change. */
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (volumeShutter && isVolumeKey(event.keyCode)) {
+            // One photo per press, not one per auto-repeat.
+            if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+                volumeChannel?.invokeMethod("pressed", null)
+            }
+            return true
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    private fun isVolumeKey(keyCode: Int) =
+        keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
 
     override fun onDestroy() {
         io.shutdown()
@@ -191,6 +224,26 @@ class MainActivity : FlutterActivity() {
         start(intent, REQUEST_PICK, result) {}
     }
 
+    private fun pickedDir(): File = File(cacheDir, "picked").apply { mkdirs() }
+
+    private fun copyPickedImage(uri: android.net.Uri, target: File) {
+        val input = contentResolver.openInputStream(uri) ?: throw IOException("No stream")
+        input.use { stream -> target.outputStream().use { stream.copyTo(it) } }
+    }
+
+    /** An image picked just before Android restarted the app, or null. */
+    private fun pendingImage(): String? =
+        File(pickedDir(), "pending_image").takeIf { it.isFile }?.path
+
+    /** Lets the user choose an image (the watermark logo). */
+    private fun pickImage(result: MethodChannel.Result) {
+        if (pending != null) return result.error("busy", "A picker is already open", null)
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .setType("image/*")
+        start(intent, REQUEST_IMAGE, result) {}
+    }
+
     private fun start(
         intent: Intent,
         request: Int,
@@ -211,10 +264,26 @@ class MainActivity : FlutterActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode != REQUEST_SAVE && requestCode != REQUEST_PICK) return
-        val result = pending ?: return
-        pending = null
+        if (requestCode != REQUEST_SAVE && requestCode != REQUEST_PICK &&
+            requestCode != REQUEST_IMAGE
+        ) return
         val uri = if (resultCode == Activity.RESULT_OK) data?.data else null
+        val result = pending
+        if (result == null) {
+            // Android stopped the app while the picker was open, so no Dart
+            // call is waiting. Keep a chosen image for Dart to collect.
+            if (requestCode == REQUEST_IMAGE && uri != null) {
+                io.execute {
+                    try {
+                        copyPickedImage(uri, File(pickedDir(), "pending_image"))
+                    } catch (e: Exception) {
+                        // Nothing to recover; the user can pick again.
+                    }
+                }
+            }
+            return
+        }
+        pending = null
 
         if (requestCode == REQUEST_SAVE) {
             val source = pendingBackup
@@ -230,6 +299,13 @@ class MainActivity : FlutterActivity() {
                 out.use { stream -> source.inputStream().use { it.copyTo(stream) } }
                 "saved"
             }
+        } else if (requestCode == REQUEST_IMAGE) {
+            if (uri == null) return result.success(null)
+            background(result) {
+                val target = File(pickedDir(), "image")
+                copyPickedImage(uri, target)
+                target.path
+            }
         } else {
             if (uri == null) return result.success(null)
             background(result) {
@@ -243,10 +319,12 @@ class MainActivity : FlutterActivity() {
 
     companion object {
         private const val CHANNEL = "co.tdevs.gps_camera/native"
+        private const val VOLUME_CHANNEL = "co.tdevs.gps_camera/volume"
         private const val GALLERY_DIR = "Pictures/GPS Camera"
         private val GALLERY_SOURCES = setOf("Photos", "Watermarked")
         private val SAFE_NAME = Regex("[A-Za-z0-9_.-]{1,120}\\.jpg")
         private const val REQUEST_SAVE = 4101
         private const val REQUEST_PICK = 4102
+        private const val REQUEST_IMAGE = 4103
     }
 }

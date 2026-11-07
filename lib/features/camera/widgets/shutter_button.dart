@@ -7,10 +7,14 @@ class ShutterButton extends StatelessWidget {
     super.key,
     required this.onPressed,
     this.isCapturing = false,
+    this.isCountingDown = false,
   });
 
   final VoidCallback? onPressed;
   final bool isCapturing;
+
+  /// A timer is running; tapping cancels it.
+  final bool isCountingDown;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +26,11 @@ class ShutterButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: enabled,
-      label: isCapturing ? 'Capturing photo' : 'Capture photo',
+      label: isCapturing
+          ? 'Capturing photo'
+          : isCountingDown
+          ? 'Cancel timer'
+          : 'Capture photo',
       child: GestureDetector(
         onTap: enabled ? onPressed : null,
         child: AnimatedOpacity(
@@ -42,10 +50,18 @@ class ShutterButton extends StatelessWidget {
               width: isCapturing ? innerSize * 0.7 : innerSize,
               height: isCapturing ? innerSize * 0.7 : innerSize,
               decoration: BoxDecoration(
-                color: isCapturing ? AppColors.accent : AppColors.onViewfinder,
+                color: isCapturing || isCountingDown
+                    ? AppColors.accent
+                    : AppColors.onViewfinder,
                 shape: BoxShape.circle,
               ),
-              child: isCapturing
+              child: isCountingDown
+                  ? const Icon(
+                      Icons.close_rounded,
+                      color: AppColors.onAccent,
+                      size: 32,
+                    )
+                  : isCapturing
                   ? const Padding(
                       padding: EdgeInsets.all(AppSpacing.md),
                       child: CircularProgressIndicator(

@@ -5,6 +5,7 @@ import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/core/services/storage_service.dart';
 import 'package:gps_camera/features/camera/controllers/capture_controller.dart';
 import 'package:gps_camera/features/camera/services/capture_saver.dart';
+import 'package:gps_camera/features/camera/services/volume_shutter.dart';
 import 'package:gps_camera/features/export/services/gallery_export_service.dart';
 import 'package:gps_camera/features/location/controllers/location_controller.dart';
 import 'package:gps_camera/features/camera/services/capture_enricher.dart';
@@ -56,6 +57,10 @@ class CameraBinding extends Bindings {
         Get.find<LocationController>(),
         assigner: Get.find<ActiveProjectController>(),
         quality: () => Get.find<AppPreferences>().photoQuality.value,
+        timer: () => Get.find<AppPreferences>().captureTimer.value,
+        volume: VolumeShutter(),
+        volumeEnabled: () => Get.find<AppPreferences>().volumeShutter.value,
+        note: () => Get.find<AppPreferences>().captureNote.value,
         postProcessor: CaptureEnricher(
           storage: storage,
           renderer: WatermarkRenderer(storage),

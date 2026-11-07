@@ -4,7 +4,10 @@ import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/features/camera/controllers/capture_controller.dart';
+import 'package:gps_camera/core/settings/app_preferences.dart';
+import 'package:gps_camera/features/camera/widgets/camera_controls_bar.dart';
 import 'package:gps_camera/features/camera/widgets/camera_top_bar.dart';
+import 'package:gps_camera/features/camera/widgets/viewfinder_layer.dart';
 import 'package:gps_camera/features/camera/widgets/camera_viewfinder.dart';
 import 'package:gps_camera/features/camera/widgets/capture_toast.dart';
 import 'package:gps_camera/features/camera/widgets/last_photo_thumbnail.dart';
@@ -15,6 +18,7 @@ import 'package:gps_camera/features/location/controllers/place_controller.dart';
 import 'package:gps_camera/features/location/widgets/gps_status_panel.dart';
 import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
 import 'package:gps_camera/features/watermark/widgets/live_watermark_overlay.dart';
+import 'package:gps_camera/shared/widgets/note_dialog.dart';
 import 'package:gps_camera/features/projects/controllers/active_project_controller.dart';
 import 'package:gps_camera/features/projects/widgets/active_project_chip.dart';
 
@@ -24,6 +28,7 @@ class CameraView extends GetView<CaptureController> {
   @override
   Widget build(BuildContext context) {
     final location = Get.find<LocationController>();
+    final prefs = Get.find<AppPreferences>();
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
@@ -71,11 +76,21 @@ class CameraView extends GetView<CaptureController> {
                                     controller.requestPermission,
                                 onOpenSettings: controller.openSettings,
                                 onRetry: controller.retry,
-                                overlay: LiveWatermarkOverlay(
-                                  location: location,
-                                  place: Get.find<PlaceController>(),
-                                  map: Get.find<LiveMapController>(),
-                                  settings: Get.find<WatermarkSettingsStore>(),
+                                overlay: ViewfinderLayer(
+                                  zoom: controller.zoom.value,
+                                  onZoom: controller.setZoom,
+                                  onFocus: controller.focusAt,
+                                  focusPoint: controller.focusPoint.value,
+                                  focusTaps: controller.focusTaps.value,
+                                  showGrid: prefs.showGrid.value,
+                                  countdown: controller.countdown.value,
+                                  child: LiveWatermarkOverlay(
+                                    location: location,
+                                    place: Get.find<PlaceController>(),
+                                    map: Get.find<LiveMapController>(),
+                                    settings:
+                                        Get.find<WatermarkSettingsStore>(),
+                                  ),
                                 ),
                               ),
                             ),
@@ -93,6 +108,33 @@ class CameraView extends GetView<CaptureController> {
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.md,
+                      AppSpacing.sm,
+                      AppSpacing.md,
+                      0,
+                    ),
+                    child: Obx(
+                      () => CameraControlsBar(
+                        showGrid: prefs.showGrid.value,
+                        timer: prefs.captureTimer.value,
+                        zoom: controller.zoom.value,
+                        zoomPresets: controller.zoomPresets,
+                        enabled:
+                            controller.canCapture &&
+                            controller.countdown.value == null,
+                        onToggleGrid: () =>
+                            prefs.setShowGrid(!prefs.showGrid.value),
+                        onCycleTimer: () => prefs.setCaptureTimer(
+                          prefs.captureTimer.value.next,
+                        ),
+                        onZoom: controller.setZoom,
+                        hasNote: prefs.captureNote.value != null,
+                        onNote: () => _editNote(context, prefs),
                       ),
                     ),
                   ),
@@ -133,8 +175,12 @@ class CameraView extends GetView<CaptureController> {
                             child: Obx(
                               () => ShutterButton(
                                 isCapturing: controller.isCapturing.value,
-                                onPressed: controller.canCapture
-                                    ? controller.capture
+                                isCountingDown:
+                                    controller.countdown.value != null,
+                                onPressed:
+                                    controller.canCapture ||
+                                        controller.countdown.value != null
+                                    ? controller.shutter
                                     : null,
                               ),
                             ),
@@ -151,5 +197,18 @@ class CameraView extends GetView<CaptureController> {
         ),
       ),
     );
+  }
+
+  Future<void> _editNote(BuildContext context, AppPreferences prefs) async {
+    final result = await showNoteDialog(
+      context,
+      title: 'Note for new photos',
+      initial: prefs.captureNote.value,
+      helper:
+          'Added to every photo you take until you change or remove it. '
+          'Shown on the watermark and in reports.',
+    );
+    if (result == null) return;
+    await prefs.setCaptureNote(result);
   }
 }

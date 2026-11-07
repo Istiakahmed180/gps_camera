@@ -450,6 +450,7 @@ List<(String, String, bool)> reportEntryRows(
           : PhotoInfoFormatter.captureFull(metadata),
       false,
     ),
+    if (metadata?.note != null) ('Note', metadata!.note!, false),
     (
       'Original file',
       entry.originalAvailable

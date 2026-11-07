@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/features/backup/services/backup_service.dart';
+import 'package:gps_camera/features/watermark/services/logo_service.dart';
 
 /// Create backup / Restore from backup tiles with their dialogs.
 class BackupActions extends StatelessWidget {
@@ -127,6 +130,10 @@ class BackupActions extends StatelessWidget {
         return;
       }
       navigator.pop();
+      // A restored logo should show up without restarting the app.
+      if (Get.isRegistered<LogoService>()) {
+        unawaited(Get.find<LogoService>().reload());
+      }
       if (context.mounted) await _showSummary(context, summary);
     } finally {
       await service.discard(picked);

@@ -8,23 +8,33 @@ import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 import 'package:gps_camera/features/watermark/models/watermark_content.dart';
 import 'package:gps_camera/features/watermark/models/watermark_template.dart';
 
-enum _Role { brand, primary, secondary, notice, poor }
+enum _Role { brand, custom, primary, secondary, note, notice, poor }
 
 class _Line {
-  const _Line(this.text, this.role, {this.label});
+  const _Line(this.text, this.role, {this.label, this.withLogo = false});
 
   final String text;
   final _Role role;
   final String? label;
+
+  /// The logo is drawn at the start of this line.
+  final bool withLogo;
 }
 
 class _Row {
-  _Row(this.value, this.label);
+  _Row(this.value, this.label, {this.logoSide = 0, this.logoGap = 0});
 
   final TextPainter value;
   final TextPainter? label;
 
-  double get height => math.max(value.height, label?.height ?? 0);
+  /// Size of the logo square at the start of the row; 0 for none.
+  final double logoSide;
+  final double logoGap;
+
+  double get logoWidth => logoSide == 0 ? 0 : logoSide + logoGap;
+
+  double get height =>
+      math.max(math.max(value.height, label?.height ?? 0), logoSide);
 }
 
 /// Lays out and paints a watermark in image pixel coordinates.
@@ -39,9 +49,14 @@ class WatermarkPainter {
     required this.imageSize,
     this.mapImage,
     this.reserveMapSlot = false,
+    this.logoImage,
   }) {
     _layout();
   }
+
+  /// The user's logo, drawn beside the heading when [WatermarkConfig.showLogo]
+  /// is on. Ignored by the Minimal template.
+  final ui.Image? logoImage;
 
   /// Map snapshot drawn by the Map template. Without it (and without
   /// [reserveMapSlot]) the template simply has no map column.
@@ -53,8 +68,6 @@ class WatermarkPainter {
 
   /// Where the map square is, in image pixels; null when there is none.
   Rect? mapRect;
-
-  static const String brand = 'GPS CAMERA';
 
   final WatermarkContent content;
   final WatermarkConfig config;
@@ -144,7 +157,28 @@ class WatermarkPainter {
           ),
         );
       } else {
-        row.value.paint(canvas, Offset(textLeft, y));
+        final logo = logoImage;
+        if (row.logoSide > 0 && logo != null) {
+          final box = Rect.fromLTWH(
+            textLeft,
+            y + (row.height - row.logoSide) / 2,
+            row.logoSide,
+            row.logoSide,
+          );
+          canvas.drawImageRect(
+            logo,
+            Rect.fromLTWH(0, 0, logo.width.toDouble(), logo.height.toDouble()),
+            _fitInside(logo, box),
+            Paint()..filterQuality = FilterQuality.medium,
+          );
+        }
+        row.value.paint(
+          canvas,
+          Offset(
+            textLeft + row.logoWidth,
+            y + (row.height - row.value.height) / 2,
+          ),
+        );
       }
       y += row.height;
     }
@@ -220,8 +254,19 @@ class WatermarkPainter {
         1.0,
         maxBlockWidth - chrome - (label == null ? 0 : labelColumn),
       );
+      final logoSide = line.withLogo ? 36 * _unit : 0.0;
+      final logoGap = line.withLogo && line.text.isNotEmpty ? 10 * _unit : 0.0;
       _rows.add(
-        _Row(_text(line.text, _style(line.role), maxValueWidth), label),
+        _Row(
+          _text(
+            line.text,
+            _style(line.role),
+            math.max(1.0, maxValueWidth - logoSide - logoGap),
+          ),
+          label,
+          logoSide: logoSide,
+          logoGap: logoGap,
+        ),
       );
     }
 
@@ -229,7 +274,7 @@ class WatermarkPainter {
     var contentHeight = 0.0;
     for (final (index, row) in _rows.indexed) {
       final width = row.label == null
-          ? row.value.width
+          ? row.logoWidth + row.value.width
           : labelColumn + row.value.width;
       contentWidth = math.max(contentWidth, width);
       contentHeight += row.height + (index > 0 ? _gap : 0);
@@ -260,7 +305,7 @@ class WatermarkPainter {
 
     return switch (_template) {
       WatermarkTemplate.classic => [
-        const _Line(brand, _Role.brand),
+        ..._header(),
         if (c.dateTimeLine != null) _Line(c.dateTimeLine!, _Role.primary),
         if (c.locationNotice != null) _Line(c.locationNotice!, _Role.notice),
         if (c.coordinatesLine != null)
@@ -268,9 +313,10 @@ class WatermarkPainter {
         if (c.accuracyValue != null)
           _Line('GPS Accuracy: ${c.accuracyValue}', _accuracyRole),
         if (c.address != null) _Line(c.address!, _Role.secondary),
+        if (c.note != null) _Line('Note: ${c.note}', _Role.note),
       ],
       WatermarkTemplate.professional => [
-        const _Line(brand, _Role.brand),
+        ..._header(),
         if (c.date != null) _Line(c.date!, _Role.primary, label: 'DATE'),
         if (c.time != null)
           _Line('${c.time}  ${c.timeZone}', _Role.secondary, label: 'TIME'),
@@ -287,9 +333,10 @@ class WatermarkPainter {
           ),
         if (c.address != null)
           _Line(c.address!, _Role.secondary, label: 'ADDR'),
+        if (c.note != null) _Line(c.note!, _Role.note, label: 'NOTE'),
       ],
       WatermarkTemplate.map => [
-        const _Line(brand, _Role.brand),
+        ..._header(),
         if (c.placeTitle != null)
           _Line(
             c.flag == null ? c.placeTitle! : '${c.placeTitle}  ${c.flag}',
@@ -305,8 +352,10 @@ class WatermarkPainter {
           _Line('GPS Accuracy: ${c.accuracyValue}', _accuracyRole),
         if (c.plusCode != null)
           _Line('Plus Code ${c.plusCode}', _Role.secondary),
+        if (c.note != null) _Line('Note: ${c.note}', _Role.note),
       ],
       WatermarkTemplate.minimal => [
+        if (c.customText != null) _Line(c.customText!, _Role.custom),
         if (c.dateTimeLine != null)
           _Line(c.dateTimeLine!.replaceAll('  |  ', '  ·  '), _Role.primary),
         if (c.locationNotice != null) _Line(c.locationNotice!, _Role.notice),
@@ -318,8 +367,19 @@ class WatermarkPainter {
                 : _Role.secondary,
           ),
         if (c.address != null) _Line(c.address!, _Role.secondary),
+        if (c.note != null) _Line(c.note!, _Role.note),
       ],
     };
+  }
+
+  /// Heading (with logo) and the user's extra line.
+  List<_Line> _header() {
+    final logo = config.showLogo && logoImage != null;
+    return [
+      if (content.brand != null || logo)
+        _Line(content.brand ?? '', _Role.brand, withLogo: logo),
+      if (content.customText != null) _Line(content.customText!, _Role.custom),
+    ];
   }
 
   _Role get _accuracyRole => content.accuracyLevel == GpsAccuracyLevel.poor
@@ -336,6 +396,12 @@ class WatermarkPainter {
     final minimal = _template == WatermarkTemplate.minimal;
     final (size, weight, color) = switch ((_template, role)) {
       (_, _Role.brand) => (15.0, FontWeight.w700, AppColors.accent),
+      (_, _Role.custom) => (20.0, FontWeight.w600, AppColors.onViewfinder),
+      (_, _Role.note) => (
+        minimal ? 18.0 : 20.0,
+        FontWeight.w500,
+        AppColors.onViewfinder,
+      ),
       (WatermarkTemplate.professional, _Role.primary) => (
         27.0,
         FontWeight.w600,
@@ -379,6 +445,20 @@ class WatermarkPainter {
               ),
             ]
           : null,
+    );
+  }
+
+  /// The largest rect with [image]'s shape centred in [box], so logos are
+  /// never stretched.
+  static Rect _fitInside(ui.Image image, Rect box) {
+    final scale = math.min(box.width / image.width, box.height / image.height);
+    final w = image.width * scale;
+    final h = image.height * scale;
+    return Rect.fromLTWH(
+      box.left + (box.width - w) / 2,
+      box.top + (box.height - h) / 2,
+      w,
+      h,
     );
   }
 
