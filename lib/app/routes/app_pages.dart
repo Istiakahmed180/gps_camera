@@ -7,6 +7,7 @@ import 'package:gps_camera/features/gallery/bindings/photo_details_binding.dart'
 import 'package:gps_camera/features/gallery/models/photo_library.dart';
 import 'package:gps_camera/features/gallery/views/gallery_view.dart';
 import 'package:gps_camera/features/gallery/views/photo_details_view.dart';
+import 'package:gps_camera/features/gallery/views/photo_map_view.dart';
 import 'package:gps_camera/features/home/bindings/home_binding.dart';
 import 'package:gps_camera/features/home/views/home_view.dart';
 import 'package:gps_camera/features/projects/bindings/project_details_binding.dart';
@@ -49,6 +50,10 @@ abstract final class AppPages {
       page: () =>
           PhotoDetailsView(photo: (Get.arguments as PhotoDetailsArgs).photo),
       binding: PhotoDetailsBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.photoMap,
+      page: () => const PhotoMapView(),
     ),
     GetPage<dynamic>(
       name: AppRoutes.projects,

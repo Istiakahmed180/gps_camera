@@ -29,6 +29,30 @@ class ShareService extends GetxService {
   Future<ShareOutcome> shareImage(File file, {Rect? origin}) =>
       shareFile(file, mimeType: 'image/jpeg', origin: origin);
 
+  /// Shares several photos in one share sheet. Missing files are skipped;
+  /// [ShareOutcome.missingFile] only when none are left.
+  Future<ShareOutcome> shareImages(List<File> files, {Rect? origin}) async {
+    final present = [
+      for (final f in files)
+        if (await f.exists()) f,
+    ];
+    if (present.isEmpty) return ShareOutcome.missingFile;
+    try {
+      final params = ShareParams(
+        files: [for (final f in present) XFile(f.path, mimeType: 'image/jpeg')],
+        sharePositionOrigin: origin,
+      );
+      final result = await (_share ?? SharePlus.instance.share)(params);
+      return switch (result.status) {
+        ShareResultStatus.success => ShareOutcome.shared,
+        ShareResultStatus.dismissed => ShareOutcome.dismissed,
+        ShareResultStatus.unavailable => ShareOutcome.opened,
+      };
+    } catch (_) {
+      return ShareOutcome.failed;
+    }
+  }
+
   /// Shares exactly [file] (no text), e.g. a report PDF.
   Future<ShareOutcome> shareFile(
     File file, {

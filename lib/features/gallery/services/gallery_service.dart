@@ -85,6 +85,25 @@ class GalleryService {
     return Isolate.run(() => readJpegDimensions(path));
   }
 
+  /// Plans for deleting several photos. A selected original takes its
+  /// copies along when [includeRelated]; a copy whose original is also
+  /// being deleted with its copies is not planned twice.
+  List<DeletePlan> planDeleteMany(
+    List<GalleryPhoto> photos,
+    GalleryIndex index, {
+    required bool includeRelated,
+  }) {
+    final ids = {for (final p in photos) p.id};
+    return [
+      for (final photo in photos)
+        if (!(includeRelated &&
+            photo.isWatermarked &&
+            index.sourceOf(photo) != null &&
+            ids.contains(index.sourceOf(photo)!.id)))
+          planDelete(photo, index),
+    ];
+  }
+
   DeletePlan planDelete(GalleryPhoto photo, GalleryIndex index) =>
       DeletePlan(target: photo, related: index.variantsOf(photo));
 

@@ -5,6 +5,9 @@ abstract final class AppRoutes {
 
   /// Argument: a `GalleryPhoto`.
   static const String photoDetails = '/gallery/photo';
+
+  /// Uses the open gallery's photos, filter and search.
+  static const String photoMap = '/gallery/map';
   static const String projects = '/projects';
 
   /// Argument: project id.

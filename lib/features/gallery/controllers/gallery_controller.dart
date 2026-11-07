@@ -7,6 +7,7 @@ import 'package:gps_camera/features/gallery/models/gallery_filter.dart';
 import 'package:gps_camera/features/gallery/models/gallery_index.dart';
 import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
 import 'package:gps_camera/features/gallery/models/photo_library.dart';
+import 'package:gps_camera/features/gallery/models/photo_search.dart';
 import 'package:gps_camera/features/gallery/services/gallery_service.dart';
 import 'package:gps_camera/features/projects/models/photo_refs.dart';
 import 'package:gps_camera/features/projects/models/project.dart';
@@ -30,6 +31,12 @@ class GalleryController extends GetxController implements PhotoLibrary {
   final Rx<ProjectFilter> projectFilter = ProjectFilter.any.obs;
   final RxBool isRefreshing = false.obs;
 
+  /// Text typed in the search field; empty shows everything.
+  final RxString query = ''.obs;
+
+  /// Whether the app bar shows the search field.
+  final RxBool searching = false.obs;
+
   /// Original photo ref → project. Empty if the database is unavailable,
   /// which never stops the gallery from showing photos.
   final RxMap<String, ProjectRef> assignments = <String, ProjectRef>{}.obs;
@@ -46,9 +53,23 @@ class GalleryController extends GetxController implements PhotoLibrary {
 
   List<GalleryPhoto> get visible {
     final byProject = projectFilter.value;
+    final words = PhotoSearch.words(query.value);
     final photos = index.value.view(filter.value, sort.value);
-    if (!byProject.isActive) return photos;
-    return photos.where((p) => byProject.matches(projectOf(p))).toList();
+    if (!byProject.isActive && words.isEmpty) return photos;
+    return photos.where((p) {
+      final project = projectOf(p);
+      if (byProject.isActive && !byProject.matches(project)) return false;
+      return PhotoSearch.matches(p, words, projectName: project?.name);
+    }).toList();
+  }
+
+  void setQuery(String value) => query.value = value;
+
+  void startSearch() => searching.value = true;
+
+  void stopSearch() {
+    searching.value = false;
+    query.value = '';
   }
 
   @override
@@ -167,6 +188,52 @@ class GalleryController extends GetxController implements PhotoLibrary {
     for (final id in selectedIds) ?index.value.byId(id),
   ];
 
+  /// Selected originals that have watermarked copies not selected too.
+  int get selectedWithCopies => selectedPhotos
+      .where(
+        (p) =>
+            p.isOriginal &&
+            index.value.variantsOf(p).any((v) => !selectedIds.contains(v.id)),
+      )
+      .length;
+
+  final RxBool isBusy = false.obs;
+
+  /// Deletes the selected photos (and their copies when [includeRelated]),
+  /// then drops their project assignments. Returns every result so the
+  /// view can report exactly what happened.
+  Future<List<DeleteResult>> deleteSelected({
+    required bool includeRelated,
+  }) async {
+    if (isBusy.value) return const [];
+    isBusy.value = true;
+    try {
+      final plans = _service.planDeleteMany(
+        selectedPhotos,
+        index.value,
+        includeRelated: includeRelated,
+      );
+      final results = <DeleteResult>[];
+      for (final plan in plans) {
+        results.add(
+          await _service.delete(plan, includeRelated: includeRelated),
+        );
+      }
+      try {
+        await _projects.forgetPhotos(
+          results.expand((r) => r.removedPhotos).map(PhotoRefs.of),
+        );
+      } catch (_) {
+        // The next scan repairs stale rows.
+      }
+      cancelSelection();
+      await reload();
+      return results;
+    } finally {
+      isBusy.value = false;
+    }
+  }
+
   /// Report of the selected photos, one entry per capture, or null when
   /// nothing is selected.
   ReportJob? selectionReport({DateTime? now}) {
@@ -199,6 +266,10 @@ class GalleryController extends GetxController implements PhotoLibrary {
       preventDuplicates: false,
     );
     await reload();
+  }
+
+  Future<void> openMap() async {
+    await Get.toNamed<void>(AppRoutes.photoMap);
   }
 
   Future<void> openCamera() async {

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
+import 'package:gps_camera/core/services/share_service.dart';
 import 'package:gps_camera/features/reports/services/report_service.dart';
 import 'package:gps_camera/features/reports/widgets/report_generation.dart';
 import 'package:gps_camera/features/gallery/controllers/gallery_controller.dart';
@@ -21,14 +22,21 @@ class GalleryView extends GetView<GalleryController> {
   Widget build(BuildContext context) {
     return Obx(
       () => PopScope(
-        // Back leaves selection mode first; nothing is changed.
-        canPop: !controller.selecting.value,
+        // Back leaves selection or search first; nothing is changed.
+        canPop: !controller.selecting.value && !controller.searching.value,
         onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) controller.cancelSelection();
+          if (didPop) return;
+          if (controller.selecting.value) {
+            controller.cancelSelection();
+          } else {
+            controller.stopSearch();
+          }
         },
         child: Scaffold(
           appBar: controller.selecting.value
               ? _selectionBar(context)
+              : controller.searching.value
+              ? _searchBar()
               : _normalBar(),
           body: _body(),
         ),
@@ -52,11 +60,132 @@ class GalleryView extends GetView<GalleryController> {
           icon: const Icon(Icons.select_all_rounded),
         ),
         IconButton(
+          tooltip: 'Share',
+          onPressed: count == 0 ? null : () => _shareSelected(context),
+          icon: const Icon(Icons.ios_share_rounded),
+        ),
+        IconButton(
           tooltip: 'Create PDF report',
           onPressed: count == 0 ? null : () => _createReport(context),
           icon: const Icon(Icons.picture_as_pdf_outlined),
         ),
+        IconButton(
+          tooltip: 'Delete',
+          onPressed: count == 0 || controller.isBusy.value
+              ? null
+              : () => _deleteSelected(context),
+          icon: const Icon(Icons.delete_outline_rounded),
+        ),
       ],
+    );
+  }
+
+  PreferredSizeWidget _searchBar() {
+    return AppBar(
+      leading: IconButton(
+        tooltip: 'Close search',
+        onPressed: controller.stopSearch,
+        icon: const Icon(Icons.arrow_back_rounded),
+      ),
+      title: TextField(
+        autofocus: true,
+        textInputAction: TextInputAction.search,
+        decoration: const InputDecoration(
+          hintText: 'Place, address, note or date',
+          border: InputBorder.none,
+        ),
+        onChanged: controller.setQuery,
+      ),
+    );
+  }
+
+  Future<void> _shareSelected(BuildContext context) async {
+    final files = [for (final p in controller.selectedPhotos) p.file];
+    final outcome = await Get.find<ShareService>().shareImages(files);
+    if (!context.mounted) return;
+    final message = switch (outcome) {
+      ShareOutcome.missingFile => 'These photos no longer exist.',
+      ShareOutcome.failed => 'The share sheet could not be opened.',
+      _ => null,
+    };
+    if (message != null) _snack(context, message, isError: true);
+  }
+
+  Future<void> _deleteSelected(BuildContext context) async {
+    final count = controller.selectedIds.length;
+    final withCopies = controller.selectedWithCopies;
+    var includeCopies = true;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => StatefulBuilder(
+        builder: (dialog, setState) => AlertDialog(
+          icon: Icon(Icons.delete_outline_rounded, color: dialog.colors.error),
+          title: Text('Delete $count photo${count == 1 ? '' : 's'}?'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'They are removed from the app with their location data. '
+                'Copies already in the phone gallery are not touched. This '
+                'cannot be undone.',
+              ),
+              if (withCopies > 0)
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: includeCopies,
+                  onChanged: (v) => setState(() => includeCopies = v ?? true),
+                  title: Text(
+                    'Also delete watermarked copies of $withCopies '
+                    'original${withCopies == 1 ? '' : 's'}',
+                  ),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialog).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: dialog.colors.error,
+                foregroundColor: dialog.colors.onError,
+              ),
+              onPressed: () => Navigator.of(dialog).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmed != true) return;
+    final results = await controller.deleteSelected(
+      includeRelated: includeCopies,
+    );
+    if (!context.mounted) return;
+    final removed = results.fold(0, (n, r) => n + r.removedPhotos.length);
+    final failed = results.fold(0, (n, r) => n + r.failures.length);
+    _snack(
+      context,
+      failed == 0
+          ? 'Deleted $removed photo${removed == 1 ? '' : 's'}'
+          : 'Deleted $removed, but $failed file'
+                '${failed == 1 ? '' : 's'} could not be removed',
+      isError: failed > 0,
+    );
+  }
+
+  static void _snack(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+  }) {
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? context.colors.error : null,
+      ),
     );
   }
 
@@ -75,6 +204,16 @@ class GalleryView extends GetView<GalleryController> {
     return AppBar(
       title: const Text('Gallery'),
       actions: [
+        IconButton(
+          tooltip: 'Search',
+          onPressed: controller.startSearch,
+          icon: const Icon(Icons.search_rounded),
+        ),
+        IconButton(
+          tooltip: 'Map',
+          onPressed: controller.openMap,
+          icon: const Icon(Icons.map_outlined),
+        ),
         IconButton(
           tooltip: 'Select photos for a report',
           onPressed: () => controller.startSelection(),
@@ -168,10 +307,19 @@ class _Content extends StatelessWidget {
                               physics: const AlwaysScrollableScrollPhysics(),
                               child: SizedBox(
                                 height: constraints.maxHeight,
-                                child: GalleryEmptyState(
-                                  filter: controller.filter.value,
-                                  onOpenCamera: controller.openCamera,
-                                ),
+                                child: controller.query.value.trim().isNotEmpty
+                                    ? const EmptyStateView(
+                                        icon: Icons.search_off_rounded,
+                                        title: 'No matching photos',
+                                        message:
+                                            'Try a place, part of the '
+                                            'address, a note or a date '
+                                            'like "07 Nov".',
+                                      )
+                                    : GalleryEmptyState(
+                                        filter: controller.filter.value,
+                                        onOpenCamera: controller.openCamera,
+                                      ),
                               ),
                             ),
                       )

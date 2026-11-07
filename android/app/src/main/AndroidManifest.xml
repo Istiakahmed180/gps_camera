@@ -3,6 +3,10 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- Address lookup, map snapshots and map tiles. Without it release
+         builds work fully offline but never show addresses or maps. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Foreground location only, used while the camera screen is open.
          Android 12+ requires coarse alongside fine. -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
