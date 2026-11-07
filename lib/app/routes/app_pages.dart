@@ -10,6 +10,8 @@ import 'package:gps_camera/features/gallery/views/photo_details_view.dart';
 import 'package:gps_camera/features/gallery/views/photo_map_view.dart';
 import 'package:gps_camera/features/home/bindings/home_binding.dart';
 import 'package:gps_camera/features/home/views/home_view.dart';
+import 'package:gps_camera/features/onboarding/bindings/onboarding_binding.dart';
+import 'package:gps_camera/features/onboarding/views/onboarding_view.dart';
 import 'package:gps_camera/features/projects/bindings/project_details_binding.dart';
 import 'package:gps_camera/features/projects/bindings/project_edit_binding.dart';
 import 'package:gps_camera/features/projects/bindings/project_photo_picker_binding.dart';
@@ -33,6 +35,11 @@ abstract final class AppPages {
       name: AppRoutes.home,
       page: () => const HomeView(),
       binding: HomeBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.onboarding,
+      page: () => const OnboardingView(),
+      binding: OnboardingBinding(),
     ),
     GetPage<dynamic>(
       name: AppRoutes.camera,

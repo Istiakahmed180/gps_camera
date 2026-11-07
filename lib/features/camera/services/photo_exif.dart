@@ -19,6 +19,8 @@ class ExifSpec {
     this.heading,
     this.fixTimeUtc,
     this.description,
+    this.direction,
+    this.directionTrueNorth = true,
   });
 
   factory ExifSpec.from(PhotoMetadata metadata) {
@@ -39,6 +41,11 @@ class ExifSpec {
       description: note != null && note.codeUnits.every((c) => c < 0x80)
           ? note
           : null,
+      // A flat phone's top edge is not where the lens looked.
+      direction: metadata.direction?.flat == false
+          ? metadata.direction!.degrees
+          : null,
+      directionTrueNorth: metadata.direction?.trueNorth ?? true,
     );
   }
 
@@ -57,6 +64,10 @@ class ExifSpec {
   final double? heading;
   final DateTime? fixTimeUtc;
   final String? description;
+
+  /// Which way the camera faced, degrees from north.
+  final double? direction;
+  final bool directionTrueNorth;
 
   bool get hasLocation => latitude != null && longitude != null;
 
@@ -208,6 +219,11 @@ abstract final class PhotoExif {
     if (spec.heading != null) {
       gps[0x0E] = img.IfdValueAscii('T');
       gps[0x0F] = img.IfdValueRational((spec.heading! * 100).round(), 100);
+    }
+    if (spec.direction != null) {
+      // GPSImgDirectionRef / GPSImgDirection.
+      gps[0x10] = img.IfdValueAscii(spec.directionTrueNorth ? 'T' : 'M');
+      gps[0x11] = img.IfdValueRational((spec.direction! * 100).round(), 100);
     }
     if (spec.accuracy != null) {
       // GPSHPositioningError, metres.

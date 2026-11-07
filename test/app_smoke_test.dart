@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gps_camera/app/app.dart';
 import 'package:gps_camera/app/bindings/initial_binding.dart';
+import 'package:gps_camera/core/constants/storage_keys.dart';
 import 'package:gps_camera/core/database/database_service.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
 import 'package:gps_camera/features/gallery/services/gallery_service.dart';
@@ -33,6 +34,8 @@ void main() {
       FakeLocationService(permission: PermissionAccess.denied),
     );
     InitialBinding().dependencies();
+    // Onboarding is covered in onboarding_test.dart.
+    GetStorage().write(StorageKeys.onboardingDone, true);
   });
   tearDown(Get.reset);
 

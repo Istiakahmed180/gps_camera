@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -91,17 +92,29 @@ class BackupActions extends StatelessWidget {
   }
 
   Future<void> _restore(BuildContext context) async {
-    final navigator = Navigator.of(context);
     final picked = await _guard(context, service.pick);
     if (picked == null || !context.mounted) return;
+    await restoreFile(context, picked);
+  }
 
+  /// Confirms, restores [picked] with progress, shows the result and then
+  /// removes the private copy. [afterRestart] explains that the file was
+  /// chosen before Android restarted the app.
+  Future<void> restoreFile(
+    BuildContext context,
+    File picked, {
+    bool afterRestart = false,
+  }) async {
+    final navigator = Navigator.of(context);
     try {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialog) => AlertDialog(
           icon: const Icon(Icons.settings_backup_restore_rounded),
           title: const Text('Restore this backup?'),
-          content: const Text(
+          content: Text(
+            '${afterRestart ? 'You chose this backup just before Android '
+                      'restarted the app. ' : ''}'
             'Photos, watermarked copies, maps, reports and projects that are '
             'not on this phone yet will be added. Files and projects already '
             'here stay exactly as they are.',

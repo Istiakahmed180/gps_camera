@@ -144,6 +144,7 @@ class _Controls extends GetView<WatermarkController> {
             config: config,
             hasAddress: controller.hasAddress,
             hasNote: controller.metadata.value?.note != null,
+            hasDirection: controller.metadata.value?.direction != null,
             onChanged: controller.updateConfig,
           ),
           const SizedBox(height: AppSpacing.xl),

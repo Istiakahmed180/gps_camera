@@ -46,6 +46,11 @@ class PhotoDetailsPanel extends StatelessWidget {
         ),
         if (metadata != null)
           _LocationSection(location: metadata.location, place: metadata.place),
+        if (metadata?.direction != null)
+          _Section(
+            title: 'Camera direction',
+            rows: [_Row('Facing', metadata!.direction!.description)],
+          ),
         if (record != null)
           _Section(
             title: 'Watermark',

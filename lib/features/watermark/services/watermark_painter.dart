@@ -312,6 +312,8 @@ class WatermarkPainter {
           _Line(c.coordinatesLine!, _Role.secondary),
         if (c.accuracyValue != null)
           _Line('GPS Accuracy: ${c.accuracyValue}', _accuracyRole),
+        if (c.direction != null)
+          _Line('Facing ${c.direction}', _Role.secondary),
         if (c.address != null) _Line(c.address!, _Role.secondary),
         if (c.note != null) _Line('Note: ${c.note}', _Role.note),
       ],
@@ -331,6 +333,8 @@ class WatermarkPainter {
             _accuracyRole,
             label: 'ACC',
           ),
+        if (c.direction != null)
+          _Line(c.direction!, _Role.secondary, label: 'DIR'),
         if (c.address != null)
           _Line(c.address!, _Role.secondary, label: 'ADDR'),
         if (c.note != null) _Line(c.note!, _Role.note, label: 'NOTE'),
@@ -350,6 +354,8 @@ class WatermarkPainter {
           _Line(c.dateTimeLine!.replaceAll('  |  ', '  ·  '), _Role.secondary),
         if (c.accuracyValue != null)
           _Line('GPS Accuracy: ${c.accuracyValue}', _accuracyRole),
+        if (c.direction != null)
+          _Line('Facing ${c.direction}', _Role.secondary),
         if (c.plusCode != null)
           _Line('Plus Code ${c.plusCode}', _Role.secondary),
         if (c.note != null) _Line('Note: ${c.note}', _Role.note),
@@ -366,6 +372,8 @@ class WatermarkPainter {
                 ? _Role.poor
                 : _Role.secondary,
           ),
+        if (c.direction != null)
+          _Line('Facing ${c.direction}', _Role.secondary),
         if (c.address != null) _Line(c.address!, _Role.secondary),
         if (c.note != null) _Line(c.note!, _Role.note),
       ],

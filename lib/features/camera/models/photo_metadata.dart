@@ -1,3 +1,4 @@
+import 'package:gps_camera/features/location/models/camera_direction.dart';
 import 'package:gps_camera/features/location/models/location_snapshot.dart';
 import 'package:gps_camera/features/location/models/place_info.dart';
 
@@ -12,6 +13,7 @@ class PhotoMetadata {
     this.place,
     this.mapImageFileName,
     this.note,
+    this.direction,
     this.schemaVersion = currentSchemaVersion,
   });
 
@@ -32,6 +34,7 @@ class PhotoMetadata {
     required DateTime capturedAt,
     required LocationSnapshot location,
     String? note,
+    CameraDirection? direction,
   }) {
     final local = capturedAt.toLocal();
     return PhotoMetadata(
@@ -41,6 +44,7 @@ class PhotoMetadata {
       timeZoneName: local.timeZoneName,
       location: location,
       note: cleanNote(note),
+      direction: direction,
     );
   }
 
@@ -60,6 +64,10 @@ class PhotoMetadata {
       },
       mapImageFileName: json['mapImageFileName'] as String?,
       note: cleanNote(json['note'] as String?),
+      direction: switch (json['direction']) {
+        final Map<String, dynamic> d => CameraDirection.fromJson(d),
+        _ => null,
+      },
     );
   }
 
@@ -75,6 +83,7 @@ class PhotoMetadata {
         place: place ?? this.place,
         mapImageFileName: mapImageFileName ?? this.mapImageFileName,
         note: note,
+        direction: direction,
       );
 
   /// The same photo with a new note (null or blank removes it). Nothing
@@ -89,6 +98,7 @@ class PhotoMetadata {
     place: place,
     mapImageFileName: mapImageFileName,
     note: cleanNote(value),
+    direction: direction,
   );
 
   /// 2 adds [place] and [mapImageFileName]; version 1 files still load.
@@ -114,6 +124,9 @@ class PhotoMetadata {
   /// The user's own description of the photo, e.g. "Crack on pillar 3".
   final String? note;
 
+  /// Which way the camera faced, from the compass; null when unknown.
+  final CameraDirection? direction;
+
   Map<String, dynamic> toJson() => {
     'schemaVersion': schemaVersion,
     'imageFileName': imageFileName,
@@ -125,5 +138,6 @@ class PhotoMetadata {
     'mapImageFileName': mapImageFileName,
     // Written only when set, so older files stay unchanged until edited.
     if (note != null) 'note': note,
+    if (direction != null) 'direction': direction!.toJson(),
   };
 }

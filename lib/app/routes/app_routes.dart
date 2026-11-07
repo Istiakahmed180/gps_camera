@@ -1,5 +1,6 @@
 abstract final class AppRoutes {
   static const String home = '/';
+  static const String onboarding = '/welcome';
   static const String camera = '/camera';
   static const String gallery = '/gallery';
 

@@ -14,6 +14,7 @@ import android.view.KeyEvent
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.io.IOException
@@ -30,6 +31,7 @@ class MainActivity : FlutterActivity() {
     /** Set by Dart while the camera screen is open. */
     private var volumeShutter = false
     private var volumeChannel: MethodChannel? = null
+    private var compass: CompassStream? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -49,10 +51,24 @@ class MainActivity : FlutterActivity() {
                     "saveBackup" -> saveBackup(call.argument<String>("path"), result)
                     "pickBackup" -> pickBackup(result)
                     "pickImage" -> pickImage(result)
-                    "pendingImage" -> result.success(pendingImage())
+                    // Queued behind any recovery copy, so it sees the result.
+                    "pendingImage" -> background(result) { pendingImage() }
+                    "pendingBackup" -> background(result) { pendingBackup() }
+                    "compassAvailable" -> result.success(compass?.available == true)
+                    "declination" -> result.success(
+                        CompassStream.declination(
+                            call.argument<Double>("latitude") ?: 0.0,
+                            call.argument<Double>("longitude") ?: 0.0,
+                            call.argument<Double>("altitude") ?: 0.0,
+                        ),
+                    )
                     else -> result.notImplemented()
                 }
             }
+        compass = CompassStream(this).also {
+            EventChannel(flutterEngine.dartExecutor.binaryMessenger, COMPASS_CHANNEL)
+                .setStreamHandler(it)
+        }
         volumeChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, VOLUME_CHANNEL)
             .apply {
                 setMethodCallHandler { call, result ->
@@ -232,6 +248,62 @@ class MainActivity : FlutterActivity() {
         input.use { stream -> target.outputStream().use { stream.copyTo(it) } }
     }
 
+    /**
+     * Finishes a picker result that arrived after Android restarted the app.
+     * The work is kept for Dart to collect with `pendingImage` or
+     * `pendingBackup`.
+     */
+    private fun recoverResult(requestCode: Int, uri: android.net.Uri) {
+        try {
+            when (requestCode) {
+                REQUEST_IMAGE -> copyPickedImage(uri, File(pickedDir(), "pending_image"))
+                REQUEST_PICK -> copyPickedImage(
+                    uri,
+                    File(backupCache().apply { mkdirs() }, "restore_pending.zip"),
+                )
+                REQUEST_SAVE -> {
+                    // The ZIP was finished before the picker opened.
+                    val zip = backupCache().listFiles()
+                        ?.filter { it.name.startsWith("GPSCamera_Backup_") && it.name.endsWith(".zip") }
+                        ?.maxByOrNull { it.lastModified() }
+                    val outcome = if (zip == null) {
+                        "failed"
+                    } else {
+                        try {
+                            val out = contentResolver.openOutputStream(uri, "w")
+                                ?: throw IOException("No stream")
+                            out.use { stream -> zip.inputStream().use { it.copyTo(stream) } }
+                            zip.delete()
+                            "saved"
+                        } catch (e: Exception) {
+                            "failed"
+                        }
+                    }
+                    File(backupCache(), "save_result").writeText(outcome)
+                }
+            }
+        } catch (e: Exception) {
+            // Nothing to recover; the user can try again.
+        }
+    }
+
+    /**
+     * Backup work finished after a restart: `restorePath` for a chosen
+     * backup waiting to be restored, `saveResult` for a backup saved (or
+     * not) to the chosen place. Reading the save result clears it.
+     */
+    private fun pendingBackup(): Map<String, String>? {
+        val dir = backupCache()
+        val restore = File(dir, "restore_pending.zip").takeIf { it.isFile }
+        val marker = File(dir, "save_result")
+        val save = if (marker.isFile) marker.readText().also { marker.delete() } else null
+        if (restore == null && save == null) return null
+        return buildMap {
+            if (restore != null) put("restorePath", restore.path)
+            if (save != null) put("saveResult", save)
+        }
+    }
+
     /** An image picked just before Android restarted the app, or null. */
     private fun pendingImage(): String? =
         File(pickedDir(), "pending_image").takeIf { it.isFile }?.path
@@ -273,15 +345,7 @@ class MainActivity : FlutterActivity() {
         if (result == null) {
             // Android stopped the app while the picker was open, so no Dart
             // call is waiting. Keep a chosen image for Dart to collect.
-            if (requestCode == REQUEST_IMAGE && uri != null) {
-                io.execute {
-                    try {
-                        copyPickedImage(uri, File(pickedDir(), "pending_image"))
-                    } catch (e: Exception) {
-                        // Nothing to recover; the user can pick again.
-                    }
-                }
-            }
+            if (uri != null) io.execute { recoverResult(requestCode, uri) }
             return
         }
         pending = null
@@ -321,6 +385,7 @@ class MainActivity : FlutterActivity() {
     companion object {
         private const val CHANNEL = "co.tdevs.gps_camera/native"
         private const val VOLUME_CHANNEL = "co.tdevs.gps_camera/volume"
+        private const val COMPASS_CHANNEL = "co.tdevs.gps_camera/compass"
         private const val GALLERY_DIR = "Pictures/GPS Camera"
         private val GALLERY_SOURCES = setOf("Photos", "Watermarked")
         private val SAFE_NAME = Regex("[A-Za-z0-9_.-]{1,120}\\.jpg")

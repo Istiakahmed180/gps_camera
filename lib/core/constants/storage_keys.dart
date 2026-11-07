@@ -9,5 +9,6 @@ abstract final class StorageKeys {
   static const String captureTimer = 'camera.timer';
   static const String volumeShutter = 'camera.volume_shutter';
   static const String captureNote = 'camera.note';
+  static const String onboardingDone = 'app.onboarding_done';
   static const String gallerySaveMode = 'export.gallery_save_mode';
 }

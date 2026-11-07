@@ -190,6 +190,29 @@ class BackupService {
     }
   }
 
+  /// Backup work that finished after Android restarted the app while a
+  /// file picker was open: a chosen backup waiting to be restored, and/or
+  /// whether a backup reached the chosen place.
+  Future<({File? restore, BackupSaveOutcome? saved})> pendingWork() async {
+    try {
+      final map = await _channel.invokeMapMethod<String, String>(
+        'pendingBackup',
+      );
+      if (map == null) return (restore: null, saved: null);
+      final path = map['restorePath'];
+      return (
+        restore: path == null ? null : File(path),
+        saved: switch (map['saveResult']) {
+          'saved' => BackupSaveOutcome.saved,
+          null => null,
+          _ => BackupSaveOutcome.failed,
+        },
+      );
+    } catch (_) {
+      return (restore: null, saved: null);
+    }
+  }
+
   /// Adds everything in [zip] that this phone does not have yet.
   Future<RestoreSummary> restore(File zip) => _exclusive(() async {
     final root = (await _storage.rootDirectory()).path;

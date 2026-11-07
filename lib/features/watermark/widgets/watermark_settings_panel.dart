@@ -12,7 +12,11 @@ class WatermarkSettingsPanel extends StatelessWidget {
     required this.hasAddress,
     required this.onChanged,
     this.hasNote = false,
+    this.hasDirection = false,
   });
+
+  /// Whether this photo recorded a compass direction.
+  final bool hasDirection;
 
   final WatermarkConfig config;
   final bool hasAddress;
@@ -60,6 +64,17 @@ class WatermarkSettingsPanel extends StatelessWidget {
                 config.showAddress && hasAddress,
                 (v) => config.copyWith(showAddress: v),
                 enabled: hasAddress,
+              ),
+            ),
+            Tooltip(
+              message: hasDirection
+                  ? ''
+                  : 'No compass direction was recorded for this photo',
+              child: _toggle(
+                'Direction',
+                config.showDirection && hasDirection,
+                (v) => config.copyWith(showDirection: v),
+                enabled: hasDirection,
               ),
             ),
             Tooltip(

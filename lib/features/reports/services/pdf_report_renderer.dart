@@ -7,6 +7,7 @@ import 'package:gps_camera/features/location/models/gps_accuracy_level.dart';
 import 'package:gps_camera/features/location/models/location_fix.dart';
 import 'package:gps_camera/features/location/models/location_snapshot.dart';
 import 'package:gps_camera/features/location/models/place_info.dart';
+import 'package:gps_camera/features/reports/models/report_map.dart';
 import 'package:gps_camera/features/reports/models/report_models.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 import 'package:gps_camera/features/watermark/utils/capture_time_formatter.dart';
@@ -84,7 +85,11 @@ Future<ReportRenderStats> renderReportPdf(
       header: (context) =>
           context.pageNumber == 1 ? pw.SizedBox() : _runningHeader(job, style),
       footer: (context) => _footer(context, job, style),
-      build: (context) => [_summary(job, style, missing), ...blocks],
+      build: (context) => [
+        _summary(job, style, missing),
+        ?_overview(job, style),
+        ...blocks,
+      ],
     ),
   );
 
@@ -304,6 +309,117 @@ pw.Widget _summary(ReportJob job, _Styles s, int missingImages) {
   );
 }
 
+/// A4 width minus the 36 pt left and right margins.
+final double _contentWidth = PdfPageFormat.a4.width - 72;
+
+/// Where the photos were taken: the map with numbered pins (numbers match
+/// the # of each photo below), and which photos each pin stands for.
+pw.Widget? _overview(ReportJob job, _Styles s) {
+  final map = job.map;
+  if (map == null) {
+    if (!job.mapUnavailable) return null;
+    return pw.Padding(
+      padding: const pw.EdgeInsets.only(bottom: 16),
+      child: pw.Text(
+        'Location map not included: there was no internet connection when '
+        'this report was made.',
+        style: s.small,
+      ),
+    );
+  }
+
+  String photos(List<int> entries) {
+    if (entries.length == 1) return '#${entries.single}';
+    final shown = entries.take(12).map((n) => '#$n').join(', ');
+    return entries.length > 12
+        ? '$shown and ${entries.length - 12} more'
+        : shown;
+  }
+
+  return pw.Inseparable(
+    child: pw.Container(
+      margin: const pw.EdgeInsets.only(bottom: 18),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text('Locations', style: s.heading),
+          pw.SizedBox(height: 6),
+          pw.ClipRRect(
+            horizontalRadius: 6,
+            verticalRadius: 6,
+            // A4 width minus the page margins; the map is 5:3.
+            child: pw.Image(
+              pw.MemoryImage(map.image),
+              fit: pw.BoxFit.cover,
+              width: _contentWidth,
+              height: _contentWidth * 0.6,
+            ),
+          ),
+          pw.SizedBox(height: 4),
+          pw.Text(
+            'Pin numbers match the photo numbers below. Photos taken within '
+            '${ReportMapPins.radiusMeters.round()} m of each other share a '
+            'pin.${map.omitted > 0 ? ' ${map.omitted} more locations are '
+                      'not shown on the map.' : ''}',
+            style: s.small,
+          ),
+          if (map.pins.any((p) => p.entries.length > 1) ||
+              map.pins.length > 1) ...[
+            pw.SizedBox(height: 8),
+            pw.Table(
+              columnWidths: const {
+                0: pw.FixedColumnWidth(40),
+                1: pw.FlexColumnWidth(3),
+                2: pw.FlexColumnWidth(4),
+              },
+              border: const pw.TableBorder(
+                horizontalInside: pw.BorderSide(color: _Styles.line),
+              ),
+              children: [
+                pw.TableRow(
+                  children: [
+                    for (final h in ['PIN', 'PHOTOS', 'PLACE'])
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.symmetric(vertical: 3),
+                        child: pw.Text(h, style: s.label),
+                      ),
+                  ],
+                ),
+                for (final pin in map.pins)
+                  pw.TableRow(
+                    children: [
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.symmetric(vertical: 3),
+                        child: pw.Text(
+                          '${pin.label}',
+                          style: s.value.copyWith(color: _Styles.accent),
+                        ),
+                      ),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.symmetric(vertical: 3),
+                        child: pw.Text(photos(pin.entries), style: s.value),
+                      ),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.symmetric(vertical: 3),
+                        child: pw.Text(
+                          pin.place ??
+                              '${pin.latitude.toStringAsFixed(5)}, '
+                                  '${pin.longitude.toStringAsFixed(5)}',
+                          style: s.value,
+                          maxLines: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
+}
+
 pw.Widget _entryBlock(
   int number,
   ReportEntry entry,
@@ -464,6 +580,8 @@ List<(String, String, bool)> reportEntryRows(
       ('Metadata', entry.metadataProblem ?? 'Unavailable', true)
     else
       ..._locationRows(metadata),
+    if (metadata?.direction != null)
+      ('Camera direction', metadata!.direction!.description, false),
     ..._watermarkRows(entry),
     if (entry.otherSelectedCopies.isNotEmpty)
       ('Also selected', entry.otherSelectedCopies.join(', '), false),

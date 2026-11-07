@@ -17,6 +17,7 @@ import 'package:gps_camera/features/camera/models/capture_post_processing.dart';
 import 'package:gps_camera/features/camera/models/capture_feedback.dart';
 import 'package:gps_camera/features/camera/services/capture_saver.dart';
 import 'package:gps_camera/features/location/controllers/location_controller.dart';
+import 'package:gps_camera/features/location/models/camera_direction.dart';
 import 'package:gps_camera/features/location/models/gps_accuracy_level.dart';
 import 'package:gps_camera/features/location/models/location_snapshot.dart';
 
@@ -43,8 +44,10 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     this._volume,
     bool Function()? volumeEnabled,
     String? Function()? note,
+    CameraDirection? Function()? direction,
   }) : _loadCameras = cameraLoader,
        _note = note ?? (() => null),
+       _direction = direction ?? (() => null),
        _quality = quality ?? (() => PhotoQuality.fallback),
        _timer = timer ?? (() => CaptureTimer.off),
        _volumeEnabled = volumeEnabled ?? (() => true);
@@ -53,6 +56,14 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
 
   /// The note added to new photos, read at the shutter.
   final String? Function() _note;
+
+  /// The compass direction, read at the shutter.
+  final CameraDirection? Function() _direction;
+
+  /// True while the front (selfie) camera is in use.
+  bool get isFrontCamera =>
+      _cameras.isNotEmpty &&
+      _cameras[_cameraIndex].lensDirection == CameraLensDirection.front;
 
   /// Volume buttons as a shutter; null disables the feature.
   final VolumeShutter? _volume;
@@ -391,6 +402,7 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     final capturedAt = DateTime.now();
     final location = _location.snapshotAt(capturedAt);
     final note = _note();
+    final direction = _direction();
     // The map is grabbed at the shutter, while it still shows this spot.
     final map = _postProcessor?.grabMap();
 
@@ -406,6 +418,7 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
           capturedAt: capturedAt,
           location: location,
           note: note,
+          direction: direction,
         );
       });
       lastCapture.value = saved;

@@ -31,6 +31,7 @@ class WatermarkContent {
     this.brand,
     this.customText,
     this.note,
+    this.direction,
   });
 
   factory WatermarkContent.from(
@@ -93,6 +94,7 @@ class WatermarkContent {
       brand: config.brandText.isEmpty ? null : config.brandText,
       customText: config.customText.isEmpty ? null : config.customText,
       note: config.showNote ? metadata.note : null,
+      direction: config.showDirection ? metadata.direction?.label : null,
     );
   }
 
@@ -128,6 +130,9 @@ class WatermarkContent {
 
   /// The photo's own note.
   final String? note;
+
+  /// `45° NE`: which way the camera faced.
+  final String? direction;
 
   /// True when a map of the capture location may be shown.
   bool get canShowMap =>

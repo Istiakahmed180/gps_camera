@@ -9,7 +9,9 @@ import 'package:gps_camera/features/camera/services/volume_shutter.dart';
 import 'package:gps_camera/features/export/services/gallery_export_service.dart';
 import 'package:gps_camera/features/location/controllers/location_controller.dart';
 import 'package:gps_camera/features/camera/services/capture_enricher.dart';
+import 'package:gps_camera/features/location/controllers/compass_controller.dart';
 import 'package:gps_camera/features/location/controllers/live_map_controller.dart';
+import 'package:gps_camera/features/location/services/compass_service.dart';
 import 'package:gps_camera/features/location/controllers/place_controller.dart';
 import 'package:gps_camera/features/location/services/location_service.dart';
 import 'package:gps_camera/features/location/services/map_cache.dart';
@@ -47,6 +49,15 @@ class CameraBinding extends Bindings {
       ),
     );
     Get.lazyPut(() => WatermarkSettingsStore(Get.find<StorageService>()));
+    Get.lazyPut(
+      () => CompassController(
+        CompassService(),
+        Get.find<LocationController>(),
+        isFrontCamera: () =>
+            Get.isRegistered<CaptureController>() &&
+            Get.find<CaptureController>().isFrontCamera,
+      ),
+    );
     Get.lazyPut(() {
       final storage = Get.find<PhotoStorageService>();
       final place = Get.find<PlaceController>();
@@ -61,6 +72,7 @@ class CameraBinding extends Bindings {
         volume: VolumeShutter(),
         volumeEnabled: () => Get.find<AppPreferences>().volumeShutter.value,
         note: () => Get.find<AppPreferences>().captureNote.value,
+        direction: () => Get.find<CompassController>().snapshot(),
         postProcessor: CaptureEnricher(
           storage: storage,
           renderer: WatermarkRenderer(storage),

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
+import 'package:gps_camera/features/location/models/camera_direction.dart';
 import 'package:gps_camera/features/location/models/location_snapshot.dart';
 
 class SavedCapture {
@@ -34,6 +35,7 @@ class CaptureSaver {
     required DateTime capturedAt,
     required LocationSnapshot location,
     String? note,
+    CameraDirection? direction,
   }) async {
     final photo = await _storage.savePhoto(image, capturedAt: capturedAt);
     final metadata = PhotoMetadata.create(
@@ -41,6 +43,7 @@ class CaptureSaver {
       capturedAt: capturedAt,
       location: location,
       note: note,
+      direction: direction,
     );
 
     File? metadataFile;

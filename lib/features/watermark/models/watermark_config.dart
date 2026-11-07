@@ -37,6 +37,7 @@ class WatermarkConfig {
     this.customText = '',
     this.showLogo = false,
     this.showNote = true,
+    this.showDirection = true,
   });
 
   static const String defaultBrand = 'GPS CAMERA';
@@ -93,6 +94,7 @@ class WatermarkConfig {
       customText: cleanText(json['customText'], maxCustomTextLength, ''),
       showLogo: flag('showLogo', fallback.showLogo),
       showNote: flag('showNote', fallback.showNote),
+      showDirection: flag('showDirection', fallback.showDirection),
     );
   }
 
@@ -125,6 +127,9 @@ class WatermarkConfig {
   /// Shows the photo's note.
   final bool showNote;
 
+  /// Shows which way the camera faced, from the compass.
+  final bool showDirection;
+
   WatermarkConfig copyWith({
     WatermarkTemplate? template,
     bool? showDate,
@@ -139,6 +144,7 @@ class WatermarkConfig {
     String? customText,
     bool? showLogo,
     bool? showNote,
+    bool? showDirection,
   }) {
     return WatermarkConfig(
       template: template ?? this.template,
@@ -158,6 +164,7 @@ class WatermarkConfig {
           : cleanText(customText, maxCustomTextLength, ''),
       showLogo: showLogo ?? this.showLogo,
       showNote: showNote ?? this.showNote,
+      showDirection: showDirection ?? this.showDirection,
     );
   }
 
@@ -175,6 +182,7 @@ class WatermarkConfig {
     'customText': customText,
     'showLogo': showLogo,
     'showNote': showNote,
+    'showDirection': showDirection,
   };
 
   @override
@@ -192,7 +200,8 @@ class WatermarkConfig {
       other.brandText == brandText &&
       other.customText == customText &&
       other.showLogo == showLogo &&
-      other.showNote == showNote;
+      other.showNote == showNote &&
+      other.showDirection == showDirection;
 
   @override
   int get hashCode => Object.hash(
@@ -209,5 +218,6 @@ class WatermarkConfig {
     customText,
     showLogo,
     showNote,
+    showDirection,
   );
 }

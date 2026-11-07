@@ -7,6 +7,7 @@ import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/core/settings/app_preferences.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
+import 'package:gps_camera/features/location/controllers/compass_controller.dart';
 import 'package:gps_camera/features/location/controllers/live_map_controller.dart';
 import 'package:gps_camera/features/location/controllers/location_controller.dart';
 import 'package:gps_camera/features/location/controllers/place_controller.dart';
@@ -172,6 +173,9 @@ class _LiveWatermarkOverlayState extends State<LiveWatermarkOverlay> {
           location: location,
           note: Get.isRegistered<AppPreferences>()
               ? Get.find<AppPreferences>().captureNote.value
+              : null,
+          direction: Get.isRegistered<CompassController>()
+              ? Get.find<CompassController>().direction.value
               : null,
         ).withPlace(
           place: fix == null || place == null
