@@ -1,12 +1,17 @@
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:get/get.dart';
 import 'package:gps_camera/core/constants/storage_keys.dart';
 import 'package:gps_camera/core/services/storage_service.dart';
+import 'package:gps_camera/features/camera/models/photo_metadata.dart';
+import 'package:gps_camera/features/camera/services/photo_exif.dart';
 import 'package:gps_camera/features/export/models/gallery_save_mode.dart';
 import 'package:gps_camera/features/export/services/phone_gallery.dart';
 import 'package:gps_camera/features/gallery/models/gallery_index.dart';
 import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// Counts from copying photos to the phone gallery.
 class GalleryExportSummary {
@@ -39,10 +44,15 @@ class GalleryExportSummary {
 /// Applies the user's [GallerySaveMode] to new and existing photos.
 /// Gallery copies are never deleted or changed by the app afterwards.
 class GalleryExportService {
-  GalleryExportService(this._storage, this._gallery);
+  GalleryExportService(
+    this._storage,
+    this._gallery, {
+    Future<Directory> Function()? tempDirectory,
+  }) : _tempDirectory = tempDirectory ?? getTemporaryDirectory;
 
   final StorageService _storage;
   final PhoneGallery _gallery;
+  final Future<Directory> Function() _tempDirectory;
 
   late final Rx<GallerySaveMode> mode = GallerySaveMode.parse(
     _storage.read<String>(StorageKeys.gallerySaveMode),
@@ -60,15 +70,53 @@ class GalleryExportService {
   Future<bool> exportCapture({
     required File original,
     File? watermarked,
-    DateTime? takenAt,
+    PhotoMetadata? metadata,
   }) async {
     final files = _filesFor(mode.value, original, [?watermarked]);
     var ok = true;
     for (final file in files) {
-      final outcome = await _gallery.save(file, takenAt: takenAt);
+      // New watermarked copies already carry full EXIF.
+      final outcome = identical(file, original)
+          ? await _saveWithExif(file, metadata, upright: false)
+          : await _gallery.save(file, takenAt: metadata?.capturedAt);
       if (outcome == PhoneGallerySave.failed) ok = false;
     }
     return ok;
+  }
+
+  /// Saves a gallery copy of [file] whose EXIF carries the capture time
+  /// (with time zone) and GPS location, so the phone's gallery and Google
+  /// Photos show when and where it was taken. The app's own file is only
+  /// read. Falls back to a plain copy if the EXIF cannot be written.
+  Future<PhoneGallerySave> _saveWithExif(
+    File file,
+    PhotoMetadata? metadata, {
+    required bool upright,
+  }) async {
+    final takenAt = metadata?.capturedAt;
+    if (metadata == null) return _gallery.save(file, takenAt: takenAt);
+    File? temp;
+    try {
+      final dir = await Directory(
+        '${(await _tempDirectory()).path}/gallery_export',
+      ).create(recursive: true);
+      final target = File('${dir.path}/${file.uri.pathSegments.last}');
+      final spec = ExifSpec.from(metadata);
+      final written = await Isolate.run(
+        () => _writeWithExif(file.path, target.path, spec, upright),
+      );
+      if (written) temp = target;
+    } catch (_) {
+      temp = null;
+    }
+    if (temp == null) return _gallery.save(file, takenAt: takenAt);
+    try {
+      return await _gallery.save(temp, takenAt: takenAt);
+    } finally {
+      try {
+        await temp.delete();
+      } catch (_) {}
+    }
   }
 
   /// Copies a watermarked copy made later in the editor, when the mode
@@ -108,7 +156,11 @@ class GalleryExportService {
     for (var i = 0; i < photos.length; i++) {
       onProgress?.call(i, photos.length);
       final photo = photos[i];
-      summary += await _gallery.save(photo.file, takenAt: photo.capturedAt);
+      summary += await _saveWithExif(
+        photo.file,
+        photo.metadata,
+        upright: photo.isWatermarked,
+      );
     }
     onProgress?.call(photos.length, photos.length);
     return summary;
@@ -124,4 +176,13 @@ class GalleryExportService {
       original,
     if (mode.savesWatermarked) ...watermarked,
   ];
+}
+
+/// Copies [source] to [target] with fresh EXIF; the pixels are untouched.
+bool _writeWithExif(String source, String target, ExifSpec spec, bool upright) {
+  final Uint8List bytes = File(source).readAsBytesSync();
+  final updated = PhotoExif.apply(bytes, spec, upright: upright);
+  if (updated == null) return false;
+  File(target).writeAsBytesSync(updated, flush: true);
+  return true;
 }

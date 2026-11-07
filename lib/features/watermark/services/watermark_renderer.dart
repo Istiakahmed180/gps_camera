@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
+import 'package:gps_camera/features/camera/services/photo_exif.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 import 'package:gps_camera/features/watermark/models/watermark_content.dart';
 import 'package:gps_camera/features/watermark/models/watermark_record.dart';
@@ -105,6 +106,7 @@ class WatermarkRenderer {
         overlay: overlay,
         expectedWidth: imageSize.width.round(),
         expectedHeight: imageSize.height.round(),
+        exif: ExifSpec.from(metadata),
       );
       await temp.rename(target.path);
       final record = await _storage.writeJsonAtomic(

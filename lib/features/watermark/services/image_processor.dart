@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:gps_camera/features/camera/services/photo_exif.dart';
 import 'package:image/image.dart' as img;
 
 class ImageProcessingException implements Exception {
@@ -76,6 +77,7 @@ class ImageProcessor {
     required OverlayBitmap overlay,
     required int expectedWidth,
     required int expectedHeight,
+    ExifSpec? exif,
   }) {
     if (sourcePath == targetPath) {
       throw const ImageProcessingException('Refusing to overwrite original');
@@ -91,6 +93,7 @@ class ImageProcessor {
         expectedHeight,
         maxPixels,
         quality,
+        exif,
       ),
     );
   }
@@ -122,6 +125,7 @@ void _compose(
   int expectedHeight,
   int maxPixels,
   int quality,
+  ExifSpec? exif,
 ) {
   final image = _decodeOriented(sourcePath, maxPixels);
   if (image.width != expectedWidth || image.height != expectedHeight) {
@@ -144,7 +148,21 @@ void _compose(
   );
   img.compositeImage(image, layer, dstX: overlay.left, dstY: overlay.top);
 
-  final encoded = img.encodeJpg(image, quality: quality);
+  var encoded = img.encodeJpg(image, quality: quality);
+  if (exif != null) {
+    // Capture time, GPS and camera details, so phone galleries and other
+    // apps show when and where the photo was taken.
+    encoded =
+        PhotoExif.apply(
+          encoded,
+          exif,
+          upright: true,
+          source: image.exif,
+          width: image.width,
+          height: image.height,
+        ) ??
+        encoded;
+  }
   File(targetPath).writeAsBytesSync(encoded, flush: true);
 }
 

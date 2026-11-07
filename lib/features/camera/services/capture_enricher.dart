@@ -98,7 +98,7 @@ class CaptureEnricher implements CapturePostProcessor {
         exported = await gallery.exportCapture(
           original: saved.photo,
           watermarked: copy,
-          takenAt: metadata.capturedAt,
+          metadata: metadata,
         );
       } catch (_) {
         exported = false;

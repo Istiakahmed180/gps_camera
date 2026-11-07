@@ -154,9 +154,10 @@ class MainActivity : FlutterActivity() {
         if (path == null || name == null || !SAFE_NAME.matches(name)) return "invalid"
         val source = File(path).canonicalFile
         val folder = source.parentFile ?: return "invalid"
-        if (folder.parentFile != appRoot() || folder.name !in GALLERY_SOURCES ||
-            !source.name.endsWith(".jpg")
-        ) return "invalid"
+        val fromApp = folder.parentFile == appRoot() && folder.name in GALLERY_SOURCES
+        // Copies with fresh EXIF are prepared in this cache folder.
+        val fromExport = folder == File(cacheDir, "gallery_export").canonicalFile
+        if (!(fromApp || fromExport) || !source.name.endsWith(".jpg")) return "invalid"
         if (!source.isFile) return "missing"
 
         val resolver = contentResolver
