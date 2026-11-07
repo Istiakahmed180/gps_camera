@@ -129,6 +129,7 @@ class CaptureEnricher implements CapturePostProcessor {
         config: _settings.load(),
         imageSize: size,
         mapImage: mapName == null ? null : map,
+        automatic: true,
       );
       return (result.output, 'Watermarked copy saved');
     } on WatermarkException catch (e) {

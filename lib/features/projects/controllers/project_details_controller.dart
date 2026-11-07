@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:get/get.dart';
+import 'package:gps_camera/core/settings/display_format.dart';
 import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/features/gallery/models/gallery_filter.dart';
 import 'package:gps_camera/features/gallery/models/gallery_index.dart';
@@ -114,6 +115,7 @@ class ProjectDetailsController extends GetxController implements PhotoLibrary {
     final entries = ReportEntryBuilder.forProject(index.value);
     if (current == null || entries.isEmpty) return null;
     return ReportJob(
+      format: DisplayFormat.current,
       type: ReportType.project,
       title: 'Project report: ${current.name}',
       projectId: current.id,

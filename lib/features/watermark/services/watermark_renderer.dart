@@ -54,6 +54,7 @@ class WatermarkRenderer {
     required WatermarkConfig config,
     required Size imageSize,
     Uint8List? mapImage,
+    bool automatic = false,
   }) async {
     if (_storage.isWatermarkedFile(original)) {
       throw const WatermarkException(
@@ -104,7 +105,14 @@ class WatermarkRenderer {
       await temp.rename(target.path);
       final record = await _storage.writeJsonAtomic(
         _storage.metadataFileFor(target),
-        _record(original, target, imageSize, config, metadata).toJson(),
+        _record(
+          original,
+          target,
+          imageSize,
+          config,
+          metadata,
+          automatic,
+        ).toJson(),
       );
       return WatermarkResult(output: target, record: record);
     } catch (e) {
@@ -124,6 +132,7 @@ class WatermarkRenderer {
     Size imageSize,
     WatermarkConfig config,
     PhotoMetadata metadata,
+    bool automatic,
   ) {
     String name(File f) => f.uri.pathSegments.last;
     return WatermarkRecord(
@@ -135,6 +144,7 @@ class WatermarkRenderer {
       imageHeight: imageSize.height.round(),
       config: config,
       sourceMetadata: metadata,
+      automatic: automatic,
     );
   }
 }

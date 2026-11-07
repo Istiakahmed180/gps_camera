@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:gps_camera/core/settings/app_preferences.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/core/services/storage_service.dart';
@@ -10,7 +11,9 @@ import 'package:gps_camera/features/camera/services/capture_enricher.dart';
 import 'package:gps_camera/features/location/controllers/live_map_controller.dart';
 import 'package:gps_camera/features/location/controllers/place_controller.dart';
 import 'package:gps_camera/features/location/services/location_service.dart';
+import 'package:gps_camera/features/location/services/map_cache.dart';
 import 'package:gps_camera/features/location/services/place_service.dart';
+import 'package:gps_camera/features/location/services/static_map_service.dart';
 import 'package:gps_camera/features/watermark/services/watermark_renderer.dart';
 import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
 import 'package:gps_camera/features/projects/controllers/active_project_controller.dart';
@@ -36,7 +39,12 @@ class CameraBinding extends Bindings {
     Get.lazyPut(
       () => PlaceController(Get.find<LocationController>(), PlaceService()),
     );
-    Get.lazyPut(() => LiveMapController(Get.find<LocationController>()));
+    Get.lazyPut(
+      () => LiveMapController(
+        Get.find<LocationController>(),
+        serviceFor: (key) => StaticMapService(key, cache: Get.find<MapCache>()),
+      ),
+    );
     Get.lazyPut(() => WatermarkSettingsStore(Get.find<StorageService>()));
     Get.lazyPut(() {
       final storage = Get.find<PhotoStorageService>();
@@ -47,6 +55,7 @@ class CameraBinding extends Bindings {
         CaptureSaver(storage),
         Get.find<LocationController>(),
         assigner: Get.find<ActiveProjectController>(),
+        quality: () => Get.find<AppPreferences>().photoQuality.value,
         postProcessor: CaptureEnricher(
           storage: storage,
           renderer: WatermarkRenderer(storage),

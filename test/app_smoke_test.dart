@@ -65,7 +65,7 @@ void main() {
     await goBack(tester);
 
     await openFromHome(tester, 'Settings');
-    expect(find.text('Appearance'.toUpperCase()), findsOneWidget);
+    expect(find.text('Camera'.toUpperCase()), findsOneWidget);
     await goBack(tester);
 
     await openFromHome(tester, 'Reports');

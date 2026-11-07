@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:get/get.dart';
+import 'package:gps_camera/core/settings/display_format.dart';
 import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/features/gallery/models/gallery_filter.dart';
 import 'package:gps_camera/features/gallery/models/gallery_index.dart';
@@ -176,6 +177,7 @@ class GalleryController extends GetxController implements PhotoLibrary {
     );
     if (entries.isEmpty) return null;
     return ReportJob(
+      format: DisplayFormat.current,
       type: ReportType.selection,
       title: 'Selected photos report',
       generatedAt: now ?? DateTime.now(),

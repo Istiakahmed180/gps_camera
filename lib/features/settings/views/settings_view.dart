@@ -6,6 +6,7 @@ import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/features/export/models/gallery_save_mode.dart';
 import 'package:gps_camera/features/settings/controllers/settings_controller.dart';
 import 'package:gps_camera/features/settings/widgets/backup_actions.dart';
+import 'package:gps_camera/features/settings/widgets/settings_sections.dart';
 import 'package:gps_camera/features/settings/widgets/theme_mode_selector.dart';
 import 'package:gps_camera/shared/widgets/responsive_center.dart';
 import 'package:gps_camera/shared/widgets/section_header.dart';
@@ -24,23 +25,19 @@ class SettingsView extends GetView<SettingsController> {
             padding: AppSpacing.page,
             children: [
               const SectionHeader('Camera'),
-              Card(
-                child: Obx(
-                  () => SwitchListTile(
-                    secondary: const Icon(Icons.branding_watermark_outlined),
-                    title: const Text('Save watermarked copy'),
-                    subtitle: const Text(
-                      'Also save a copy with the location overlay for every '
-                      'photo. The original is always kept.',
-                    ),
-                    value: controller.autoWatermark.value,
-                    onChanged: controller.setAutoWatermark,
-                  ),
-                ),
-              ),
+              Card(child: CameraSettings(controller: controller)),
+              const SizedBox(height: AppSpacing.xl),
+              const SectionHeader('Time and units'),
+              Card(child: DisplaySettings(controller: controller)),
               const SizedBox(height: AppSpacing.xl),
               const SectionHeader('Phone gallery'),
               Card(child: _GallerySettings(controller: controller)),
+              const SizedBox(height: AppSpacing.xl),
+              const SectionHeader('Location details'),
+              Card(child: LocationDetailsSettings(controller: controller)),
+              const SizedBox(height: AppSpacing.xl),
+              const SectionHeader('Storage'),
+              Card(child: StorageSettings(controller: controller)),
               const SizedBox(height: AppSpacing.xl),
               const SectionHeader('Backup'),
               Card(child: BackupActions(service: controller.backup)),

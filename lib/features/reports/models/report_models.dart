@@ -1,3 +1,4 @@
+import 'package:gps_camera/core/settings/display_format.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 
@@ -84,6 +85,7 @@ class ReportJob {
     this.projectId,
     this.projectName,
     this.projectDescription,
+    this.format = const DisplayFormat(),
   });
 
   final ReportType type;
@@ -95,6 +97,9 @@ class ReportJob {
   final String? projectId;
   final String? projectName;
   final String? projectDescription;
+
+  /// Units and time format chosen in Settings when the report was made.
+  final DisplayFormat format;
 
   int get watermarkedVersionCount =>
       entries.fold(0, (sum, e) => sum + e.watermarks.length);

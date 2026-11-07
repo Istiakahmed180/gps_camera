@@ -5,6 +5,7 @@ import 'dart:isolate';
 
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/core/settings/display_format.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/core/services/share_service.dart';
 import 'package:gps_camera/features/reports/models/report_models.dart';
@@ -272,6 +273,8 @@ class ReportService extends GetxService {
     (SendPort, ReportJob, ReportFonts, String) args,
   ) async {
     final (send, job, fonts, path) = args;
+    // Statics are not shared with this isolate.
+    DisplayFormat.current = job.format;
     final stats = await renderReportPdf(
       job,
       fonts,

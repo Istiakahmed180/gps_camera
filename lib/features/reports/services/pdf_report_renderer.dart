@@ -493,7 +493,7 @@ List<(String, String, bool)> _locationRows(PhotoMetadata metadata) {
       ('Longitude', '${fix.longitude}°', false),
       (
         'GPS accuracy',
-        '±${PhotoInfoFormatter.measured(fix.accuracy)} m '
+        '±${PhotoInfoFormatter.length(fix.accuracy)} '
             '(${_level(GpsAccuracyLevel.fromMeters(fix.accuracy))})',
         GpsAccuracyLevel.fromMeters(fix.accuracy) == GpsAccuracyLevel.poor,
       ),
@@ -577,8 +577,8 @@ String _altitude(LocationFix fix) {
   };
   final accuracy = fix.altitudeAccuracy == null
       ? ''
-      : ', ±${PhotoInfoFormatter.measured(fix.altitudeAccuracy!)} m';
-  return '${PhotoInfoFormatter.measured(fix.altitude!)} m $reference$accuracy';
+      : ', ±${PhotoInfoFormatter.length(fix.altitudeAccuracy!)}';
+  return '${PhotoInfoFormatter.length(fix.altitude!)} $reference$accuracy';
 }
 
 String _level(GpsAccuracyLevel level) => switch (level) {

@@ -17,6 +17,7 @@ class WatermarkRecord {
     required this.imageHeight,
     required this.config,
     this.sourceMetadata,
+    this.automatic = false,
     this.schemaVersion = currentSchemaVersion,
   });
 
@@ -34,6 +35,7 @@ class WatermarkRecord {
       sourceMetadata: metadata is Map<String, dynamic>
           ? PhotoMetadata.fromJson(metadata)
           : null,
+      automatic: json['automatic'] == true,
     );
   }
 
@@ -53,6 +55,11 @@ class WatermarkRecord {
   /// The original's metadata at render time. Null in schema 1 records.
   final PhotoMetadata? sourceMetadata;
 
+  /// Made by the camera right after capture, not by the user in the
+  /// editor. Only such copies are replaced when an address or map that was
+  /// missing at capture becomes available.
+  final bool automatic;
+
   Map<String, dynamic> toJson() => {
     'schemaVersion': schemaVersion,
     'outputFileName': outputFileName,
@@ -63,5 +70,6 @@ class WatermarkRecord {
     'imageHeight': imageHeight,
     'config': config.toJson(),
     'sourceMetadata': sourceMetadata?.toJson(),
+    if (automatic) 'automatic': true,
   };
 }

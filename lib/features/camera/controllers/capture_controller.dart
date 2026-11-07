@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/features/camera/models/photo_quality.dart';
 import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
 import 'package:gps_camera/features/camera/models/camera_status.dart';
@@ -34,7 +35,13 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     CameraLoader cameraLoader = availableCameras,
     this._assigner,
     this._postProcessor,
-  }) : _loadCameras = cameraLoader;
+    PhotoQuality Function()? quality,
+  }) : _loadCameras = cameraLoader,
+       _quality = quality ?? (() => PhotoQuality.fallback);
+
+  /// Read each time the camera opens, so a change in Settings applies the
+  /// next time the camera screen is used.
+  final PhotoQuality Function() _quality;
 
   /// Files new captures into the active project. Optional: the camera works
   /// the same without it, and its failures never fail a capture.
@@ -314,7 +321,7 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
 
     final controller = CameraController(
       _cameras[_cameraIndex],
-      ResolutionPreset.veryHigh,
+      _quality().preset,
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.jpeg,
     );

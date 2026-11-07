@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:gps_camera/features/location/services/map_cache.dart';
+
 /// Fetches a small map image (PNG) centred on a point, with a marker, from
 /// Geoapify's Static Maps API. Free plan: no credit card. Geoapify prints
 /// its required attribution inside the image, so it must not be cropped.
@@ -10,6 +12,7 @@ class StaticMapService {
     this._apiKey, {
     HttpClient? client,
     this.timeout = const Duration(seconds: 8),
+    this.cache,
   }) : _client = client ?? HttpClient();
 
   /// Square image side in logical pixels; the PNG is twice that.
@@ -19,6 +22,9 @@ class StaticMapService {
   final String _apiKey;
   final HttpClient _client;
   final Duration timeout;
+
+  /// Checked before downloading and filled after; null disables caching.
+  final MapCache? cache;
 
   Uri urlFor(double latitude, double longitude) {
     final point = 'lonlat:$longitude,$latitude';
@@ -35,8 +41,17 @@ class StaticMapService {
     });
   }
 
-  /// PNG bytes, or null when offline, rate-limited or the key is invalid.
+  /// PNG bytes from the cache or the network, or null when offline,
+  /// rate-limited or the key is invalid.
   Future<Uint8List?> fetch(double latitude, double longitude) async {
+    final cached = await cache?.read(latitude, longitude, zoom);
+    if (cached != null && _isPng(cached)) return cached;
+    final bytes = await _download(latitude, longitude);
+    if (bytes != null) await cache?.write(latitude, longitude, zoom, bytes);
+    return bytes;
+  }
+
+  Future<Uint8List?> _download(double latitude, double longitude) async {
     try {
       final request = await _client
           .getUrl(urlFor(latitude, longitude))

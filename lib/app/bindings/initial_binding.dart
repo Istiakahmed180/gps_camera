@@ -6,10 +6,12 @@ import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/core/services/share_service.dart';
 import 'package:gps_camera/core/services/storage_service.dart';
 import 'package:gps_camera/core/services/theme_service.dart';
+import 'package:gps_camera/core/settings/app_preferences.dart';
 import 'package:gps_camera/features/backup/services/backup_service.dart';
 import 'package:gps_camera/features/export/services/gallery_export_service.dart';
 import 'package:gps_camera/features/export/services/phone_gallery.dart';
 import 'package:gps_camera/features/gallery/services/gallery_service.dart';
+import 'package:gps_camera/features/location/services/map_cache.dart';
 import 'package:gps_camera/features/projects/services/project_repository.dart';
 import 'package:gps_camera/features/reports/services/report_service.dart';
 
@@ -20,9 +22,11 @@ class InitialBinding extends Bindings {
   void dependencies() {
     final storage = Get.put(StorageService(GetStorage()), permanent: true);
     Get.put(ThemeService(storage), permanent: true);
+    Get.put(AppPreferences(storage), permanent: true);
     Get.lazyPut(PermissionService.new, fenix: true);
     Get.lazyPut(PhotoStorageService.new, fenix: true);
     Get.lazyPut(ShareService.new, fenix: true);
+    Get.lazyPut(MapCache.new, fenix: true);
 
     // The database opens lazily on a background isolate at the first query,
     // so registering it here never delays the first screen.

@@ -1,3 +1,5 @@
+import 'package:gps_camera/core/settings/display_format.dart';
+
 /// Formats a capture time in the time zone it was taken in, not the
 /// device's current zone.
 abstract final class CaptureTimeFormatter {
@@ -26,8 +28,11 @@ abstract final class CaptureTimeFormatter {
       '${_two(wallClock.day)} ${_months[wallClock.month - 1]} '
       '${wallClock.year}';
 
-  /// `10:02 AM`
-  static String time(DateTime wallClock) {
+  /// `10:02 AM`, or `10:02` / `22:02` when 24-hour time is chosen.
+  static String time(DateTime wallClock, {bool? use24Hour}) {
+    if (use24Hour ?? DisplayFormat.current.use24Hour) {
+      return '${_two(wallClock.hour)}:${_two(wallClock.minute)}';
+    }
     final hour = wallClock.hour % 12 == 0 ? 12 : wallClock.hour % 12;
     final period = wallClock.hour < 12 ? 'AM' : 'PM';
     return '${_two(hour)}:${_two(wallClock.minute)} $period';

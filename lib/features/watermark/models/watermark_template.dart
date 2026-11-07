@@ -18,4 +18,6 @@ enum WatermarkTemplate {
 
   final String label;
   final String description;
+
+  bool get showsMap => this == map;
 }

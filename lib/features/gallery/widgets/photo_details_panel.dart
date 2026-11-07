@@ -106,7 +106,7 @@ class _LocationSection extends StatelessWidget {
           _Row('Longitude', '${fix.longitude}°'),
           _Row(
             'Accuracy',
-            '±${PhotoInfoFormatter.measured(fix.accuracy)} m · '
+            '±${PhotoInfoFormatter.length(fix.accuracy)} · '
                 '${_level(GpsAccuracyLevel.fromMeters(fix.accuracy))}',
           ),
           if (location.fixAge != null)
@@ -151,8 +151,8 @@ class _LocationSection extends StatelessWidget {
     };
     final accuracy = fix.altitudeAccuracy == null
         ? ''
-        : ' (±${PhotoInfoFormatter.measured(fix.altitudeAccuracy!)} m)';
-    return '${PhotoInfoFormatter.measured(fix.altitude!)} m $reference'
+        : ' (±${PhotoInfoFormatter.length(fix.altitudeAccuracy!)})';
+    return '${PhotoInfoFormatter.length(fix.altitude!)} $reference'
         '$accuracy';
   }
 
