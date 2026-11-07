@@ -26,12 +26,20 @@ class ShareService extends GetxService {
 
   final ShareInvoker? _share;
 
-  Future<ShareOutcome> shareImage(File file, {Rect? origin}) async {
+  Future<ShareOutcome> shareImage(File file, {Rect? origin}) =>
+      shareFile(file, mimeType: 'image/jpeg', origin: origin);
+
+  /// Shares exactly [file] (no text), e.g. a report PDF.
+  Future<ShareOutcome> shareFile(
+    File file, {
+    required String mimeType,
+    Rect? origin,
+  }) async {
     if (!await file.exists()) return ShareOutcome.missingFile;
 
     try {
       final params = ShareParams(
-        files: [XFile(file.path, mimeType: 'image/jpeg')],
+        files: [XFile(file.path, mimeType: mimeType)],
         sharePositionOrigin: origin,
       );
       final result = await (_share ?? SharePlus.instance.share)(params);

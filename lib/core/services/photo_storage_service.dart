@@ -15,6 +15,7 @@ class PhotoStorageService extends GetxService {
   static const String _rootFolder = 'GPSCamera';
   static const String _photosFolder = 'Photos';
   static const String _watermarkedFolder = 'Watermarked';
+  static const String _reportsFolder = 'Reports';
 
   /// `<ApplicationDocuments>/GPSCamera`. Database rows store photo paths
   /// relative to this folder.
@@ -26,6 +27,26 @@ class PhotoStorageService extends GetxService {
   Future<Directory> photosDirectory() => _directory(_photosFolder);
 
   Future<Directory> watermarkedDirectory() => _directory(_watermarkedFolder);
+
+  /// Generated PDF reports, each with a `.json` record.
+  Future<Directory> reportsDirectory() => _directory(_reportsFolder);
+
+  /// Claims a new, unused `<baseName>[_n].pdf` in the reports folder by
+  /// creating it exclusively, so reports never overwrite each other.
+  Future<File> reserveReportFile(String baseName) async {
+    final directory = await reportsDirectory();
+    for (var suffix = 0; ; suffix++) {
+      final name = suffix == 0 ? baseName : '${baseName}_$suffix';
+      final candidate = File('${directory.path}/$name.pdf');
+      if (await metadataFileFor(candidate).exists()) continue;
+      try {
+        await candidate.create(exclusive: true);
+        return candidate;
+      } on FileSystemException {
+        if (!await candidate.exists()) rethrow;
+      }
+    }
+  }
 
   Future<Directory> _directory(String name) async {
     final documents = await getApplicationDocumentsDirectory();

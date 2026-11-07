@@ -28,6 +28,12 @@ class HomeView extends GetView<HomeController> {
         onTap: controller.openProjects,
       ),
       QuickActionCard(
+        icon: Icons.picture_as_pdf_outlined,
+        title: 'Reports',
+        subtitle: 'PDF reports you have created',
+        onTap: controller.openReports,
+      ),
+      QuickActionCard(
         icon: Icons.tune_rounded,
         title: 'Settings',
         subtitle: 'Appearance and preferences',

@@ -13,7 +13,10 @@ class PhotoGrid extends StatelessWidget {
     required this.onOpen,
     this.overlayBuilder,
     this.padding,
+    this.onLongPress,
   });
+
+  final ValueChanged<GalleryPhoto>? onLongPress;
 
   static const double maxCellExtent = 180;
 
@@ -59,6 +62,9 @@ class PhotoGrid extends StatelessWidget {
               decodeWidth: decodeWidth,
               hasOriginal: photo.isOriginal || index.sourceOf(photo) != null,
               onTap: () => onOpen(photo),
+              onLongPress: onLongPress == null
+                  ? null
+                  : () => onLongPress!(photo),
             );
             final overlay = overlayBuilder?.call(photo);
             if (overlay == null) return item;

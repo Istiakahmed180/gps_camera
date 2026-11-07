@@ -12,7 +12,10 @@ class PhotoGridItem extends StatelessWidget {
     required this.decodeWidth,
     required this.hasOriginal,
     required this.onTap,
+    this.onLongPress,
   });
+
+  final VoidCallback? onLongPress;
 
   final GalleryPhoto photo;
 
@@ -42,6 +45,7 @@ class PhotoGridItem extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
+          onLongPress: onLongPress,
           child: Stack(
             fit: StackFit.expand,
             children: [

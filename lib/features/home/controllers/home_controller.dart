@@ -9,4 +9,6 @@ class HomeController extends GetxController {
   void openProjects() => Get.toNamed<void>(AppRoutes.projects);
 
   void openSettings() => Get.toNamed<void>(AppRoutes.settings);
+
+  void openReports() => Get.toNamed<void>(AppRoutes.reports);
 }

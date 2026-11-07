@@ -66,6 +66,11 @@ void main() {
         'UTC+05:45',
       );
       expect(CaptureTimeFormatter.utcOffset(Duration.zero), 'UTC');
+      expect(
+        CaptureTimeFormatter.age(const Duration(milliseconds: 969)),
+        '<1 s',
+      );
+      expect(CaptureTimeFormatter.age(const Duration(seconds: 5)), '5 s');
       expect(CaptureTimeFormatter.time(DateTime.utc(2026, 1, 2)), '12:00 AM');
       expect(
         CaptureTimeFormatter.time(DateTime.utc(2026, 1, 1, 12, 5)),

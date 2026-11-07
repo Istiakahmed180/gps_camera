@@ -10,6 +10,8 @@ import 'package:gps_camera/features/gallery/services/gallery_service.dart';
 import 'package:gps_camera/features/projects/models/photo_refs.dart';
 import 'package:gps_camera/features/projects/models/project.dart';
 import 'package:gps_camera/features/projects/services/project_repository.dart';
+import 'package:gps_camera/features/reports/models/report_models.dart';
+import 'package:gps_camera/features/reports/services/report_entry_builder.dart';
 
 enum GalleryStatus { loading, ready, error }
 
@@ -33,6 +35,10 @@ class GalleryController extends GetxController implements PhotoLibrary {
 
   /// Projects offered in the project filter.
   final RxList<Project> projectOptions = <Project>[].obs;
+
+  /// Multi-select for reports. Selecting changes no photo or project data.
+  final RxBool selecting = false.obs;
+  final RxSet<String> selectedIds = <String>{}.obs;
 
   Future<void>? _scan;
   bool _rescanRequested = false;
@@ -82,6 +88,7 @@ class GalleryController extends GetxController implements PhotoLibrary {
     try {
       final scanned = await _service.scan();
       index.value = scanned;
+      selectedIds.removeWhere((id) => scanned.byId(id) == null);
       status.value = GalleryStatus.ready;
       await _repairAssignments(scanned, startedAt);
       await reloadAssignments();
@@ -136,6 +143,45 @@ class GalleryController extends GetxController implements PhotoLibrary {
   }
 
   bool _knownProject(String id) => filterProjects.any((p) => p.id == id);
+
+  void startSelection([GalleryPhoto? first]) {
+    selecting.value = true;
+    if (first != null) selectedIds.add(first.id);
+  }
+
+  void toggleSelection(GalleryPhoto photo) {
+    selectedIds.contains(photo.id)
+        ? selectedIds.remove(photo.id)
+        : selectedIds.add(photo.id);
+  }
+
+  void selectAllVisible() => selectedIds.addAll(visible.map((p) => p.id));
+
+  void cancelSelection() {
+    selecting.value = false;
+    selectedIds.clear();
+  }
+
+  List<GalleryPhoto> get selectedPhotos => [
+    for (final id in selectedIds) ?index.value.byId(id),
+  ];
+
+  /// Report of the selected photos, one entry per capture, or null when
+  /// nothing is selected.
+  ReportJob? selectionReport({DateTime? now}) {
+    final entries = ReportEntryBuilder.forSelection(
+      selectedPhotos,
+      index.value,
+      projectOf: projectOf,
+    );
+    if (entries.isEmpty) return null;
+    return ReportJob(
+      type: ReportType.selection,
+      title: 'Selected photos report',
+      generatedAt: now ?? DateTime.now(),
+      entries: entries,
+    );
+  }
 
   void setFilter(GalleryFilter value) => filter.value = value;
 

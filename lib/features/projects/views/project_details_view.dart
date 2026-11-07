@@ -6,6 +6,8 @@ import 'package:gps_camera/features/gallery/utils/photo_info_formatter.dart';
 import 'package:gps_camera/features/gallery/widgets/gallery_filter_bar.dart';
 import 'package:gps_camera/features/gallery/widgets/photo_grid.dart';
 import 'package:gps_camera/features/projects/controllers/project_details_controller.dart';
+import 'package:gps_camera/features/reports/services/report_service.dart';
+import 'package:gps_camera/features/reports/widgets/report_generation.dart';
 import 'package:gps_camera/shared/widgets/app_button.dart';
 import 'package:gps_camera/shared/widgets/empty_state_view.dart';
 
@@ -23,6 +25,13 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
           title: Text(project?.name ?? 'Project'),
           actions: [
             if (project != null) ...[
+              IconButton(
+                tooltip: 'Create PDF report',
+                onPressed: controller.isBusy.value
+                    ? null
+                    : () => _createReport(context),
+                icon: const Icon(Icons.picture_as_pdf_outlined),
+              ),
               IconButton(
                 tooltip: 'Edit project',
                 onPressed: controller.isBusy.value ? null : controller.edit,
@@ -191,6 +200,15 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
         ),
       ],
     );
+  }
+
+  Future<void> _createReport(BuildContext context) async {
+    final job = controller.reportJob();
+    if (job == null) {
+      _snack(context, 'Add photos to this project to create a report.');
+      return;
+    }
+    await generateReportWithProgress(context, Get.find<ReportService>(), job);
   }
 
   Future<void> _onMenu(BuildContext context, _MenuAction action) async {

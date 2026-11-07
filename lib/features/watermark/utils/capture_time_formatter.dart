@@ -41,8 +41,9 @@ abstract final class CaptureTimeFormatter {
     return 'UTC$sign${_two(minutes ~/ 60)}:${_two(minutes % 60)}';
   }
 
-  /// `45 s`, `12 min`, `3 h`
+  /// `<1 s`, `45 s`, `12 min`, `3 h`
   static String age(Duration age) {
+    if (age.inSeconds < 1) return '<1 s';
     if (age.inSeconds < 60) return '${age.inSeconds} s';
     if (age.inMinutes < 60) return '${age.inMinutes} min';
     return '${age.inHours} h';

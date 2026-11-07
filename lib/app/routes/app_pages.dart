@@ -17,6 +17,8 @@ import 'package:gps_camera/features/projects/views/project_details_view.dart';
 import 'package:gps_camera/features/projects/views/project_edit_view.dart';
 import 'package:gps_camera/features/projects/views/project_photo_picker_view.dart';
 import 'package:gps_camera/features/projects/views/projects_view.dart';
+import 'package:gps_camera/features/reports/bindings/reports_binding.dart';
+import 'package:gps_camera/features/reports/views/reports_view.dart';
 import 'package:gps_camera/features/settings/bindings/settings_binding.dart';
 import 'package:gps_camera/features/settings/views/settings_view.dart';
 import 'package:gps_camera/features/watermark/bindings/watermark_binding.dart';
@@ -67,6 +69,11 @@ abstract final class AppPages {
       name: AppRoutes.projectAddPhotos,
       page: () => const ProjectPhotoPickerView(),
       binding: ProjectPhotoPickerBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.reports,
+      page: () => const ReportsView(),
+      binding: ReportsBinding(),
     ),
     GetPage<dynamic>(
       name: AppRoutes.settings,

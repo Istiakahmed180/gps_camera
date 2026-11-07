@@ -48,3 +48,8 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // FileProvider for opening report PDFs in other apps.
+    implementation("androidx.core:core:1.13.1")
+}

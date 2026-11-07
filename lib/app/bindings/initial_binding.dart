@@ -8,6 +8,7 @@ import 'package:gps_camera/core/services/storage_service.dart';
 import 'package:gps_camera/core/services/theme_service.dart';
 import 'package:gps_camera/features/gallery/services/gallery_service.dart';
 import 'package:gps_camera/features/projects/services/project_repository.dart';
+import 'package:gps_camera/features/reports/services/report_service.dart';
 
 /// App-wide services that live for the whole session.
 /// Requires `GetStorage.init()` to have completed.
@@ -26,6 +27,13 @@ class InitialBinding extends Bindings {
     Get.lazyPut(() => ProjectRepository(database.db), fenix: true);
     Get.lazyPut(
       () => GalleryService(Get.find<PhotoStorageService>()),
+      fenix: true,
+    );
+    Get.lazyPut(
+      () => ReportService(
+        Get.find<PhotoStorageService>(),
+        Get.find<ShareService>(),
+      ),
       fenix: true,
     );
   }

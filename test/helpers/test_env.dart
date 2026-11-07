@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
+import 'package:gps_camera/core/services/share_service.dart';
+import 'package:gps_camera/features/reports/models/report_record.dart';
+import 'package:gps_camera/features/reports/services/report_service.dart';
 import 'package:gps_camera/features/gallery/models/gallery_index.dart';
 import 'package:gps_camera/features/gallery/services/gallery_service.dart';
 import 'package:gps_camera/features/location/models/location_fix.dart';
@@ -145,4 +148,12 @@ class FakeGalleryService extends GalleryService {
 
   @override
   Future<GalleryIndex> scan() async => _index;
+}
+
+/// Report history without file I/O, for widget tests.
+class FakeReportService extends ReportService {
+  FakeReportService() : super(PhotoStorageService(), ShareService());
+
+  @override
+  Future<List<ReportFile>> history() async => const [];
 }

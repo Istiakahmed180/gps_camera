@@ -10,6 +10,8 @@ import 'package:gps_camera/features/gallery/services/gallery_service.dart';
 import 'package:gps_camera/features/projects/models/photo_refs.dart';
 import 'package:gps_camera/features/projects/models/project.dart';
 import 'package:gps_camera/features/projects/services/project_repository.dart';
+import 'package:gps_camera/features/reports/models/report_models.dart';
+import 'package:gps_camera/features/reports/services/report_entry_builder.dart';
 
 enum ProjectDetailsStatus { loading, ready, missing, error }
 
@@ -104,6 +106,23 @@ class ProjectDetailsController extends GetxController implements PhotoLibrary {
   }
 
   void setFilter(GalleryFilter value) => filter.value = value;
+
+  /// A report of every original in this project (with its watermarked
+  /// versions), or null when the project has no photos.
+  ReportJob? reportJob({DateTime? now}) {
+    final current = project.value;
+    final entries = ReportEntryBuilder.forProject(index.value);
+    if (current == null || entries.isEmpty) return null;
+    return ReportJob(
+      type: ReportType.project,
+      title: 'Project report: ${current.name}',
+      projectId: current.id,
+      projectName: current.name,
+      projectDescription: current.description,
+      generatedAt: now ?? DateTime.now(),
+      entries: entries,
+    );
+  }
 
   @override
   Future<void> openPhoto(GalleryPhoto photo) async {

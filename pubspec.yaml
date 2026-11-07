@@ -33,9 +33,11 @@ dependencies:
 
   # Native share sheet for photos
   share_plus: ^13.3.1
+
+  # Offline PDF report generation (pure Dart)
+  pdf: ^3.13.1
   drift: ^2.35.3
   drift_flutter: ^0.3.1
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -45,3 +47,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    # Embedded in PDF reports; see ROBOTO_LICENSE.txt
+    - assets/fonts/Roboto-Regular.ttf
+    - assets/fonts/Roboto-Medium.ttf
+    - assets/fonts/Roboto-Bold.ttf

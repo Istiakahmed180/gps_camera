@@ -10,6 +10,7 @@ import 'package:gps_camera/core/database/database_service.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
 import 'package:gps_camera/features/gallery/services/gallery_service.dart';
 import 'package:gps_camera/features/location/services/location_service.dart';
+import 'package:gps_camera/features/reports/services/report_service.dart';
 
 import 'helpers/test_env.dart';
 
@@ -27,6 +28,7 @@ void main() {
     Get.put(DatabaseService(NativeDatabase.memory()), permanent: true);
     Get.put<PermissionService>(FakePermissionService());
     Get.put<GalleryService>(FakeGalleryService());
+    Get.put<ReportService>(FakeReportService());
     Get.put<LocationService>(
       FakeLocationService(permission: PermissionAccess.denied),
     );
@@ -64,6 +66,10 @@ void main() {
 
     await openFromHome(tester, 'Settings');
     expect(find.text('Appearance'.toUpperCase()), findsOneWidget);
+    await goBack(tester);
+
+    await openFromHome(tester, 'Reports');
+    expect(find.text('No reports yet'), findsOneWidget);
   });
 
   testWidgets('theme selector switches light and dark', (tester) async {

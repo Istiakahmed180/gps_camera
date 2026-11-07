@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Temporary copies of report PDFs being opened in another app. -->
+    <cache-path name="open_reports" path="open_reports/" />
+</paths>
