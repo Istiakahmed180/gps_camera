@@ -1,21 +1,29 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// Stores original captures in app-private storage:
-/// `<ApplicationDocuments>/GPSCamera/Photos/IMG_yyyyMMdd_HHmmss_SSS.jpg`.
+/// App-private photo storage under `<ApplicationDocuments>/GPSCamera/`:
+///
+/// * `Photos/IMG_<timestamp>.jpg` — original captures, never modified.
+/// * `Photos/IMG_<timestamp>.json` — capture metadata sidecar.
+/// * `Watermarked/IMG_<timestamp>_wm[_n].jpg` — rendered copies, each with a
+///   `.json` render record naming its original.
 class PhotoStorageService extends GetxService {
   static const String _rootFolder = 'GPSCamera';
   static const String _photosFolder = 'Photos';
+  static const String _watermarkedFolder = 'Watermarked';
 
-  Future<Directory> photosDirectory() async {
+  Future<Directory> photosDirectory() => _directory(_photosFolder);
+
+  Future<Directory> watermarkedDirectory() => _directory(_watermarkedFolder);
+
+  Future<Directory> _directory(String name) async {
     final documents = await getApplicationDocumentsDirectory();
-    final directory = Directory(
-      '${documents.path}/$_rootFolder/$_photosFolder',
-    );
-    return directory.create(recursive: true);
+    return Directory('${documents.path}/$_rootFolder/$name')
+        .create(recursive: true);
   }
 
   /// Copies the captured image into the photos directory and returns the
@@ -42,6 +50,82 @@ class PhotoStorageService extends GetxService {
     return target;
   }
 
+  /// True when [file] lives in the `Watermarked/` folder. Such files are
+  /// outputs and must never be used as a watermark source.
+  bool isWatermarkedFile(File file) {
+    final segments = file.absolute.uri.pathSegments;
+    return segments.length >= 2 &&
+        segments[segments.length - 2] == _watermarkedFolder;
+  }
+
+  /// The sidecar for [photo]: same folder and base name, `.json` extension.
+  File metadataFileFor(File photo) => File(sidecarPathFor(photo.path));
+
+  /// Pure path helper, usable from background isolates.
+  static String sidecarPathFor(String imagePath) {
+    final dot = imagePath.lastIndexOf('.');
+    final base = dot > imagePath.lastIndexOf('/')
+        ? imagePath.substring(0, dot)
+        : imagePath;
+    return '$base.json';
+  }
+
+  /// Writes [json] next to [photo] atomically (temp file, then rename), so a
+  /// crash never leaves a half-written sidecar.
+  Future<File> saveMetadata(File photo, Map<String, dynamic> json) =>
+      writeJsonAtomic(metadataFileFor(photo), json);
+
+  /// The decoded sidecar of [photo], or null when it has none.
+  /// Throws [FormatException] if the file exists but is not a JSON object.
+  Future<Map<String, dynamic>?> readMetadata(File photo) async {
+    final file = metadataFileFor(photo);
+    if (!await file.exists()) return null;
+    final decoded = jsonDecode(await file.readAsString());
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('Metadata is not a JSON object');
+    }
+    return decoded;
+  }
+
+  Future<File> writeJsonAtomic(File target, Map<String, dynamic> json) async {
+    final temp = File('${target.path}.tmp');
+    await temp.writeAsString(
+      const JsonEncoder.withIndent('  ').convert(json),
+      flush: true,
+    );
+    return temp.rename(target.path);
+  }
+
+  /// Claims a new, unused output path for a watermarked copy of [original]
+  /// by creating an empty placeholder exclusively, so two saves can never
+  /// pick the same name. Callers replace the placeholder via rename, or call
+  /// [releaseReservation] on failure.
+  Future<File> reserveWatermarkedFile(File original) async {
+    final directory = await watermarkedDirectory();
+    final base = original.uri.pathSegments.last.replaceFirst(
+      RegExp(r'\.[^.]*$'),
+      '',
+    );
+    for (var suffix = 0; ; suffix++) {
+      final name = suffix == 0 ? '${base}_wm' : '${base}_wm_$suffix';
+      final candidate = File('${directory.path}/$name.jpg');
+      if (await metadataFileFor(candidate).exists()) continue;
+      try {
+        await candidate.create(exclusive: true);
+        return candidate;
+      } on FileSystemException {
+        if (!await candidate.exists()) rethrow;
+      }
+    }
+  }
+
+  /// Removes an unused reservation and any temp file next to it.
+  Future<void> releaseReservation(File reserved) async {
+    for (final file in [reserved, File('${reserved.path}.tmp')]) {
+      await _deleteTemporary(file);
+    }
+  }
+
   Future<void> _deleteTemporary(File file) async {
     try {
       await file.delete();
@@ -54,7 +138,8 @@ class PhotoStorageService extends GetxService {
     final baseName = 'IMG_${_timestamp(time)}';
     var candidate = File('${directory.path}/$baseName.jpg');
     var suffix = 1;
-    while (await candidate.exists()) {
+    while (await candidate.exists() ||
+        await metadataFileFor(candidate).exists()) {
       candidate = File('${directory.path}/${baseName}_$suffix.jpg');
       suffix++;
     }

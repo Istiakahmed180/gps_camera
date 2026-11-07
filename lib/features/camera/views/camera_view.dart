@@ -9,12 +9,16 @@ import 'package:gps_camera/features/camera/widgets/camera_viewfinder.dart';
 import 'package:gps_camera/features/camera/widgets/capture_toast.dart';
 import 'package:gps_camera/features/camera/widgets/last_photo_thumbnail.dart';
 import 'package:gps_camera/features/camera/widgets/shutter_button.dart';
+import 'package:gps_camera/features/location/controllers/location_controller.dart';
+import 'package:gps_camera/features/location/widgets/gps_status_panel.dart';
 
 class CameraView extends GetView<CaptureController> {
   const CameraView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final location = Get.find<LocationController>();
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
@@ -78,15 +82,35 @@ class CameraView extends GetView<CaptureController> {
                     ),
                   ),
                   Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.md,
+                      AppSpacing.sm,
+                      AppSpacing.md,
+                      0,
+                    ),
+                    child: Obx(
+                      () => GpsStatusPanel(
+                        status: location.status.value,
+                        fix: location.fix.value,
+                        isStale: location.isStale.value,
+                        onRequestPermission: location.requestPermission,
+                        onOpenAppSettings: location.openAppSettings,
+                        onOpenLocationSettings: location.openLocationSettings,
+                        onRetry: location.retry,
+                      ),
+                    ),
+                  ),
+                  Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.xl,
-                      vertical: AppSpacing.xl,
+                      vertical: AppSpacing.lg,
                     ),
                     child: Row(
                       children: [
                         Obx(
                           () => LastPhotoThumbnail(
                             path: controller.lastPhotoPath.value,
+                            onTap: controller.openWatermarkEditor,
                           ),
                         ),
                         Expanded(

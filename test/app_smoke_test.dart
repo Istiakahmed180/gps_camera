@@ -5,6 +5,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:gps_camera/app/app.dart';
 import 'package:gps_camera/app/bindings/initial_binding.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
+import 'package:gps_camera/features/gallery/services/gallery_service.dart';
+import 'package:gps_camera/features/location/services/location_service.dart';
 
 import 'helpers/test_env.dart';
 
@@ -19,6 +21,10 @@ void main() {
   setUp(() {
     // Registered first so InitialBinding's lazy registration keeps the fake.
     Get.put<PermissionService>(FakePermissionService());
+    Get.put<GalleryService>(FakeGalleryService());
+    Get.put<LocationService>(
+      FakeLocationService(permission: PermissionAccess.denied),
+    );
     InitialBinding().dependencies();
   });
   tearDown(Get.reset);
@@ -40,6 +46,7 @@ void main() {
 
     await openFromHome(tester, 'Open camera');
     expect(find.text('Camera access needed'), findsOneWidget);
+    expect(find.text('Location permission needed'), findsOneWidget);
     await goBack(tester);
 
     await openFromHome(tester, 'Gallery');

@@ -1,0 +1,154 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:ui';
+
+import 'package:get/get.dart';
+import 'package:gps_camera/core/services/photo_storage_service.dart';
+import 'package:gps_camera/features/camera/models/photo_metadata.dart';
+import 'package:gps_camera/features/watermark/models/watermark_config.dart';
+import 'package:gps_camera/features/watermark/models/watermark_content.dart';
+import 'package:gps_camera/features/watermark/services/image_processor.dart';
+import 'package:gps_camera/features/watermark/services/watermark_renderer.dart';
+import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
+
+enum WatermarkEditorStatus { loading, ready, error }
+
+/// Editor state for watermarking one original photo.
+class WatermarkController extends GetxController {
+  WatermarkController({
+    required this.photo,
+    required this._storage,
+    required this._renderer,
+    required this._settings,
+    this._processor = const ImageProcessor(),
+  });
+
+  final File photo;
+  final PhotoStorageService _storage;
+  final WatermarkRenderer _renderer;
+  final WatermarkSettingsStore _settings;
+  final ImageProcessor _processor;
+
+  final Rx<WatermarkEditorStatus> status = WatermarkEditorStatus.loading.obs;
+  final RxnString loadError = RxnString();
+  final Rxn<PhotoMetadata> metadata = Rxn<PhotoMetadata>();
+  final Rxn<PreviewImage> preview = Rxn<PreviewImage>();
+  final Rx<WatermarkConfig> config = const WatermarkConfig().obs;
+  final RxBool isSaving = false.obs;
+  final Rxn<WatermarkResult> lastResult = Rxn<WatermarkResult>();
+  final RxnString saveError = RxnString();
+
+  WatermarkContent? get content {
+    final current = metadata.value;
+    return current == null
+        ? null
+        : WatermarkContent.from(current, config.value);
+  }
+
+  bool get hasAddress => metadata.value?.location.fix?.address != null;
+
+  bool get canSave =>
+      status.value == WatermarkEditorStatus.ready &&
+      !isSaving.value &&
+      !(content?.isEmpty ?? true);
+
+  @override
+  void onInit() {
+    super.onInit();
+    config.value = _settings.load();
+    unawaited(load());
+  }
+
+  Future<void> load() async {
+    status.value = WatermarkEditorStatus.loading;
+    loadError.value = null;
+
+    if (_storage.isWatermarkedFile(photo)) {
+      _fail(
+        'This is a watermarked copy. Open its original to create a new '
+        'watermark.',
+      );
+      return;
+    }
+
+    try {
+      final results = await Future.wait<Object?>([
+        _readMetadata(),
+        _processor.loadPreview(photo.path),
+      ]);
+      metadata.value = results[0]! as PhotoMetadata;
+      preview.value = results[1]! as PreviewImage;
+      status.value = WatermarkEditorStatus.ready;
+    } on _LoadException catch (e) {
+      _fail(e.message);
+    } on ImageProcessingException catch (e) {
+      _fail(e.message);
+    } catch (_) {
+      _fail('This photo could not be opened.');
+    }
+  }
+
+  void updateConfig(WatermarkConfig next) {
+    if (next == config.value) return;
+    config.value = next;
+    saveError.value = null;
+    lastResult.value = null;
+    unawaited(_settings.save(next));
+  }
+
+  Future<void> save() async {
+    final current = metadata.value;
+    final image = preview.value;
+    if (!canSave || current == null || image == null) return;
+
+    isSaving.value = true;
+    saveError.value = null;
+    lastResult.value = null;
+    try {
+      lastResult.value = await _renderer.render(
+        original: photo,
+        metadata: current,
+        config: config.value,
+        imageSize: Size(image.width.toDouble(), image.height.toDouble()),
+      );
+    } on WatermarkException catch (e) {
+      saveError.value = e.message;
+    } catch (_) {
+      saveError.value = 'The watermarked copy could not be saved.';
+    } finally {
+      isSaving.value = false;
+    }
+  }
+
+  Future<PhotoMetadata> _readMetadata() async {
+    final Map<String, dynamic>? json;
+    try {
+      json = await _storage.readMetadata(photo);
+    } on FormatException {
+      throw const _LoadException('This photo\'s metadata file is damaged.');
+    } on FileSystemException {
+      throw const _LoadException('This photo\'s metadata could not be read.');
+    }
+    if (json == null) {
+      throw const _LoadException(
+        'This photo has no metadata, so a watermark cannot be created.',
+      );
+    }
+    try {
+      return PhotoMetadata.fromJson(json);
+    } catch (_) {
+      throw const _LoadException('This photo\'s metadata is not recognised.');
+    }
+  }
+
+  void _fail(String message) {
+    loadError.value = message;
+    status.value = WatermarkEditorStatus.error;
+  }
+}
+
+class _LoadException implements Exception {
+  const _LoadException(this.message);
+
+  final String message;
+}

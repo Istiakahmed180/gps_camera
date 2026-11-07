@@ -25,6 +25,15 @@ dependencies:
   # App-private directory for captured photos
   path_provider: ^2.1.6
 
+  # GPS position updates and location-service status
+  geolocator: ^14.1.2
+
+  # JPEG decode, EXIF orientation and encode for watermark rendering
+  image: ^4.12.0
+
+  # Native share sheet for photos
+  share_plus: ^13.3.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -3,13 +3,18 @@ import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/features/camera/bindings/camera_binding.dart';
 import 'package:gps_camera/features/camera/views/camera_view.dart';
 import 'package:gps_camera/features/gallery/bindings/gallery_binding.dart';
+import 'package:gps_camera/features/gallery/bindings/photo_details_binding.dart';
+import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
 import 'package:gps_camera/features/gallery/views/gallery_view.dart';
+import 'package:gps_camera/features/gallery/views/photo_details_view.dart';
 import 'package:gps_camera/features/home/bindings/home_binding.dart';
 import 'package:gps_camera/features/home/views/home_view.dart';
 import 'package:gps_camera/features/projects/bindings/projects_binding.dart';
 import 'package:gps_camera/features/projects/views/projects_view.dart';
 import 'package:gps_camera/features/settings/bindings/settings_binding.dart';
 import 'package:gps_camera/features/settings/views/settings_view.dart';
+import 'package:gps_camera/features/watermark/bindings/watermark_binding.dart';
+import 'package:gps_camera/features/watermark/views/watermark_editor_view.dart';
 
 abstract final class AppPages {
   static const String initial = AppRoutes.home;
@@ -32,6 +37,11 @@ abstract final class AppPages {
       binding: GalleryBinding(),
     ),
     GetPage<dynamic>(
+      name: AppRoutes.photoDetails,
+      page: () => PhotoDetailsView(photo: Get.arguments as GalleryPhoto),
+      binding: PhotoDetailsBinding(),
+    ),
+    GetPage<dynamic>(
       name: AppRoutes.projects,
       page: () => const ProjectsView(),
       binding: ProjectsBinding(),
@@ -40,6 +50,11 @@ abstract final class AppPages {
       name: AppRoutes.settings,
       page: () => const SettingsView(),
       binding: SettingsBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.watermark,
+      page: () => const WatermarkEditorView(),
+      binding: WatermarkBinding(),
     ),
   ];
 }

@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/features/camera/controllers/capture_controller.dart';
+import 'package:gps_camera/features/camera/services/capture_saver.dart';
+import 'package:gps_camera/features/location/controllers/location_controller.dart';
 import 'package:gps_camera/features/camera/models/camera_status.dart';
 
 import 'helpers/test_env.dart';
@@ -20,7 +22,8 @@ void main() {
     return Get.put(
       CaptureController(
         permissions,
-        PhotoStorageService(),
+        CaptureSaver(PhotoStorageService()),
+        LocationController(FakeLocationService(), permissions),
         cameraLoader: loader ?? () async => const [],
       ),
     );
@@ -41,7 +44,7 @@ void main() {
   });
 
   test('blocked permission does not prompt and opens settings', () async {
-    permissions = FakePermissionService(status: CameraPermission.blocked);
+    permissions = FakePermissionService(status: PermissionAccess.blocked);
     final controller = build();
     await settle();
 
@@ -53,11 +56,11 @@ void main() {
   });
 
   test('stays blocked when Android later reports plain denied', () async {
-    permissions = FakePermissionService(status: CameraPermission.blocked);
+    permissions = FakePermissionService(status: PermissionAccess.blocked);
     final controller = build();
     await settle();
 
-    permissions.status = CameraPermission.denied;
+    permissions.status = PermissionAccess.denied;
     controller.didChangeAppLifecycleState(AppLifecycleState.resumed);
     await settle();
 
@@ -65,7 +68,7 @@ void main() {
   });
 
   test('no cameras gives a readable error instead of crashing', () async {
-    permissions = FakePermissionService(status: CameraPermission.granted);
+    permissions = FakePermissionService(status: PermissionAccess.granted);
     final controller = build();
     await settle();
 
@@ -75,7 +78,7 @@ void main() {
 
   test('camera loader failure is reported as unavailable', () async {
     permissions = FakePermissionService(
-      requestResult: CameraPermission.granted,
+      requestResult: PermissionAccess.granted,
     );
     final controller = build(
       loader: () async => throw CameraException('Boom', 'driver failure'),

@@ -4,15 +4,21 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
-import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/features/camera/models/camera_status.dart';
 import 'package:gps_camera/features/camera/models/capture_feedback.dart';
+import 'package:gps_camera/features/camera/services/capture_saver.dart';
+import 'package:gps_camera/features/location/controllers/location_controller.dart';
+import 'package:gps_camera/features/location/models/gps_accuracy_level.dart';
+import 'package:gps_camera/features/location/models/location_snapshot.dart';
 
 typedef CameraLoader = Future<List<CameraDescription>> Function();
 
 /// Owns the camera session: permission, initialization, lifecycle,
-/// lens switching, flash and capture.
+/// lens switching, flash and capture. Location tracking lives in
+/// [LocationController]; this controller only starts it and reads a
+/// snapshot when a photo is taken.
 ///
 /// Every operation that creates, disposes or uses the native camera runs
 /// through [_serial], so lifecycle events, lens switches and captures can
@@ -20,7 +26,8 @@ typedef CameraLoader = Future<List<CameraDescription>> Function();
 class CaptureController extends GetxController with WidgetsBindingObserver {
   CaptureController(
     this._permissions,
-    this._photoStorage, {
+    this._saver,
+    this._location, {
     CameraLoader cameraLoader = availableCameras,
   }) : _loadCameras = cameraLoader;
 
@@ -32,7 +39,8 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
   static const Duration _feedbackDuration = Duration(milliseconds: 2500);
 
   final PermissionService _permissions;
-  final PhotoStorageService _photoStorage;
+  final CaptureSaver _saver;
+  final LocationController _location;
   final CameraLoader _loadCameras;
 
   final Rx<CameraStatus> status = CameraStatus.initializing.obs;
@@ -47,11 +55,16 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
   /// Local path of the most recent saved photo, for later phases.
   final RxnString lastPhotoPath = RxnString();
 
+  /// The most recent capture, including its metadata sidecar.
+  final Rxn<SavedCapture> lastCapture = Rxn<SavedCapture>();
+
   List<CameraDescription> _cameras = const [];
   int _cameraIndex = 0;
   Future<void> _pending = Future<void>.value();
-  bool _isRequestingPermission = false;
   bool _isClosed = false;
+
+  /// True while another screen (the watermark editor) covers the camera.
+  bool _isSuspended = false;
   Timer? _feedbackTimer;
 
   bool get canCapture =>
@@ -65,7 +78,14 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
-    unawaited(_checkPermissionAndStart(requestIfNeeded: true));
+    unawaited(_initialSetup());
+  }
+
+  /// Camera permission first, then location, so the two system dialogs
+  /// never overlap.
+  Future<void> _initialSetup() async {
+    await _checkPermissionAndStart(requestIfNeeded: true);
+    if (!_isClosed) await _location.start();
   }
 
   @override
@@ -79,7 +99,7 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (_isRequestingPermission || _isClosed) return;
+    if (_permissions.isRequesting || _isClosed || _isSuspended) return;
 
     switch (state) {
       case AppLifecycleState.inactive:
@@ -103,6 +123,26 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
   Future<void> retry() => _checkPermissionAndStart(requestIfNeeded: true);
 
   void close() => Get.back<void>();
+
+  /// Opens the watermark editor for the latest capture. The camera and GPS
+  /// are released while the editor is open and restarted afterwards.
+  Future<void> openWatermarkEditor() async {
+    final path = lastPhotoPath.value;
+    if (path == null || isCapturing.value || _isSuspended) return;
+
+    _isSuspended = true;
+    _location.suspend();
+    await _serial(_disposeCamera);
+    try {
+      await Get.toNamed<void>(AppRoutes.watermark, arguments: path);
+    } finally {
+      _isSuspended = false;
+      if (!_isClosed) {
+        unawaited(_location.resume());
+        await _checkPermissionAndStart(requestIfNeeded: false);
+      }
+    }
+  }
 
   Future<void> cycleFlashMode() async {
     final controller = camera.value;
@@ -143,18 +183,24 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
   Future<void> capture() async {
     if (!canCapture) return;
     isCapturing.value = true;
+    final capturedAt = DateTime.now();
+    final location = _location.snapshotAt(capturedAt);
 
     try {
-      await _serial(() async {
+      final saved = await _serial(() async {
         final controller = camera.value;
         if (controller == null || !controller.value.isInitialized) {
           throw CameraException('CameraClosed', 'The camera is not ready.');
         }
         final image = await controller.takePicture();
-        final saved = await _photoStorage.savePhoto(image);
-        lastPhotoPath.value = saved.path;
+        return _saver.save(image, capturedAt: capturedAt, location: location);
       });
-      _showFeedback('Photo saved');
+      lastCapture.value = saved;
+      lastPhotoPath.value = saved.photo.path;
+      _showFeedback(
+        captureFeedbackMessage(saved),
+        isError: !saved.hasMetadataFile,
+      );
     } on CameraException catch (e) {
       _showFeedback('Capture failed: ${_describe(e)}', isError: true);
     } on FileSystemException catch (e) {
@@ -170,30 +216,24 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     if (camera.value != null && status.value == CameraStatus.ready) return;
 
     var permission = await _safePermission(_permissions.cameraStatus);
-    if (permission == CameraPermission.denied && requestIfNeeded) {
+    if (permission == PermissionAccess.denied && requestIfNeeded) {
       permission = await _request();
     }
     await _applyPermission(permission);
   }
 
-  Future<CameraPermission?> _request() async {
-    _isRequestingPermission = true;
-    try {
-      return await _safePermission(_permissions.requestCamera);
-    } finally {
-      _isRequestingPermission = false;
-    }
-  }
+  Future<PermissionAccess?> _request() =>
+      _safePermission(_permissions.requestCamera);
 
-  Future<void> _applyPermission(CameraPermission? permission) async {
+  Future<void> _applyPermission(PermissionAccess? permission) async {
     if (_isClosed) return;
 
     switch (permission) {
-      case CameraPermission.granted:
+      case PermissionAccess.granted:
         await _serial(_startCamera);
-      case CameraPermission.blocked:
+      case PermissionAccess.blocked:
         status.value = CameraStatus.permissionBlocked;
-      case CameraPermission.denied:
+      case PermissionAccess.denied:
         // Android reports "denied" for a permanently denied permission until
         // it is requested again, so keep the blocked state once known.
         if (status.value != CameraStatus.permissionBlocked) {
@@ -204,8 +244,8 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  Future<CameraPermission?> _safePermission(
-    Future<CameraPermission> Function() check,
+  Future<PermissionAccess?> _safePermission(
+    Future<PermissionAccess> Function() check,
   ) async {
     try {
       return await check();
@@ -323,6 +363,23 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     _feedbackTimer?.cancel();
     feedback.value = CaptureFeedback(message, isError: isError);
     _feedbackTimer = Timer(_feedbackDuration, () => feedback.value = null);
+  }
+
+  /// Tells the user what was recorded, without overstating GPS quality.
+  @visibleForTesting
+  static String captureFeedbackMessage(SavedCapture saved) {
+    if (!saved.hasMetadataFile) {
+      return 'Photo saved, but its location data could not be saved';
+    }
+    final location = saved.metadata.location;
+    return switch (location.status) {
+      LocationRecordStatus.unavailable => 'Photo saved · no location',
+      LocationRecordStatus.stale => 'Photo saved · last known location',
+      LocationRecordStatus.current
+          when location.accuracyLevel == GpsAccuracyLevel.poor =>
+        'Photo saved · poor GPS accuracy',
+      LocationRecordStatus.current => 'Photo saved with location',
+    };
   }
 
   String _describe(CameraException e) => e.description ?? e.code;
