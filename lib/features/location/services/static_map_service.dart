@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:gps_camera/features/location/services/map_cache.dart';
+import 'package:gps_camera/features/reports/models/report_map.dart';
 
 /// Fetches a small map image (PNG) centred on a point, with a marker, from
 /// Geoapify's Static Maps API. Free plan: no credit card. Geoapify prints
@@ -41,6 +42,37 @@ class StaticMapService {
     });
   }
 
+  /// Overview of report [pins], numbered, fitted with a margin.
+  Uri overviewUrl(
+    List<ReportMapPin> pins, {
+    int width = 600,
+    int height = 360,
+  }) {
+    final fit = MapFit.of(pins, width: width, height: height);
+    String ll(double lat, double lng) =>
+        '${lng.toStringAsFixed(6)},${lat.toStringAsFixed(6)}';
+    return Uri.https('maps.geoapify.com', '/v1/staticmap', {
+      'style': 'osm-bright',
+      'width': '$width',
+      'height': '$height',
+      'scaleFactor': '2',
+      'format': 'png',
+      'center': 'lonlat:${ll(fit.latitude, fit.longitude)}',
+      'zoom': fit.zoom.toStringAsFixed(1),
+      'marker': [
+        for (final p in pins)
+          'lonlat:${ll(p.latitude, p.longitude)};type:awesome;'
+              'color:#e53935;size:large;text:${p.label}',
+      ].join('|'),
+      'apiKey': _apiKey,
+    });
+  }
+
+  /// The report overview map, or null when offline or unavailable. Never
+  /// cached: it depends on the whole set of photos.
+  Future<Uint8List?> fetchOverview(List<ReportMapPin> pins) =>
+      _get(overviewUrl(pins));
+
   /// PNG bytes from the cache or the network, or null when offline,
   /// rate-limited or the key is invalid.
   Future<Uint8List?> fetch(double latitude, double longitude) async {
@@ -51,11 +83,12 @@ class StaticMapService {
     return bytes;
   }
 
-  Future<Uint8List?> _download(double latitude, double longitude) async {
+  Future<Uint8List?> _download(double latitude, double longitude) =>
+      _get(urlFor(latitude, longitude));
+
+  Future<Uint8List?> _get(Uri url) async {
     try {
-      final request = await _client
-          .getUrl(urlFor(latitude, longitude))
-          .timeout(timeout);
+      final request = await _client.getUrl(url).timeout(timeout);
       final response = await request.close().timeout(timeout);
       if (response.statusCode != HttpStatus.ok) {
         await response.drain<void>();

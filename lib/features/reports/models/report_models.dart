@@ -1,5 +1,6 @@
 import 'package:gps_camera/core/settings/display_format.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
+import 'package:gps_camera/features/reports/models/report_map.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 
 enum ReportType {
@@ -86,7 +87,24 @@ class ReportJob {
     this.projectName,
     this.projectDescription,
     this.format = const DisplayFormat(),
+    this.map,
+    this.mapUnavailable = false,
   });
+
+  /// The same job with its overview map, or noting that one could not be
+  /// fetched.
+  ReportJob withMap(ReportMap? map, {required bool unavailable}) => ReportJob(
+    type: type,
+    title: title,
+    generatedAt: generatedAt,
+    entries: entries,
+    projectId: projectId,
+    projectName: projectName,
+    projectDescription: projectDescription,
+    format: format,
+    map: map,
+    mapUnavailable: unavailable,
+  );
 
   final ReportType type;
   final String title;
@@ -100,6 +118,12 @@ class ReportJob {
 
   /// Units and time format chosen in Settings when the report was made.
   final DisplayFormat format;
+
+  /// Overview map of where the photos were taken; null when none.
+  final ReportMap? map;
+
+  /// Photos have locations but the map could not be fetched (offline).
+  final bool mapUnavailable;
 
   int get watermarkedVersionCount =>
       entries.fold(0, (sum, e) => sum + e.watermarks.length);

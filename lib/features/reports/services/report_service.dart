@@ -5,6 +5,8 @@ import 'dart:isolate';
 
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/features/location/services/static_map_service.dart';
+import 'package:gps_camera/features/reports/models/report_map.dart';
 import 'package:gps_camera/core/settings/display_format.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/core/services/share_service.dart';
@@ -38,6 +40,9 @@ typedef ReportRunner = Future<ReportRenderStats> Function(
 );
 
 typedef FontLoader = Future<ReportFonts> Function();
+typedef OverviewMapFetcher = Future<Uint8List?> Function(
+  List<ReportMapPin> pins,
+);
 
 /// Generates, lists, shares, opens and deletes PDF reports in
 /// `GPSCamera/Reports/`. Never reads or writes anything but report files;
@@ -49,6 +54,7 @@ class ReportService extends GetxService {
     ReportRunner? runner,
     FontLoader? fonts,
     MethodChannel? channel,
+    this._overviewMap,
   }) : _runner = runner ?? runInIsolate,
        _fonts = fonts ?? loadBundledFonts,
        _channel = channel ?? const MethodChannel('co.tdevs.gps_camera/native');
@@ -58,6 +64,13 @@ class ReportService extends GetxService {
 
   final PhotoStorageService _storage;
   final ShareService _share;
+
+  /// Fetches the overview map; when null the Geoapify key from the build is
+  /// used.
+  final OverviewMapFetcher? _overviewMap;
+
+  /// A slow or offline network never holds up a report for longer.
+  static const Duration mapTimeout = Duration(seconds: 10);
   final ReportRunner _runner;
   final FontLoader _fonts;
   final MethodChannel _channel;
@@ -85,6 +98,7 @@ class ReportService extends GetxService {
     File? target;
     File? temp;
     try {
+      job = await _withOverviewMap(job);
       final fonts = await _fonts();
       target = await _storage.reserveReportFile(baseNameFor(job));
       temp = File('${target.path}.tmp');
@@ -126,6 +140,37 @@ class ReportService extends GetxService {
       isGenerating.value = false;
       progress.value = null;
     }
+  }
+
+  /// Adds the overview map of where the photos were taken. Reports are
+  /// still made without it when there is no internet.
+  Future<ReportJob> _withOverviewMap(ReportJob job) async {
+    final all = ReportMapPins.from(job.entries);
+    if (all.isEmpty) return job;
+    final pins = all.take(ReportMapPins.maxPins).toList();
+    Uint8List? image;
+    try {
+      image = await (_overviewMap ?? _geoapifyOverview)(pins)
+          .timeout(mapTimeout);
+    } catch (_) {
+      image = null;
+    }
+    return job.withMap(
+      image == null
+          ? null
+          : ReportMap(
+              image: image,
+              pins: pins,
+              omitted: all.length - pins.length,
+            ),
+      unavailable: image == null,
+    );
+  }
+
+  Future<Uint8List?> _geoapifyOverview(List<ReportMapPin> pins) async {
+    final key = await _channel.invokeMethod<String>('mapKey');
+    if (key == null || key.isEmpty) return null;
+    return StaticMapService(key).fetchOverview(pins);
   }
 
   /// Reports in the reports folder, newest first. Only finished PDFs are
