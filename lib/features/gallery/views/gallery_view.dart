@@ -88,6 +88,12 @@ class _Content extends StatelessWidget {
               index: index,
               onChanged: controller.setFilter,
             ),
+            if (controller.filterProjects.isNotEmpty)
+              GalleryProjectFilter(
+                selected: controller.projectFilter.value,
+                projects: controller.filterProjects,
+                onChanged: controller.setProjectFilter,
+              ),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: controller.reload,

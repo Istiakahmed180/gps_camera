@@ -8,6 +8,9 @@ import 'package:gps_camera/features/gallery/models/gallery_filter.dart';
 import 'package:gps_camera/features/gallery/models/gallery_index.dart';
 import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
 import 'package:gps_camera/features/gallery/services/gallery_service.dart';
+import 'package:gps_camera/features/projects/services/project_repository.dart';
+
+import 'helpers/db_fixtures.dart';
 
 GalleryPhoto _photo(String name, GalleryPhotoKind kind, int day) =>
     GalleryPhoto(
@@ -44,7 +47,9 @@ void main() {
 
   test('shows loading, then the photos newest first', () async {
     final service = _ScriptedService();
-    final controller = Get.put(GalleryController(service));
+    final controller = Get.put(
+      GalleryController(service, ProjectRepository(DbFixture().db)),
+    );
 
     expect(controller.status.value, GalleryStatus.loading);
     service.scans.single.complete(index);
@@ -60,7 +65,9 @@ void main() {
 
   test('filter and sort update the visible list', () async {
     final service = _ScriptedService();
-    final controller = Get.put(GalleryController(service));
+    final controller = Get.put(
+      GalleryController(service, ProjectRepository(DbFixture().db)),
+    );
     service.scans.single.complete(index);
     await pumpEventQueue();
 
@@ -75,7 +82,9 @@ void main() {
 
   test('overlapping reloads never scan concurrently', () async {
     final service = _ScriptedService();
-    final controller = Get.put(GalleryController(service));
+    final controller = Get.put(
+      GalleryController(service, ProjectRepository(DbFixture().db)),
+    );
 
     final second = controller.reload();
     final third = controller.reload();
@@ -93,7 +102,9 @@ void main() {
 
   test('an empty gallery is ready, not an error', () async {
     final service = _ScriptedService();
-    final controller = Get.put(GalleryController(service));
+    final controller = Get.put(
+      GalleryController(service, ProjectRepository(DbFixture().db)),
+    );
     service.scans.single.complete(GalleryIndex.empty);
     await pumpEventQueue();
 
@@ -103,7 +114,9 @@ void main() {
 
   test('a failed first scan shows an error state', () async {
     final service = _ScriptedService();
-    final controller = Get.put(GalleryController(service));
+    final controller = Get.put(
+      GalleryController(service, ProjectRepository(DbFixture().db)),
+    );
     service.scans.single.completeError(const FileSystemExceptionStub());
     await pumpEventQueue();
 

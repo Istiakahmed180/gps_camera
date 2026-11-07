@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
 import 'package:gps_camera/features/camera/models/camera_status.dart';
+import 'package:gps_camera/features/camera/models/capture_assignment.dart';
 import 'package:gps_camera/features/camera/models/capture_feedback.dart';
 import 'package:gps_camera/features/camera/services/capture_saver.dart';
 import 'package:gps_camera/features/location/controllers/location_controller.dart';
@@ -29,7 +30,12 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     this._saver,
     this._location, {
     CameraLoader cameraLoader = availableCameras,
+    this._assigner,
   }) : _loadCameras = cameraLoader;
+
+  /// Files new captures into the active project. Optional: the camera works
+  /// the same without it, and its failures never fail a capture.
+  final CaptureAssigner? _assigner;
 
   static const List<FlashMode> flashModes = [
     FlashMode.off,
@@ -197,9 +203,10 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
       });
       lastCapture.value = saved;
       lastPhotoPath.value = saved.photo.path;
+      final assignment = await _assign(saved.photo);
       _showFeedback(
-        captureFeedbackMessage(saved),
-        isError: !saved.hasMetadataFile,
+        captureFeedbackMessage(saved, assignment),
+        isError: !saved.hasMetadataFile || assignment is AssignmentFailed,
       );
     } on CameraException catch (e) {
       _showFeedback('Capture failed: ${_describe(e)}', isError: true);
@@ -365,9 +372,34 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     _feedbackTimer = Timer(_feedbackDuration, () => feedback.value = null);
   }
 
+  Future<CaptureAssignment> _assign(File photo) async {
+    final assigner = _assigner;
+    if (assigner == null) return const NotAssigned();
+    try {
+      return await assigner
+          .assignCapture(photo)
+          .timeout(const Duration(seconds: 3));
+    } catch (_) {
+      return const AssignmentFailed('the project');
+    }
+  }
+
   /// Tells the user what was recorded, without overstating GPS quality.
   @visibleForTesting
-  static String captureFeedbackMessage(SavedCapture saved) {
+  static String captureFeedbackMessage(
+    SavedCapture saved, [
+    CaptureAssignment assignment = const NotAssigned(),
+  ]) {
+    final base = _locationMessage(saved);
+    return switch (assignment) {
+      NotAssigned() => base,
+      AssignedToProject(:final projectName) => '$base · $projectName',
+      AssignmentFailed(:final projectName) =>
+        '$base, but it could not be added to $projectName',
+    };
+  }
+
+  static String _locationMessage(SavedCapture saved) {
     if (!saved.hasMetadataFile) {
       return 'Photo saved, but its location data could not be saved';
     }

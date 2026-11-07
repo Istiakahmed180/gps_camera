@@ -16,6 +16,13 @@ class PhotoStorageService extends GetxService {
   static const String _photosFolder = 'Photos';
   static const String _watermarkedFolder = 'Watermarked';
 
+  /// `<ApplicationDocuments>/GPSCamera`. Database rows store photo paths
+  /// relative to this folder.
+  Future<Directory> rootDirectory() async {
+    final documents = await getApplicationDocumentsDirectory();
+    return Directory('${documents.path}/$_rootFolder');
+  }
+
   Future<Directory> photosDirectory() => _directory(_photosFolder);
 
   Future<Directory> watermarkedDirectory() => _directory(_watermarkedFolder);

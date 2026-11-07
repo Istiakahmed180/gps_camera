@@ -11,6 +11,8 @@ class PhotoGrid extends StatelessWidget {
     required this.photos,
     required this.index,
     required this.onOpen,
+    this.overlayBuilder,
+    this.padding,
   });
 
   static const double maxCellExtent = 180;
@@ -18,6 +20,10 @@ class PhotoGrid extends StatelessWidget {
   final List<GalleryPhoto> photos;
   final GalleryIndex index;
   final ValueChanged<GalleryPhoto> onOpen;
+
+  /// Extra decoration over each cell, e.g. a selection mark.
+  final Widget Function(GalleryPhoto photo)? overlayBuilder;
+  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -31,12 +37,14 @@ class PhotoGrid extends StatelessWidget {
 
         return GridView.builder(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.sm,
-            AppSpacing.lg,
-            AppSpacing.xxl,
-          ),
+          padding:
+              padding ??
+              const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+                AppSpacing.xxl,
+              ),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
             mainAxisSpacing: AppSpacing.sm,
@@ -45,12 +53,21 @@ class PhotoGrid extends StatelessWidget {
           itemCount: photos.length,
           itemBuilder: (_, i) {
             final photo = photos[i];
-            return PhotoGridItem(
+            final item = PhotoGridItem(
               key: ValueKey(photo.id),
               photo: photo,
               decodeWidth: decodeWidth,
               hasOriginal: photo.isOriginal || index.sourceOf(photo) != null,
               onTap: () => onOpen(photo),
+            );
+            final overlay = overlayBuilder?.call(photo);
+            if (overlay == null) return item;
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                item,
+                IgnorePointer(child: overlay),
+              ],
             );
           },
         );

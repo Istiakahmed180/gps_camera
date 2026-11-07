@@ -13,8 +13,11 @@ import 'package:image/image.dart' as img;
 GalleryIndex scanGallery(String photosDir, String watermarkedDir) {
   final photos = <GalleryPhoto>[];
   var orphans = 0;
+  var complete = true;
 
-  final originals = _images(photosDir);
+  final listedOriginals = _images(photosDir);
+  if (listedOriginals == null) complete = false;
+  final originals = listedOriginals ?? const <File>[];
   final originalMetadata = <String, PhotoMetadata>{};
   for (final image in originals) {
     final (json, issue) = _readJson(
@@ -48,7 +51,9 @@ GalleryIndex scanGallery(String photosDir, String watermarkedDir) {
   }
   orphans += _orphanSidecars(photosDir, originals);
 
-  final outputs = _images(watermarkedDir);
+  final listedOutputs = _images(watermarkedDir);
+  if (listedOutputs == null) complete = false;
+  final outputs = listedOutputs ?? const <File>[];
   for (final image in outputs) {
     final stat = _stat(image);
     // Zero bytes is a name reserved by a render still in progress.
@@ -85,7 +90,11 @@ GalleryIndex scanGallery(String photosDir, String watermarkedDir) {
   }
   orphans += _orphanSidecars(watermarkedDir, outputs);
 
-  return GalleryIndex(photos: photos, orphanSidecars: orphans);
+  return GalleryIndex(
+    photos: photos,
+    orphanSidecars: orphans,
+    complete: complete,
+  );
 }
 
 /// `IMG_x_wm.jpg` / `IMG_x_wm_3.jpg` → `IMG_x.jpg`, for records that are
@@ -122,7 +131,8 @@ ImageDimensions? readJpegDimensions(String path) {
   }
 }
 
-List<File> _images(String dir) {
+/// Null when the folder exists but cannot be listed.
+List<File>? _images(String dir) {
   final directory = Directory(dir);
   if (!directory.existsSync()) return const [];
   try {
@@ -134,7 +144,7 @@ List<File> _images(String dir) {
         )
         .toList();
   } on FileSystemException {
-    return const [];
+    return null;
   }
 }
 

@@ -3,8 +3,11 @@ import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
 
 /// Everything found in app storage, with original ↔ watermarked links.
 class GalleryIndex {
-  GalleryIndex({required List<GalleryPhoto> photos, this.orphanSidecars = 0})
-    : photos = _newestFirst(photos) {
+  GalleryIndex({
+    required List<GalleryPhoto> photos,
+    this.orphanSidecars = 0,
+    this.complete = true,
+  }) : photos = _newestFirst(photos) {
     for (final photo in this.photos) {
       if (photo.isOriginal) {
         _originals[photo.fileName] = photo;
@@ -21,6 +24,16 @@ class GalleryIndex {
 
   /// JSON files whose image is missing. They are never shown.
   final int orphanSidecars;
+
+  /// False when a folder could not be listed. Never repair database rows
+  /// from an incomplete scan: missing entries may still exist on disk.
+  final bool complete;
+
+  /// Relative refs of every file found, for database reconciliation.
+  Set<String> get fileRefs => {
+    for (final photo in photos)
+      '${photo.isOriginal ? 'Photos' : 'Watermarked'}/${photo.fileName}',
+  };
 
   final Map<String, GalleryPhoto> _originals = {};
   final Map<String, List<GalleryPhoto>> _variants = {};

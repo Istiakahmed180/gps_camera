@@ -11,6 +11,8 @@ import 'package:gps_camera/features/camera/widgets/last_photo_thumbnail.dart';
 import 'package:gps_camera/features/camera/widgets/shutter_button.dart';
 import 'package:gps_camera/features/location/controllers/location_controller.dart';
 import 'package:gps_camera/features/location/widgets/gps_status_panel.dart';
+import 'package:gps_camera/features/projects/controllers/active_project_controller.dart';
+import 'package:gps_camera/features/projects/widgets/active_project_chip.dart';
 
 class CameraView extends GetView<CaptureController> {
   const CameraView({super.key});
@@ -43,6 +45,9 @@ class CameraView extends GetView<CaptureController> {
                       onClose: controller.close,
                       onFlash: controller.cycleFlashMode,
                       onSwitch: controller.switchCamera,
+                      center: ActiveProjectChip(
+                        controller: Get.find<ActiveProjectController>(),
+                      ),
                     ),
                   ),
                   Expanded(

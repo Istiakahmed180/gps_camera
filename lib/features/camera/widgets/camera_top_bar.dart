@@ -13,7 +13,11 @@ class CameraTopBar extends StatelessWidget {
     required this.onClose,
     required this.onFlash,
     required this.onSwitch,
+    this.center,
   });
+
+  /// Shown between the close button and the camera controls.
+  final Widget? center;
 
   final FlashMode flashMode;
   final bool showFlash;
@@ -37,7 +41,14 @@ class CameraTopBar extends StatelessWidget {
             tooltip: 'Close camera',
             onPressed: onClose,
           ),
-          const Spacer(),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: center ?? const SizedBox.shrink(),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
           if (showFlash)
             CameraIconButton(
               icon: _flashIcon(flashMode),

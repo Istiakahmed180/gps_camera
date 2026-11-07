@@ -28,10 +28,17 @@ class DeleteFailure {
 }
 
 class DeleteResult {
-  const DeleteResult({required this.deleted, required this.failures});
+  const DeleteResult({
+    required this.deleted,
+    required this.failures,
+    this.removedPhotos = const [],
+  });
 
   /// File names removed, images and JSON.
   final List<String> deleted;
+
+  /// Photos whose image file no longer exists after this delete.
+  final List<GalleryPhoto> removedPhotos;
   final List<DeleteFailure> failures;
 
   bool get isComplete => failures.isEmpty;
@@ -77,11 +84,13 @@ class GalleryService {
   }) async {
     final deleted = <String>[];
     final failures = <DeleteFailure>[];
+    final removed = <GalleryPhoto>[];
     final photos = [if (includeRelated) ...plan.related, plan.target];
 
     for (final photo in photos) {
       final imageGone = await _remove(photo.file, deleted, failures);
       if (imageGone) {
+        removed.add(photo);
         await _remove(
           File(PhotoStorageService.sidecarPathFor(photo.path)),
           deleted,
@@ -89,7 +98,11 @@ class GalleryService {
         );
       }
     }
-    return DeleteResult(deleted: deleted, failures: failures);
+    return DeleteResult(
+      deleted: deleted,
+      failures: failures,
+      removedPhotos: removed,
+    );
   }
 
   /// True when the file no longer exists afterwards.

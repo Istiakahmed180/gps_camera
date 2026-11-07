@@ -11,6 +11,8 @@ import 'package:gps_camera/features/gallery/services/gallery_service.dart';
 import 'package:gps_camera/features/gallery/utils/photo_info_formatter.dart';
 import 'package:gps_camera/features/gallery/widgets/photo_action_menu.dart';
 import 'package:gps_camera/features/gallery/widgets/photo_details_panel.dart';
+import 'package:gps_camera/features/projects/models/project.dart';
+import 'package:gps_camera/features/projects/widgets/project_picker_sheet.dart';
 import 'package:gps_camera/shared/widgets/section_header.dart';
 
 class PhotoDetailsView extends GetView<PhotoDetailsController> {
@@ -46,7 +48,13 @@ class PhotoDetailsView extends GetView<PhotoDetailsController> {
             () => PhotoDetailsPanel(
               photo: photo,
               dimensions: controller.dimensions.value,
-              related: _Related(controller: controller),
+              related: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _ProjectSection(controller: controller),
+                  _Related(controller: controller),
+                ],
+              ),
             ),
           );
 
@@ -117,7 +125,9 @@ class PhotoDetailsView extends GetView<PhotoDetailsController> {
     if (!context.mounted) return;
 
     if (result.isComplete) {
-      Get.until((route) => route.settings.name == AppRoutes.gallery);
+      // Close every stacked photo details screen, returning to the gallery
+      // or project the photo was opened from.
+      Get.until((route) => route.settings.name != AppRoutes.photoDetails);
       _snack(
         Get.context ?? context,
         result.deleted.where((n) => n.endsWith('.jpg')).length > 1
@@ -203,6 +213,104 @@ class _Preview extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Shows and changes the photo's project. A watermarked copy shows and
+/// changes its original's project; it never gets its own assignment.
+class _ProjectSection extends StatelessWidget {
+  const _ProjectSection({required this.controller});
+
+  final PhotoDetailsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final project = controller.project;
+      final photo = controller.photo;
+      final canChange = controller.canChangeProject;
+
+      return Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SectionHeader('Project'),
+            Card(
+              child: ListTile(
+                leading: Icon(
+                  project == null
+                      ? Icons.folder_off_outlined
+                      : Icons.folder_outlined,
+                ),
+                title: Text(project?.name ?? 'Not in a project'),
+                subtitle: photo.isWatermarked
+                    ? Text(
+                        canChange
+                            ? 'Set through its original photo'
+                            : 'Original deleted; project can’t be changed',
+                      )
+                    : null,
+                trailing: canChange
+                    ? TextButton(
+                        onPressed: controller.isBusy.value
+                            ? null
+                            : () => _choose(context, project),
+                        child: Text(
+                          project == null ? 'Add to project' : 'Change',
+                        ),
+                      )
+                    : null,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Future<void> _choose(BuildContext context, ProjectRef? current) async {
+    final List<Project> projects;
+    try {
+      projects = await controller.assignableProjects();
+    } catch (_) {
+      if (context.mounted) {
+        PhotoDetailsView._snack(
+          context,
+          'Projects could not be loaded.',
+          isError: true,
+        );
+      }
+      return;
+    }
+    if (!context.mounted) return;
+
+    final choice = await showProjectPicker(
+      context,
+      projects: projects,
+      selectedId: current?.id,
+      title: controller.photo.isWatermarked
+          ? 'Project for the original photo'
+          : 'Add to project',
+      noneLabel: current == null ? 'No project' : 'Remove from project',
+    );
+    if (choice == null || !context.mounted) return;
+
+    final target = switch (choice) {
+      ChoseProject(:final project) => project,
+      ChoseNoProject() => null,
+    };
+    if (target?.id == current?.id) return;
+    final error = await controller.setProject(target);
+    if (!context.mounted) return;
+    PhotoDetailsView._snack(
+      context,
+      error ??
+          (target == null
+              ? 'Removed from ${current!.name}'
+              : 'Added to ${target.name}'),
+      isError: error != null,
     );
   }
 }

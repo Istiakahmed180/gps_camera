@@ -4,12 +4,18 @@ import 'package:gps_camera/features/camera/bindings/camera_binding.dart';
 import 'package:gps_camera/features/camera/views/camera_view.dart';
 import 'package:gps_camera/features/gallery/bindings/gallery_binding.dart';
 import 'package:gps_camera/features/gallery/bindings/photo_details_binding.dart';
-import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
+import 'package:gps_camera/features/gallery/models/photo_library.dart';
 import 'package:gps_camera/features/gallery/views/gallery_view.dart';
 import 'package:gps_camera/features/gallery/views/photo_details_view.dart';
 import 'package:gps_camera/features/home/bindings/home_binding.dart';
 import 'package:gps_camera/features/home/views/home_view.dart';
+import 'package:gps_camera/features/projects/bindings/project_details_binding.dart';
+import 'package:gps_camera/features/projects/bindings/project_edit_binding.dart';
+import 'package:gps_camera/features/projects/bindings/project_photo_picker_binding.dart';
 import 'package:gps_camera/features/projects/bindings/projects_binding.dart';
+import 'package:gps_camera/features/projects/views/project_details_view.dart';
+import 'package:gps_camera/features/projects/views/project_edit_view.dart';
+import 'package:gps_camera/features/projects/views/project_photo_picker_view.dart';
 import 'package:gps_camera/features/projects/views/projects_view.dart';
 import 'package:gps_camera/features/settings/bindings/settings_binding.dart';
 import 'package:gps_camera/features/settings/views/settings_view.dart';
@@ -38,13 +44,29 @@ abstract final class AppPages {
     ),
     GetPage<dynamic>(
       name: AppRoutes.photoDetails,
-      page: () => PhotoDetailsView(photo: Get.arguments as GalleryPhoto),
+      page: () =>
+          PhotoDetailsView(photo: (Get.arguments as PhotoDetailsArgs).photo),
       binding: PhotoDetailsBinding(),
     ),
     GetPage<dynamic>(
       name: AppRoutes.projects,
       page: () => const ProjectsView(),
       binding: ProjectsBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.projectDetails,
+      page: () => const ProjectDetailsView(),
+      binding: ProjectDetailsBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.projectEdit,
+      page: () => const ProjectEditView(),
+      binding: ProjectEditBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.projectAddPhotos,
+      page: () => const ProjectPhotoPickerView(),
+      binding: ProjectPhotoPickerBinding(),
     ),
     GetPage<dynamic>(
       name: AppRoutes.settings,
