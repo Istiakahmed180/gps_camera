@@ -4,6 +4,7 @@ import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/core/services/storage_service.dart';
 import 'package:gps_camera/features/camera/controllers/capture_controller.dart';
 import 'package:gps_camera/features/camera/services/capture_saver.dart';
+import 'package:gps_camera/features/export/services/gallery_export_service.dart';
 import 'package:gps_camera/features/location/controllers/location_controller.dart';
 import 'package:gps_camera/features/camera/services/capture_enricher.dart';
 import 'package:gps_camera/features/location/controllers/live_map_controller.dart';
@@ -52,6 +53,7 @@ class CameraBinding extends Bindings {
           settings: Get.find<WatermarkSettingsStore>(),
           placeFor: place.placeFor,
           grabMap: map.snapshot,
+          gallery: Get.find<GalleryExportService>(),
         ),
       );
     });

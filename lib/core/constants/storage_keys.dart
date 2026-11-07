@@ -3,4 +3,5 @@ abstract final class StorageKeys {
   static const String watermarkConfig = 'watermark.config';
   static const String activeProjectId = 'camera.active_project_id';
   static const String autoWatermark = 'camera.auto_watermark';
+  static const String gallerySaveMode = 'export.gallery_save_mode';
 }

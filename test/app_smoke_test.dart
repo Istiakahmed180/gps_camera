@@ -27,7 +27,7 @@ void main() {
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
     Get.put(DatabaseService(NativeDatabase.memory()), permanent: true);
     Get.put<PermissionService>(FakePermissionService());
-    Get.put<GalleryService>(FakeGalleryService());
+    Get.put<GalleryService>(FakeGalleryService(), permanent: true);
     Get.put<ReportService>(FakeReportService());
     Get.put<LocationService>(
       FakeLocationService(permission: PermissionAccess.denied),
@@ -76,6 +76,13 @@ void main() {
     await tester.pumpWidget(const GpsCameraApp());
     await tester.pumpAndSettle();
     await openFromHome(tester, 'Settings');
+    // Theme sits below the camera, gallery and backup sections.
+    await tester.scrollUntilVisible(
+      find.text('Dark'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
 
     Brightness brightness() =>
         Theme.of(tester.element(find.text('Theme'))).brightness;

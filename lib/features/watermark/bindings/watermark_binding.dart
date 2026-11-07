@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/core/services/storage_service.dart';
+import 'package:gps_camera/features/export/services/gallery_export_service.dart';
 import 'package:gps_camera/features/watermark/controllers/watermark_controller.dart';
 import 'package:gps_camera/features/watermark/services/watermark_renderer.dart';
 import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
@@ -18,6 +19,7 @@ class WatermarkBinding extends Bindings {
         storage: storage,
         renderer: WatermarkRenderer(storage),
         settings: WatermarkSettingsStore(Get.find<StorageService>()),
+        gallery: Get.find<GalleryExportService>(),
       );
     });
   }

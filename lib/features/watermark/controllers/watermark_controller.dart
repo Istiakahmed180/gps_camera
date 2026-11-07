@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
 import 'package:gps_camera/features/camera/services/capture_enricher.dart';
+import 'package:gps_camera/features/export/services/gallery_export_service.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 import 'package:gps_camera/features/watermark/models/watermark_content.dart';
 import 'package:gps_camera/features/watermark/services/image_processor.dart';
@@ -23,6 +24,7 @@ class WatermarkController extends GetxController {
     required this._renderer,
     required this._settings,
     this._processor = const ImageProcessor(),
+    this._gallery,
   });
 
   final File photo;
@@ -30,6 +32,11 @@ class WatermarkController extends GetxController {
   final WatermarkRenderer _renderer;
   final WatermarkSettingsStore _settings;
   final ImageProcessor _processor;
+  final GalleryExportService? _gallery;
+
+  /// False when the saved copy should have reached the phone gallery but
+  /// did not.
+  final RxBool galleryFailed = false.obs;
 
   final Rx<WatermarkEditorStatus> status = WatermarkEditorStatus.loading.obs;
   final RxnString loadError = RxnString();
@@ -117,14 +124,27 @@ class WatermarkController extends GetxController {
     isSaving.value = true;
     saveError.value = null;
     lastResult.value = null;
+    galleryFailed.value = false;
     try {
-      lastResult.value = await _renderer.render(
+      final result = await _renderer.render(
         original: photo,
         metadata: current,
         config: config.value,
         imageSize: ui.Size(image.width.toDouble(), image.height.toDouble()),
         mapImage: _mapBytes,
       );
+      lastResult.value = result;
+      final gallery = _gallery;
+      if (gallery != null) {
+        try {
+          galleryFailed.value = !await gallery.exportEdited(
+            result.output,
+            takenAt: current.capturedAt,
+          );
+        } catch (_) {
+          galleryFailed.value = true;
+        }
+      }
     } on WatermarkException catch (e) {
       saveError.value = e.message;
     } catch (_) {

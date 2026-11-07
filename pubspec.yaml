@@ -39,6 +39,8 @@ dependencies:
   drift: ^2.35.3
   drift_flutter: ^0.3.1
   geocoding: ^5.0.1
+  # Backup ZIP files, streamed from and to disk
+  archive: ^4.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

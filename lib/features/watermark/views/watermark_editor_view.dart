@@ -234,7 +234,8 @@ class _SaveBar extends GetView<WatermarkController> {
                         (empty
                             ? 'Choose at least one detail to show.'
                             : 'Saved as ${result!.output.uri.pathSegments.last}. '
-                                  'The original is unchanged.'),
+                                  'The original is unchanged.'
+                                  '${controller.galleryFailed.value ? ' It could not be added to the phone gallery.' : ''}'),
                   ),
                   const SizedBox(height: AppSpacing.md),
                 ],

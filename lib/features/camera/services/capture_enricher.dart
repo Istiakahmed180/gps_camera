@@ -7,6 +7,7 @@ import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/features/camera/models/capture_post_processing.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
 import 'package:gps_camera/features/camera/services/capture_saver.dart';
+import 'package:gps_camera/features/export/services/gallery_export_service.dart';
 import 'package:gps_camera/features/gallery/services/gallery_scanner.dart';
 import 'package:gps_camera/features/location/models/location_fix.dart';
 import 'package:gps_camera/features/location/models/place_info.dart';
@@ -27,6 +28,7 @@ class CaptureEnricher implements CapturePostProcessor {
     required this._settings,
     required this._placeFor,
     required this._grabMap,
+    this._gallery,
     this._imageSize = readImageSize,
   });
 
@@ -36,6 +38,9 @@ class CaptureEnricher implements CapturePostProcessor {
   final PlaceLookup _placeFor;
   final MapGrabber _grabMap;
   final ImageSizeReader _imageSize;
+
+  /// Copies the result to the phone gallery; null skips that step.
+  final GalleryExportService? _gallery;
 
   @override
   Future<Uint8List?> grabMap() async {
@@ -80,22 +85,56 @@ class CaptureEnricher implements CapturePostProcessor {
       }
     }
 
-    if (!_settings.loadAutoWatermark()) return null;
+    String? message;
+    File? copy;
+    if (_settings.loadAutoWatermark()) {
+      (copy, message) = await _renderCopy(saved.photo, metadata, mapName, map);
+    }
+
+    final gallery = _gallery;
+    if (gallery != null) {
+      bool exported;
+      try {
+        exported = await gallery.exportCapture(
+          original: saved.photo,
+          watermarked: copy,
+          takenAt: metadata.capturedAt,
+        );
+      } catch (_) {
+        exported = false;
+      }
+      if (!exported) {
+        message = message == null
+            ? 'Not saved to phone gallery'
+            : '$message · not saved to phone gallery';
+      }
+    }
+    return message;
+  }
+
+  Future<(File?, String)> _renderCopy(
+    File photo,
+    PhotoMetadata metadata,
+    String? mapName,
+    Uint8List? map,
+  ) async {
     try {
-      final size = await _imageSize(saved.photo.path);
-      if (size == null) return 'Watermarked copy not saved: photo unreadable';
-      await _renderer.render(
-        original: saved.photo,
+      final size = await _imageSize(photo.path);
+      if (size == null) {
+        return (null, 'Watermarked copy not saved: photo unreadable');
+      }
+      final result = await _renderer.render(
+        original: photo,
         metadata: metadata,
         config: _settings.load(),
         imageSize: size,
         mapImage: mapName == null ? null : map,
       );
-      return 'Watermarked copy saved';
+      return (result.output, 'Watermarked copy saved');
     } on WatermarkException catch (e) {
-      return 'Watermarked copy not saved: ${e.message}';
+      return (null, 'Watermarked copy not saved: ${e.message}');
     } catch (_) {
-      return 'Watermarked copy not saved';
+      return (null, 'Watermarked copy not saved');
     }
   }
 
