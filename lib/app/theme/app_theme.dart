@@ -9,43 +9,43 @@ abstract final class AppTheme {
 
   static ThemeData get dark => _build(_darkScheme, AppColors.darkBackground);
 
-  static final ColorScheme _lightScheme = ColorScheme.fromSeed(
-    seedColor: AppColors.brand,
-  ).copyWith(
-    primary: AppColors.brand,
-    onPrimary: Colors.white,
-    tertiary: AppColors.accent,
-    onTertiary: AppColors.onAccent,
-    error: AppColors.errorLight,
-    surface: AppColors.lightSurface,
-    onSurface: AppColors.lightTextPrimary,
-    onSurfaceVariant: AppColors.lightTextSecondary,
-    surfaceContainerLowest: AppColors.lightSurface,
-    surfaceContainerLow: AppColors.lightBackground,
-    surfaceContainer: AppColors.lightSurfaceContainer,
-    surfaceContainerHigh: AppColors.lightSurfaceContainerHigh,
-    outline: AppColors.lightOutline,
-    outlineVariant: AppColors.lightOutlineVariant,
-  );
+  static final ColorScheme _lightScheme =
+      ColorScheme.fromSeed(seedColor: AppColors.brand).copyWith(
+        primary: AppColors.brand,
+        onPrimary: Colors.white,
+        tertiary: AppColors.accent,
+        onTertiary: AppColors.onAccent,
+        error: AppColors.errorLight,
+        surface: AppColors.lightSurface,
+        onSurface: AppColors.lightTextPrimary,
+        onSurfaceVariant: AppColors.lightTextSecondary,
+        surfaceContainerLowest: AppColors.lightSurface,
+        surfaceContainerLow: AppColors.lightBackground,
+        surfaceContainer: AppColors.lightSurfaceContainer,
+        surfaceContainerHigh: AppColors.lightSurfaceContainerHigh,
+        outline: AppColors.lightOutline,
+        outlineVariant: AppColors.lightOutlineVariant,
+      );
 
-  static final ColorScheme _darkScheme = ColorScheme.fromSeed(
-    seedColor: AppColors.brand,
-    brightness: Brightness.dark,
-  ).copyWith(
-    primary: AppColors.brandLight,
-    tertiary: AppColors.accent,
-    onTertiary: AppColors.onAccent,
-    error: AppColors.errorDark,
-    surface: AppColors.darkSurface,
-    onSurface: AppColors.darkTextPrimary,
-    onSurfaceVariant: AppColors.darkTextSecondary,
-    surfaceContainerLowest: AppColors.darkBackground,
-    surfaceContainerLow: AppColors.darkSurface,
-    surfaceContainer: AppColors.darkSurfaceContainer,
-    surfaceContainerHigh: AppColors.darkSurfaceContainerHigh,
-    outline: AppColors.darkOutline,
-    outlineVariant: AppColors.darkOutlineVariant,
-  );
+  static final ColorScheme _darkScheme =
+      ColorScheme.fromSeed(
+        seedColor: AppColors.brand,
+        brightness: Brightness.dark,
+      ).copyWith(
+        primary: AppColors.brandLight,
+        tertiary: AppColors.accent,
+        onTertiary: AppColors.onAccent,
+        error: AppColors.errorDark,
+        surface: AppColors.darkSurface,
+        onSurface: AppColors.darkTextPrimary,
+        onSurfaceVariant: AppColors.darkTextSecondary,
+        surfaceContainerLowest: AppColors.darkBackground,
+        surfaceContainerLow: AppColors.darkSurface,
+        surfaceContainer: AppColors.darkSurfaceContainer,
+        surfaceContainerHigh: AppColors.darkSurfaceContainerHigh,
+        outline: AppColors.darkOutline,
+        outlineVariant: AppColors.darkOutlineVariant,
+      );
 
   static ThemeData _build(ColorScheme scheme, Color background) {
     final isDark = scheme.brightness == Brightness.dark;
@@ -76,10 +76,9 @@ abstract final class AppTheme {
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: textTheme.titleLarge,
-        systemOverlayStyle: (isDark
-                ? SystemUiOverlayStyle.light
-                : SystemUiOverlayStyle.dark)
-            .copyWith(statusBarColor: Colors.transparent),
+        systemOverlayStyle:
+            (isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+                .copyWith(statusBarColor: Colors.transparent),
       ),
       cardTheme: CardThemeData(
         color: scheme.surface,

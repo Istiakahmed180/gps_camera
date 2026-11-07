@@ -14,7 +14,8 @@ class GalleryView extends GetView<GalleryController> {
       body: EmptyStateView(
         icon: Icons.photo_library_outlined,
         title: 'No photos yet',
-        message: 'Photos you capture will appear here with their location '
+        message:
+            'Photos you capture will appear here with their location '
             'and timestamp.',
         action: AppButton(
           label: 'Open camera',

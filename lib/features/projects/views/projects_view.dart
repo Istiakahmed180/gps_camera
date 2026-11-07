@@ -13,7 +13,8 @@ class ProjectsView extends GetView<ProjectsController> {
       body: const EmptyStateView(
         icon: Icons.folder_outlined,
         title: 'No projects yet',
-        message: 'Group photos by site, client or job to build albums '
+        message:
+            'Group photos by site, client or job to build albums '
             'and reports.',
       ),
     );

@@ -34,22 +34,24 @@ class AppButton extends StatelessWidget {
 
     final Widget button = switch (variant) {
       AppButtonVariant.primary => FilledButton.icon(
-          onPressed: callback,
-          icon: leading,
-          label: child,
-        ),
+        onPressed: callback,
+        icon: leading,
+        label: child,
+      ),
       AppButtonVariant.secondary => OutlinedButton.icon(
-          onPressed: callback,
-          icon: leading,
-          label: child,
-        ),
+        onPressed: callback,
+        icon: leading,
+        label: child,
+      ),
       AppButtonVariant.tertiary => TextButton.icon(
-          onPressed: callback,
-          icon: leading,
-          label: child,
-        ),
+        onPressed: callback,
+        icon: leading,
+        label: child,
+      ),
     };
 
-    return isExpanded ? SizedBox(width: double.infinity, child: button) : button;
+    return isExpanded
+        ? SizedBox(width: double.infinity, child: button)
+        : button;
   }
 }

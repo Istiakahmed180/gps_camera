@@ -4,8 +4,11 @@ import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/features/camera/controllers/capture_controller.dart';
+import 'package:gps_camera/features/camera/widgets/camera_top_bar.dart';
+import 'package:gps_camera/features/camera/widgets/camera_viewfinder.dart';
+import 'package:gps_camera/features/camera/widgets/capture_toast.dart';
+import 'package:gps_camera/features/camera/widgets/last_photo_thumbnail.dart';
 import 'package:gps_camera/features/camera/widgets/shutter_button.dart';
-import 'package:gps_camera/features/camera/widgets/viewfinder_placeholder.dart';
 
 class CameraView extends GetView<CaptureController> {
   const CameraView({super.key});
@@ -20,35 +23,91 @@ class CameraView extends GetView<CaptureController> {
       child: Scaffold(
         backgroundColor: AppColors.viewfinderBackground,
         body: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs,
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      tooltip: 'Close camera',
-                      onPressed: controller.close,
-                      color: AppColors.onViewfinder,
-                      icon: const Icon(Icons.close_rounded),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppBreakpoints.maxContentWidth,
+              ),
+              child: Column(
+                children: [
+                  Obx(
+                    () => CameraTopBar(
+                      flashMode: controller.flashMode.value,
+                      showFlash: controller.isFlashSupported.value,
+                      showSwitch: controller.canSwitchCamera.value,
+                      controlsEnabled: controller.canCapture,
+                      onClose: controller.close,
+                      onFlash: controller.cycleFlashMode,
+                      onSwitch: controller.switchCamera,
                     ),
-                  ],
-                ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                      ),
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Obx(
+                              () => CameraViewfinder(
+                                status: controller.status.value,
+                                camera: controller.camera.value,
+                                errorMessage: controller.errorMessage.value,
+                                onRequestPermission:
+                                    controller.requestPermission,
+                                onOpenSettings: controller.openSettings,
+                                onRetry: controller.retry,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: AppSpacing.lg,
+                            right: AppSpacing.lg,
+                            bottom: AppSpacing.lg,
+                            child: Center(
+                              child: Obx(
+                                () => CaptureToast(
+                                  feedback: controller.feedback.value,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xl,
+                      vertical: AppSpacing.xl,
+                    ),
+                    child: Row(
+                      children: [
+                        Obx(
+                          () => LastPhotoThumbnail(
+                            path: controller.lastPhotoPath.value,
+                          ),
+                        ),
+                        Expanded(
+                          child: Center(
+                            child: Obx(
+                              () => ShutterButton(
+                                isCapturing: controller.isCapturing.value,
+                                onPressed: controller.canCapture
+                                    ? controller.capture
+                                    : null,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: LastPhotoThumbnail.size),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  child: ViewfinderPlaceholder(),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                child: ShutterButton(onPressed: null),
-              ),
-            ],
+            ),
           ),
         ),
       ),

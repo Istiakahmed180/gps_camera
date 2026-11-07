@@ -6,7 +6,8 @@ plugins {
 
 android {
     namespace = "co.tdevs.gps_camera"
-    compileSdk = flutter.compileSdkVersion
+    // permission_handler_android 14.x requires compiling against API 37.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

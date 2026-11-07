@@ -1,27 +1,26 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gps_camera/app/app.dart';
 import 'package:gps_camera/app/bindings/initial_binding.dart';
+import 'package:gps_camera/core/services/permission_service.dart';
+
+import 'helpers/test_env.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
-    final tempDir = await Directory.systemTemp.createTemp('gps_camera_test');
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (_) async => tempDir.path,
-    );
+    await mockPathProvider();
     await GetStorage.init();
   });
 
-  setUp(() => InitialBinding().dependencies());
+  setUp(() {
+    // Registered first so InitialBinding's lazy registration keeps the fake.
+    Get.put<PermissionService>(FakePermissionService());
+    InitialBinding().dependencies();
+  });
   tearDown(Get.reset);
 
   Future<void> openFromHome(WidgetTester tester, String label) async {
@@ -40,7 +39,7 @@ void main() {
     expect(find.text('Open camera'), findsOneWidget);
 
     await openFromHome(tester, 'Open camera');
-    expect(find.text('Camera preview'), findsOneWidget);
+    expect(find.text('Camera access needed'), findsOneWidget);
     await goBack(tester);
 
     await openFromHome(tester, 'Gallery');

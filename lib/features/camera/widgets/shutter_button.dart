@@ -3,35 +3,57 @@ import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 
 class ShutterButton extends StatelessWidget {
-  const ShutterButton({super.key, required this.onPressed});
+  const ShutterButton({
+    super.key,
+    required this.onPressed,
+    this.isCapturing = false,
+  });
 
   final VoidCallback? onPressed;
+  final bool isCapturing;
 
   @override
   Widget build(BuildContext context) {
-    final enabled = onPressed != null;
+    final enabled = onPressed != null && !isCapturing;
+    const ring = 4.0;
+    const gap = AppSpacing.xs + AppSpacing.xxs;
+    const innerSize = AppSizes.shutter - (ring + gap) * 2;
 
     return Semantics(
       button: true,
       enabled: enabled,
-      label: 'Capture photo',
-      child: Opacity(
-        opacity: enabled ? 1 : 0.4,
-        child: GestureDetector(
-          onTap: onPressed,
+      label: isCapturing ? 'Capturing photo' : 'Capture photo',
+      child: GestureDetector(
+        onTap: enabled ? onPressed : null,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 150),
+          opacity: enabled || isCapturing ? 1 : 0.4,
           child: Container(
             width: AppSizes.shutter,
             height: AppSizes.shutter,
-            padding: const EdgeInsets.all(AppSpacing.xs + AppSpacing.xxs),
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.onViewfinder, width: 4),
+              border: Border.all(color: AppColors.onViewfinder, width: ring),
             ),
-            child: const DecoratedBox(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              curve: Curves.easeOut,
+              width: isCapturing ? innerSize * 0.7 : innerSize,
+              height: isCapturing ? innerSize * 0.7 : innerSize,
               decoration: BoxDecoration(
-                color: AppColors.onViewfinder,
+                color: isCapturing ? AppColors.accent : AppColors.onViewfinder,
                 shape: BoxShape.circle,
               ),
+              child: isCapturing
+                  ? const Padding(
+                      padding: EdgeInsets.all(AppSpacing.md),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: AppColors.onAccent,
+                      ),
+                    )
+                  : null,
             ),
           ),
         ),
