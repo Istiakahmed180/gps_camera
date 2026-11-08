@@ -49,10 +49,14 @@ abstract final class CaptureTimeFormatter {
 
   /// `<1 s`, `45 s`, `12 min`, `3 h`
   static String age(Duration age) {
-    if (age.inSeconds < 1) return '<1 s';
-    if (age.inSeconds < 60) return '${age.inSeconds} s';
-    if (age.inMinutes < 60) return '${age.inMinutes} min';
-    return '${age.inHours} h';
+    if (age.inSeconds < 1) return '<1 s'.tr;
+    if (age.inSeconds < 60) {
+      return '@n s'.trParams({'n': '${age.inSeconds}'});
+    }
+    if (age.inMinutes < 60) {
+      return '@n min'.trParams({'n': '${age.inMinutes}'});
+    }
+    return '@n h'.trParams({'n': '${age.inHours}'});
   }
 
   static String _two(int value) => value.toString().padLeft(2, '0');

@@ -61,7 +61,6 @@ const Map<String, String> bnCommon = {
   'Unavailable': 'পাওয়া যায়নি',
   'Original file': 'অরিজিনাল ফাইল',
   '@file (original deleted)': '@file (অরিজিনাল মুছে ফেলা হয়েছে)',
-  'None': 'নেই',
   'Metadata': 'মেটাডেটা',
   'Also selected': 'আরও বাছাই করা হয়েছে',
   'Unavailable (@reason)': 'পাওয়া যায়নি (@reason)',
@@ -101,4 +100,9 @@ const Map<String, String> bnCommon = {
   'PHOTOS': 'ছবি',
   'PLACE': 'জায়গা',
   'Project report: @name': 'প্রজেক্ট রিপোর্ট: @name',
+  '<1 s': '<1 সে.',
+  '@n s': '@n সে.',
+  '@n min': '@n মি.',
+  '@n h': '@n ঘ.',
+  'No watermark': 'ওয়াটারমার্ক নেই',
 };

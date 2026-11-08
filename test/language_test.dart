@@ -263,6 +263,15 @@ void main() {
       }
     }
   });
+  test('time units follow the language', () {
+    Get.addTranslations(AppTranslations().keys);
+    Get.locale = AppLanguage.bangla.locale;
+    expect(CaptureTimeFormatter.age(const Duration(seconds: 5)), '5 সে.');
+    expect(CaptureTimeFormatter.age(const Duration(minutes: 3)), '3 মি.');
+    Get.locale = AppLanguage.english.locale;
+    expect(CaptureTimeFormatter.age(const Duration(seconds: 5)), '5 s');
+    expect(CaptureTimeFormatter.age(Duration.zero), '<1 s');
+  });
 }
 
 String _reportDate(DateTime day) => CaptureTimeFormatter.date(day);

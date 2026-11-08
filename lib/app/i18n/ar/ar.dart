@@ -721,7 +721,6 @@ const Map<String, String> ar = {
   'Unavailable': 'غير متاح',
   'Original file': 'الملف الأصلي',
   '@file (original deleted)': '@file (حُذفت الصورة الأصلية)',
-  'None': 'لا يوجد',
   'Metadata': 'البيانات الوصفية',
   'Also selected': 'محددة أيضًا',
   'Unavailable (@reason)': 'غير متاح (@reason)',
@@ -760,4 +759,9 @@ const Map<String, String> ar = {
   'PHOTOS': 'الصور',
   'PLACE': 'المكان',
   'Project report: @name': 'تقرير المشروع: @name',
+  '<1 s': '<1 ث',
+  '@n s': '@n ث',
+  '@n min': '@n د',
+  '@n h': '@n س',
+  'No watermark': 'بدون علامة مائية',
 };

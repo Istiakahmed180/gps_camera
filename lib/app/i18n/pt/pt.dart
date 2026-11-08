@@ -731,7 +731,6 @@ const Map<String, String> pt = {
   'Unavailable': 'Indisponível',
   'Original file': 'Arquivo original',
   '@file (original deleted)': '@file (original excluído)',
-  'None': 'Nenhum',
   'Metadata': 'Metadados',
   'Also selected': 'Também selecionadas',
   'Unavailable (@reason)': 'Indisponível (@reason)',
@@ -771,4 +770,9 @@ const Map<String, String> pt = {
   'PHOTOS': 'FOTOS',
   'PLACE': 'LUGAR',
   'Project report: @name': 'Relatório do projeto: @name',
+  '<1 s': '<1 s',
+  '@n s': '@n s',
+  '@n min': '@n min',
+  '@n h': '@n h',
+  'No watermark': 'Sem marca d\'água',
 };

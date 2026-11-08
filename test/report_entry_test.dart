@@ -139,7 +139,7 @@ void main() {
         index,
         projectOf: (_) => null,
       ).single;
-      expect(rows(entry, ReportType.selection)['Project'], 'None');
+      expect(rows(entry, ReportType.selection)['Project'], 'No project');
     });
   });
 
@@ -175,7 +175,7 @@ void main() {
         '−26.1 m above WGS84 ellipsoid (not sea level), ±3.642 m',
       );
       expect(r['Direction of travel'], '249°');
-      expect(r['Watermark'], 'None');
+      expect(r['Watermark'], 'No watermark');
       expect(r.containsKey('Address'), isFalse);
     });
 

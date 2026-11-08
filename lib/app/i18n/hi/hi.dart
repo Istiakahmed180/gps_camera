@@ -723,7 +723,6 @@ const Map<String, String> hi = {
   'Unavailable': 'उपलब्ध नहीं',
   'Original file': 'ओरिजिनल फ़ाइल',
   '@file (original deleted)': '@file (ओरिजिनल मिटा दी गई)',
-  'None': 'कोई नहीं',
   'Metadata': 'मेटाडेटा',
   'Also selected': 'ये भी चुनी गईं',
   'Unavailable (@reason)': 'उपलब्ध नहीं (@reason)',
@@ -763,4 +762,9 @@ const Map<String, String> hi = {
   'PHOTOS': 'फ़ोटो',
   'PLACE': 'जगह',
   'Project report: @name': 'प्रोजेक्ट रिपोर्ट: @name',
+  '<1 s': '<1 से.',
+  '@n s': '@n से.',
+  '@n min': '@n मि.',
+  '@n h': '@n घं.',
+  'No watermark': 'कोई वॉटरमार्क नहीं',
 };

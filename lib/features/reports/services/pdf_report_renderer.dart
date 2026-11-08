@@ -727,7 +727,7 @@ List<(String, String, bool)> reportEntryRows(
       !entry.originalAvailable,
     ),
     if (type == ReportType.selection)
-      ('Project'.tr, entry.projectName ?? 'None'.tr, false),
+      ('Project'.tr, entry.projectName ?? 'No project'.tr, false),
     if (metadata == null)
       ('Metadata'.tr, entry.metadataProblem?.tr ?? 'Unavailable'.tr, true)
     else
@@ -792,7 +792,7 @@ List<(String, String, bool)> _locationRows(PhotoMetadata metadata) {
 
 List<(String, String, bool)> _watermarkRows(ReportEntry entry) {
   if (entry.watermarks.isEmpty) {
-    return [('Watermark'.tr, 'None'.tr, false)];
+    return [('Watermark'.tr, 'No watermark'.tr, false)];
   }
   final latest = entry.watermarks.first;
   final count = entry.watermarks.length;

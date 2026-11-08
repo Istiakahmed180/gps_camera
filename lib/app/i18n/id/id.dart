@@ -726,7 +726,6 @@ const Map<String, String> id = {
   'Unavailable': 'Tidak tersedia',
   'Original file': 'File asli',
   '@file (original deleted)': '@file (foto asli dihapus)',
-  'None': 'Tidak ada',
   'Metadata': 'Metadata',
   'Also selected': 'Juga dipilih',
   'Unavailable (@reason)': 'Tidak tersedia (@reason)',
@@ -766,4 +765,9 @@ const Map<String, String> id = {
   'PHOTOS': 'FOTO',
   'PLACE': 'TEMPAT',
   'Project report: @name': 'Laporan proyek: @name',
+  '<1 s': '<1 dtk',
+  '@n s': '@n dtk',
+  '@n min': '@n mnt',
+  '@n h': '@n jam',
+  'No watermark': 'Tanpa tanda air',
 };
