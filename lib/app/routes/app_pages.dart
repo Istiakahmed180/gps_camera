@@ -23,6 +23,7 @@ import 'package:gps_camera/features/projects/views/projects_view.dart';
 import 'package:gps_camera/features/reports/bindings/reports_binding.dart';
 import 'package:gps_camera/features/reports/views/reports_view.dart';
 import 'package:gps_camera/features/settings/bindings/settings_binding.dart';
+import 'package:gps_camera/features/settings/views/language_view.dart';
 import 'package:gps_camera/features/settings/views/settings_view.dart';
 import 'package:gps_camera/features/watermark/bindings/watermark_binding.dart';
 import 'package:gps_camera/features/watermark/views/watermark_editor_view.dart';
@@ -35,6 +36,10 @@ abstract final class AppPages {
       name: AppRoutes.home,
       page: () => const HomeView(),
       binding: HomeBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.language,
+      page: () => const LanguageView(),
     ),
     GetPage<dynamic>(
       name: AppRoutes.onboarding,

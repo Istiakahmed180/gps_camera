@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
@@ -9,12 +10,14 @@ import 'package:get_storage/get_storage.dart';
 import 'package:gps_camera/app/app.dart';
 import 'package:gps_camera/app/bindings/initial_binding.dart';
 import 'package:gps_camera/app/i18n/app_language.dart';
+import 'package:gps_camera/app/i18n/app_translations.dart';
 import 'package:gps_camera/app/i18n/bn/bn.dart';
 import 'package:gps_camera/core/constants/storage_keys.dart';
 import 'package:gps_camera/core/database/database_service.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
 import 'package:gps_camera/features/gallery/services/gallery_service.dart';
 import 'package:gps_camera/features/location/services/location_service.dart';
+import 'package:gps_camera/features/settings/views/language_view.dart';
 import 'package:gps_camera/features/reports/services/report_service.dart';
 import 'package:gps_camera/features/watermark/utils/capture_time_formatter.dart';
 
@@ -111,6 +114,73 @@ void main() {
       }
     }
   });
+  test('every language has the same texts, filled in, with placeholders', () {
+    final tables = AppTranslations().keys;
+    final keys = bn.keys.toSet();
+    for (final language in AppLanguage.values) {
+      final locale = language.locale;
+      if (locale == null || locale.languageCode == 'en') continue;
+      final table = tables['${locale.languageCode}_${locale.countryCode}'];
+      expect(table, isNotNull, reason: '$language has no table');
+      expect(table!.keys.toSet(), keys, reason: '$language keys');
+      for (final e in table.entries) {
+        expect(e.value.trim(), isNotEmpty, reason: '$language ${e.key}');
+        for (final m in RegExp(r'@\w+').allMatches(e.key)) {
+          expect(e.value, contains(m[0]), reason: '$language "${e.key}"');
+        }
+      }
+    }
+  });
+
+  test('System picks the phone language when the app has it', () {
+    expect(
+      LanguageService.resolve(AppLanguage.system, const Locale('es', 'MX')),
+      AppLanguage.spanish.locale,
+    );
+    expect(
+      LanguageService.resolve(AppLanguage.system, const Locale('pt', 'PT')),
+      AppLanguage.portuguese.locale,
+    );
+    expect(
+      LanguageService.resolve(AppLanguage.system, const Locale('ar', 'EG')),
+      AppLanguage.arabic.locale,
+    );
+    expect(AppLanguage.arabic.isRtl, isTrue);
+    expect(AppLanguage.hindi.isRtl, isFalse);
+  });
+
+  testWidgets(
+    'language screen lists every language and shows Arabic right to left',
+    (tester) async {
+      await tester.pumpWidget(const GpsCameraApp());
+      await tester.pumpAndSettle();
+      unawaited(Get.to<void>(() => const LanguageView()));
+      await tester.pumpAndSettle();
+      for (final language in AppLanguage.values.skip(1)) {
+        await tester.scrollUntilVisible(
+          find.text(language.label).first,
+          80,
+          scrollable: find
+              .descendant(
+                of: find.byType(LanguageView),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+        expect(find.text(language.label), findsWidgets);
+      }
+
+      await switchTo(tester, AppLanguage.arabic);
+      expect(Get.find<LanguageService>().language.value, AppLanguage.arabic);
+      expect(GetStorage().read<String>(StorageKeys.language), 'arabic');
+      // Arabic screens are laid out right to left.
+      expect(
+        Directionality.of(tester.element(find.byType(LanguageView))),
+        TextDirection.rtl,
+      );
+      await switchTo(tester, AppLanguage.system);
+    },
+  );
 }
 
 String _reportDate(DateTime day) => CaptureTimeFormatter.date(day);

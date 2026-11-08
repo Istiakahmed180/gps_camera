@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/app_language.dart';
+import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
@@ -19,20 +21,36 @@ class OnboardingView extends GetView<OnboardingController> {
             constraints: const BoxConstraints(maxWidth: 560),
             child: Column(
               children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Obx(
-                    () => AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: controller.isLastPage ? 0 : 1,
-                      child: TextButton(
-                        onPressed: controller.isLastPage
-                            ? null
-                            : () => controller.finish(),
-                        child: Text('Skip'.tr),
+                Row(
+                  children: [
+                    // Choose a language before reading the rest.
+                    Obx(
+                      () => TextButton.icon(
+                        onPressed: () => Get.toNamed<void>(AppRoutes.language),
+                        icon: const Icon(Icons.translate_rounded, size: 20),
+                        label: Text(
+                          (Get.find<LanguageService>().language.value ==
+                                      AppLanguage.system
+                                  ? Get.find<LanguageService>().phoneLanguage
+                                  : Get.find<LanguageService>().language.value)
+                              .label,
+                        ),
                       ),
                     ),
-                  ),
+                    const Spacer(),
+                    Obx(
+                      () => AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        opacity: controller.isLastPage ? 0 : 1,
+                        child: TextButton(
+                          onPressed: controller.isLastPage
+                              ? null
+                              : () => controller.finish(),
+                          child: Text('Skip'.tr),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 Expanded(
                   child: PageView(

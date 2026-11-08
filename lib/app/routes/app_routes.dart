@@ -20,6 +20,7 @@ abstract final class AppRoutes {
   /// Argument: project id.
   static const String projectAddPhotos = '/projects/add-photos';
   static const String settings = '/settings';
+  static const String language = '/settings/language';
   static const String reports = '/reports';
 
   /// Argument: the original photo's file path.

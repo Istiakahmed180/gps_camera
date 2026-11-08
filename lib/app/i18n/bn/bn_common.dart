@@ -33,4 +33,7 @@ const Map<String, String> bnCommon = {
   'Adding photo @done of @total': 'ছবি যোগ হচ্ছে (@done/@total)',
   'AM': 'AM',
   'PM': 'PM',
+  'Phone language': 'ফোনের ভাষা',
+  'Follows the phone: now @language': 'ফোন অনুযায়ী: এখন @language',
+  '@language (phone language)': '@language (ফোনের ভাষা)',
 };

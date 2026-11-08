@@ -61,6 +61,8 @@ class SettingsController extends GetxController {
 
   Rx<AppLanguage> get language => Get.find<LanguageService>().language;
 
+  AppLanguage get phoneLanguage => Get.find<LanguageService>().phoneLanguage;
+
   Future<void> setLanguage(AppLanguage value) =>
       Get.find<LanguageService>().setLanguage(value);
 

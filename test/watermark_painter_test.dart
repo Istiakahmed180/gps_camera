@@ -119,4 +119,36 @@ void main() {
     expect(opaque, greaterThan(overlay.width * overlay.height ~/ 2));
     painter.dispose();
   });
+  test('right-to-left languages mirror the layout', () async {
+    final recorder = PictureRecorder();
+    Canvas(recorder).drawRect(
+      const Rect.fromLTWH(0, 0, 8, 8),
+      Paint()..color = const Color(0xFF00FF00),
+    );
+    final map = await recorder.endRecording().toImage(8, 8);
+    WatermarkPainter make({required bool rtl}) => WatermarkPainter(
+      content: content,
+      config: const WatermarkConfig(template: WatermarkTemplate.map),
+      imageSize: image,
+      mapImage: map,
+      rtl: rtl,
+    );
+    final ltr = make(rtl: false);
+    final rtl = make(rtl: true);
+    expect(rtl.bounds.left, closeTo(ltr.bounds.left, 0.01));
+    expect(rtl.bounds.width, closeTo(ltr.bounds.width, 0.01));
+    expect(ltr.mapRect!.center.dx, lessThan(ltr.bounds.center.dx));
+    expect(rtl.mapRect!.center.dx, greaterThan(rtl.bounds.center.dx));
+    expect(
+      rtl.mapRect!.right - rtl.bounds.left,
+      closeTo(ltr.bounds.right - ltr.mapRect!.left, 0.01),
+    );
+    // Draws without errors.
+    final out = PictureRecorder();
+    rtl.paint(Canvas(out));
+    out.endRecording().dispose();
+    ltr.dispose();
+    rtl.dispose();
+    map.dispose();
+  });
 }

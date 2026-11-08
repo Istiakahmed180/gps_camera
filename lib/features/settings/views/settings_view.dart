@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gps_camera/app/i18n/app_language.dart';
+import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/constants/app_constants.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
@@ -63,36 +64,25 @@ class SettingsView extends GetView<SettingsController> {
                           onChanged: controller.changeThemeMode,
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.xl),
-                      Text('Language'.tr, style: context.text.titleMedium),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        'Text in the app and on new watermarks. PDF reports '
-                                'stay in English.'
-                            .tr,
-                        style: context.text.bodySmall,
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      Obx(
-                        () => SegmentedButton<AppLanguage>(
-                          showSelectedIcon: false,
-                          segments: [
-                            for (final l in AppLanguage.values)
-                              ButtonSegment(
-                                value: l,
-                                label: Text(
-                                  l == AppLanguage.system
-                                      ? l.label.tr
-                                      : l.label,
-                                ),
-                              ),
-                          ],
-                          selected: {controller.language.value},
-                          onSelectionChanged: (s) =>
-                              controller.setLanguage(s.first),
-                        ),
-                      ),
                     ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Card(
+                child: Obx(
+                  () => ListTile(
+                    leading: const Icon(Icons.translate_rounded),
+                    title: Text('Language'.tr),
+                    subtitle: Text(
+                      controller.language.value == AppLanguage.system
+                          ? '@language (phone language)'.trParams({
+                              'language': controller.phoneLanguage.label,
+                            })
+                          : controller.language.value.label,
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => Get.toNamed<void>(AppRoutes.language),
                   ),
                 ),
               ),

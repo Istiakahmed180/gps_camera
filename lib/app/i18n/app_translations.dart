@@ -1,5 +1,10 @@
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/ar/ar.dart';
 import 'package:gps_camera/app/i18n/bn/bn.dart';
+import 'package:gps_camera/app/i18n/es/es.dart';
+import 'package:gps_camera/app/i18n/hi/hi.dart';
+import 'package:gps_camera/app/i18n/id/id.dart';
+import 'package:gps_camera/app/i18n/pt/pt.dart';
 
 /// UI text. Keys are the English text itself, so English needs no table:
 /// a key without a translation is shown as is.
@@ -8,10 +13,19 @@ import 'package:gps_camera/app/i18n/bn/bn.dart';
 /// * Wrap every user-facing string: `'Open camera'.tr`.
 /// * Values: `'Adding photo @done of @total'.trParams({...})`.
 /// * Counts: `'@n photo'.trPluralParams('@n photos', n, {'n': '$n'})`;
-///   Bangla has one form, so both keys map to the same text.
+///   languages with one form map both keys to the same text.
 /// * PDF reports and CSV exports stay in English (the PDF library cannot
-///   shape Bangla script), so never translate text used only there.
+///   shape Bangla, Hindi or Arabic script), so never translate text used
+///   only there.
+/// * Every new key needs an entry in each table below.
 class AppTranslations extends Translations {
   @override
-  Map<String, Map<String, String>> get keys => {'bn_BD': bn};
+  Map<String, Map<String, String>> get keys => {
+    'bn_BD': bn,
+    'hi_IN': hi,
+    'id_ID': id,
+    'es_ES': es,
+    'pt_BR': pt,
+    'ar_SA': ar,
+  };
 }

@@ -52,9 +52,21 @@ class WatermarkPainter {
     this.mapImage,
     this.reserveMapSlot = false,
     this.logoImage,
-  }) {
+    bool? rtl,
+  }) : rtl = rtl ?? isRtlLanguage() {
     _layout();
   }
+
+  /// Lays the watermark out right to left (Arabic): text right-aligned,
+  /// map, logo, labels and accent bar on the right.
+  final bool rtl;
+
+  /// Whether the app's current language is written right to left.
+  static bool isRtlLanguage() => Get.locale?.languageCode == 'ar';
+
+  /// [x]..[x]+[width] mirrored inside [bounds] when [rtl].
+  double _x(double x, double width) =>
+      rtl ? bounds.left + bounds.right - x - width : x;
 
   /// The user's logo, drawn beside the heading when [WatermarkConfig.showLogo]
   /// is on. Ignored by the Minimal template.
@@ -114,7 +126,7 @@ class WatermarkPainter {
         ..save()
         ..clipRRect(panel)
         ..drawRect(
-          Rect.fromLTWH(bounds.left, bounds.top, _bar, bounds.height),
+          Rect.fromLTWH(_x(bounds.left, _bar), bounds.top, _bar, bounds.height),
           Paint()..color = AppColors.accent,
         )
         ..restore();
@@ -143,6 +155,7 @@ class WatermarkPainter {
       canvas.restore();
     }
 
+    // Positions are worked out left to right, then mirrored by [_x].
     final textLeft =
         bounds.left + _bar + _padH + (map == null ? 0 : _mapSide + _mapGap);
     var y = bounds.top + _padV;
@@ -150,11 +163,17 @@ class WatermarkPainter {
       if (index > 0) y += _gap;
       final label = row.label;
       if (label != null) {
-        label.paint(canvas, Offset(textLeft, y + (row.height - label.height)));
+        label.paint(
+          canvas,
+          Offset(
+            _x(textLeft, label.width),
+            y + (row.height - label.height),
+          ),
+        );
         row.value.paint(
           canvas,
           Offset(
-            textLeft + _labelWidth + _labelGap,
+            _x(textLeft + _labelWidth + _labelGap, row.value.width),
             y + (row.height - row.value.height),
           ),
         );
@@ -162,7 +181,7 @@ class WatermarkPainter {
         final logo = logoImage;
         if (row.logoSide > 0 && logo != null) {
           final box = Rect.fromLTWH(
-            textLeft,
+            _x(textLeft, row.logoSide),
             y + (row.height - row.logoSide) / 2,
             row.logoSide,
             row.logoSide,
@@ -177,7 +196,7 @@ class WatermarkPainter {
         row.value.paint(
           canvas,
           Offset(
-            textLeft + row.logoWidth,
+            _x(textLeft + row.logoWidth, row.value.width),
             y + (row.height - row.value.height) / 2,
           ),
         );
@@ -297,7 +316,7 @@ class WatermarkPainter {
     bounds = Rect.fromLTWH(left, top, width, height);
     if (withMap) {
       mapRect = Rect.fromLTWH(
-        left + _padH,
+        _x(left + _padH, _mapSide),
         top + (height - _mapSide) / 2,
         _mapSide,
         _mapSide,
@@ -514,10 +533,10 @@ class WatermarkPainter {
     height: 1.25,
   );
 
-  static TextPainter _text(String text, TextStyle style, double maxWidth) {
+  TextPainter _text(String text, TextStyle style, double maxWidth) {
     return TextPainter(
       text: TextSpan(text: text, style: style),
-      textDirection: TextDirection.ltr,
+      textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
       textScaler: TextScaler.noScaling,
       maxLines: 2,
       ellipsis: '…',
