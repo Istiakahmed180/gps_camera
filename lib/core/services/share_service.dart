@@ -26,8 +26,13 @@ class ShareService extends GetxService {
 
   final ShareInvoker? _share;
 
+  /// Shares one photo or video.
   Future<ShareOutcome> shareImage(File file, {Rect? origin}) =>
-      shareFile(file, mimeType: 'image/jpeg', origin: origin);
+      shareFile(file, mimeType: mediaTypeOf(file.path), origin: origin);
+
+  /// `video/mp4` for videos, `image/jpeg` for photos.
+  static String mediaTypeOf(String path) =>
+      path.toLowerCase().endsWith('.mp4') ? 'video/mp4' : 'image/jpeg';
 
   /// Shares several photos in one share sheet. Missing files are skipped;
   /// [ShareOutcome.missingFile] only when none are left.
@@ -39,7 +44,9 @@ class ShareService extends GetxService {
     if (present.isEmpty) return ShareOutcome.missingFile;
     try {
       final params = ShareParams(
-        files: [for (final f in present) XFile(f.path, mimeType: 'image/jpeg')],
+        files: [
+          for (final f in present) XFile(f.path, mimeType: mediaTypeOf(f.path)),
+        ],
         sharePositionOrigin: origin,
       );
       final result = await (_share ?? SharePlus.instance.share)(params);

@@ -12,11 +12,11 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <!-- Declared by the camera plugin but not used: photos are saved to
-         app-private storage and audio is never recorded. -->
-    <uses-permission
-        android:name="android.permission.RECORD_AUDIO"
-        tools:node="remove" />
+    <!-- Sound for videos; asked for the first time video mode is used. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Declared by the camera plugin but not used: captures are saved to
+         app-private storage. -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:node="remove" />

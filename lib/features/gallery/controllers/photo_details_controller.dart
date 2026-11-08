@@ -2,6 +2,11 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:get/get.dart';
+import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
+import 'package:gps_camera/features/watermark/services/watermark_renderer.dart';
+import 'package:gps_camera/features/video/services/video_stamp_service.dart';
+import 'package:gps_camera/features/export/services/gallery_export_service.dart';
+import 'package:gps_camera/core/services/storage_service.dart';
 import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/core/services/share_service.dart';
 import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
@@ -119,10 +124,63 @@ class PhotoDetailsController extends GetxController {
   }
 
   /// Only originals can be watermarked; copies never become a source.
+  /// A video gets a new stamped copy with the current watermark settings.
   Future<void> openWatermarkEditor() async {
     if (!photo.isOriginal) return;
+    if (photo.isVideo) {
+      await stampVideo();
+      return;
+    }
     await Get.toNamed<void>(AppRoutes.watermark, arguments: photo.path);
     await _library.reload();
+  }
+
+  /// This video is being stamped (after capture, here or by recovery), so
+  /// it must not be deleted yet. Reactive inside Obx.
+  bool get isBeingStamped =>
+      photo.isVideo &&
+      Get.isRegistered<VideoStampService>() &&
+      Get.find<VideoStampService>().busyWith.value == photo.path;
+
+  /// 0 to 1 while this video is being stamped.
+  final Rxn<double> stampProgress = Rxn<double>();
+
+  /// Message about the last stamp attempt, for a snack bar.
+  final Rxn<(String, bool)> stampResult = Rxn<(String, bool)>();
+
+  /// Makes a stamped copy of this video with the current settings.
+  Future<void> stampVideo() async {
+    final metadata = photo.metadata;
+    if (!photo.isVideo || metadata == null || isBusy.value) return;
+    final stamper = Get.find<VideoStampService>();
+    isBusy.value = true;
+    final progress = ever<double?>(stamper.progress, (p) {
+      stampProgress.value = p;
+    });
+    try {
+      final result = await stamper.stamp(
+        original: photo.file,
+        metadata: metadata,
+        config: WatermarkSettingsStore(Get.find<StorageService>()).load(),
+      );
+      if (Get.isRegistered<GalleryExportService>()) {
+        await Get.find<GalleryExportService>().exportEdited(
+          result.output,
+          takenAt: metadata.capturedAt,
+        );
+      }
+      stampResult.value = ('Stamped video saved'.tr, false);
+      await _library.reload();
+    } on WatermarkException catch (e) {
+      stampResult.value = (
+        'Stamped video not saved: @error'.trParams({'error': e.message}),
+        true,
+      );
+    } finally {
+      progress.dispose();
+      stampProgress.value = null;
+      isBusy.value = false;
+    }
   }
 
   Future<void> openRelated(GalleryPhoto other) => _library.openPhoto(other);

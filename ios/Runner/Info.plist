@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>To record sound with your videos.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>GPS Camera uses the camera to capture photos for your site documentation.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

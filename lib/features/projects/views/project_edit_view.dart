@@ -9,6 +9,7 @@ import 'package:gps_camera/features/projects/services/project_repository.dart';
 import 'package:gps_camera/shared/widgets/app_button.dart';
 import 'package:gps_camera/shared/widgets/responsive_center.dart';
 import 'package:gps_camera/shared/widgets/section_header.dart';
+import 'package:gps_camera/shared/widgets/media_thumbnail.dart';
 
 class ProjectEditView extends GetView<ProjectEditController> {
   const ProjectEditView({super.key});
@@ -133,11 +134,9 @@ class _Thumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.file(
-      photo.file,
-      fit: BoxFit.cover,
+    return MediaThumbnail(
+      photo.path,
       cacheWidth: (88 * MediaQuery.devicePixelRatioOf(context)).round(),
-      errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined),
     );
   }
 }

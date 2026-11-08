@@ -10,8 +10,12 @@ import 'package:path_provider/path_provider.dart';
 ///
 /// * `Photos/IMG_<timestamp>.jpg` — original captures, never modified.
 /// * `Photos/IMG_<timestamp>.json` — capture metadata sidecar.
-/// * `Watermarked/IMG_<timestamp>_wm[_n].jpg` — rendered copies, each with a
-///   `.json` render record naming its original.
+/// * `Photos/VID_<timestamp>.mp4` — recorded videos, with the same `.json`
+///   sidecar (plus video details).
+/// * `Watermarked/IMG_<timestamp>_wm[_n].jpg` (or `VID_…_wm.mp4`) — stamped
+///   copies, each with a `.json` render record naming its original.
+/// * `Thumbnails/<video name>.jpg` — a frame of each video, made on demand
+///   and safe to delete.
 class PhotoStorageService extends GetxService {
   static const String _rootFolder = 'GPSCamera';
   static const String _photosFolder = 'Photos';
@@ -19,6 +23,7 @@ class PhotoStorageService extends GetxService {
   static const String _reportsFolder = 'Reports';
   static const String _mapsFolder = 'Maps';
   static const String _brandingFolder = 'Branding';
+  static const String _thumbnailsFolder = 'Thumbnails';
 
   /// `<ApplicationDocuments>/GPSCamera`. Database rows store photo paths
   /// relative to this folder.
@@ -68,6 +73,15 @@ class PhotoStorageService extends GetxService {
   Future<File> mapImageFor(File photo) async =>
       File('${(await mapsDirectory()).path}/${mapImageNameFor(photo.path)}');
 
+  /// Video thumbnails; a cache that is rebuilt when missing.
+  Future<Directory> thumbnailsDirectory() => _directory(_thumbnailsFolder);
+
+  /// The thumbnail for the video at [videoPath], whether or not it exists.
+  Future<File> thumbnailFileFor(String videoPath) async => File(
+    '${(await thumbnailsDirectory()).path}/'
+    '${videoPath.substring(videoPath.lastIndexOf('/') + 1)}.jpg',
+  );
+
   /// Generated PDF reports, each with a `.json` record.
   Future<Directory> reportsDirectory() => _directory(_reportsFolder);
 
@@ -103,6 +117,28 @@ class PhotoStorageService extends GetxService {
   Future<File> savePhoto(XFile capture, {DateTime? capturedAt}) async {
     final directory = await photosDirectory();
     final target = await _uniqueFile(directory, capturedAt ?? DateTime.now());
+    return _copyCapture(capture, target);
+  }
+
+  /// Like [savePhoto], for a recorded video: `Photos/VID_<timestamp>.mp4`,
+  /// named after the time recording started.
+  Future<File> saveVideo(XFile capture, {required DateTime startedAt}) async {
+    final directory = await photosDirectory();
+    final target = await _uniqueFile(
+      directory,
+      startedAt,
+      prefix: 'VID',
+      extension: 'mp4',
+    );
+    return _copyCapture(capture, target);
+  }
+
+  /// While a video records: its start time, location and track, so it can
+  /// be recovered if Android closes the app before it is saved.
+  Future<File> recordingJournalFile() async =>
+      File('${(await rootDirectory()).path}/recording.json');
+
+  Future<File> _copyCapture(XFile capture, File target) async {
     final source = File(capture.path);
 
     await capture.saveTo(target.path);
@@ -111,7 +147,7 @@ class PhotoStorageService extends GetxService {
     if (sourceLength == 0 ||
         !await target.exists() ||
         await target.length() != sourceLength) {
-      throw FileSystemException('Captured photo was not written', target.path);
+      throw FileSystemException('Capture was not written', target.path);
     }
 
     await _deleteTemporary(source);
@@ -174,9 +210,12 @@ class PhotoStorageService extends GetxService {
       RegExp(r'\.[^.]*$'),
       '',
     );
+    final name = original.uri.pathSegments.last;
+    final dot = name.lastIndexOf('.');
+    final extension = dot > 0 ? name.substring(dot + 1).toLowerCase() : 'jpg';
     for (var suffix = 0; ; suffix++) {
       final name = suffix == 0 ? '${base}_wm' : '${base}_wm_$suffix';
-      final candidate = File('${directory.path}/$name.jpg');
+      final candidate = File('${directory.path}/$name.$extension');
       if (await metadataFileFor(candidate).exists()) continue;
       try {
         await candidate.create(exclusive: true);
@@ -202,13 +241,18 @@ class PhotoStorageService extends GetxService {
     }
   }
 
-  Future<File> _uniqueFile(Directory directory, DateTime time) async {
-    final baseName = 'IMG_${_timestamp(time)}';
-    var candidate = File('${directory.path}/$baseName.jpg');
+  Future<File> _uniqueFile(
+    Directory directory,
+    DateTime time, {
+    String prefix = 'IMG',
+    String extension = 'jpg',
+  }) async {
+    final baseName = '${prefix}_${_timestamp(time)}';
+    var candidate = File('${directory.path}/$baseName.$extension');
     var suffix = 1;
     while (await candidate.exists() ||
         await metadataFileFor(candidate).exists()) {
-      candidate = File('${directory.path}/${baseName}_$suffix.jpg');
+      candidate = File('${directory.path}/${baseName}_$suffix.$extension');
       suffix++;
     }
     return candidate;

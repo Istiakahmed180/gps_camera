@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/features/camera/models/video_details.dart';
 import 'package:gps_camera/core/utils/script.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
@@ -46,6 +47,22 @@ class PhotoDetailsPanel extends StatelessWidget {
                   _Row('Time zone', metadata.timeZoneName),
                 ],
         ),
+        if (metadata?.video case final video?)
+          _Section(
+            title: 'Video',
+            rows: [
+              _Row('Length', formatVideoDuration(video.duration)),
+              _Row('Sound', video.hasAudio ? 'Recorded'.tr : 'Not recorded'.tr),
+              _Row(
+                'Location track',
+                video.track.length < 2
+                    ? 'Start location only'.tr
+                    : 'Every second · @n points'.trParams({
+                        'n': '${video.track.length}',
+                      }),
+              ),
+            ],
+          ),
         if (metadata != null)
           _LocationSection(location: metadata.location, place: metadata.place),
         if (metadata?.direction != null)

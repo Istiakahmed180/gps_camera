@@ -402,8 +402,10 @@ class BackupService {
     }
   }
 
+  /// An original photo or video (videos live in `Photos/` too).
   static bool _isOriginalPhoto(String ref) =>
-      ref.startsWith('Photos/') && ref.endsWith('.jpg');
+      ref.startsWith('Photos/') &&
+      (ref.endsWith('.jpg') || ref.endsWith('.mp4'));
 
   static String _fileName(DateTime t) {
     String two(int v) => v.toString().padLeft(2, '0');

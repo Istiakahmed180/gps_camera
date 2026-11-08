@@ -30,13 +30,19 @@ abstract final class CaptureTimeFormatter {
       '${wallClock.year}';
 
   /// `10:02 AM`, or `10:02` / `22:02` when 24-hour time is chosen.
-  static String time(DateTime wallClock, {bool? use24Hour}) {
+  /// [seconds] adds `:ss`, for the live stamp on videos.
+  static String time(
+    DateTime wallClock, {
+    bool? use24Hour,
+    bool seconds = false,
+  }) {
+    final ss = seconds ? ':${_two(wallClock.second)}' : '';
     if (use24Hour ?? DisplayFormat.current.use24Hour) {
-      return '${_two(wallClock.hour)}:${_two(wallClock.minute)}';
+      return '${_two(wallClock.hour)}:${_two(wallClock.minute)}$ss';
     }
     final hour = wallClock.hour % 12 == 0 ? 12 : wallClock.hour % 12;
     final period = (wallClock.hour < 12 ? 'AM' : 'PM').tr;
-    return '${_two(hour)}:${_two(wallClock.minute)} $period';
+    return '${_two(hour)}:${_two(wallClock.minute)}$ss $period';
   }
 
   /// `UTC+06:00`, `UTC-03:30`, or `UTC`.

@@ -65,7 +65,10 @@ class WatermarkContent {
 
     return WatermarkContent(
       date: config.showDate ? CaptureTimeFormatter.date(wallClock) : null,
-      time: config.showTime ? CaptureTimeFormatter.time(wallClock) : null,
+      // A video's stamp ticks every second.
+      time: config.showTime
+          ? CaptureTimeFormatter.time(wallClock, seconds: metadata.isVideo)
+          : null,
       timeZone: config.showTime
           ? CaptureTimeFormatter.utcOffset(metadata.timeZoneOffset)
           : null,
@@ -134,6 +137,28 @@ class WatermarkContent {
 
   /// `45° NE`: which way the camera faced.
   final String? direction;
+
+  /// Everything the stamp shows, so two moments of a video that would look
+  /// the same can share one image.
+  String get signature => [
+    date,
+    time,
+    timeZone,
+    locationState?.name,
+    latitude,
+    longitude,
+    accuracy,
+    accuracyLevel?.name,
+    fixAge?.inSeconds,
+    address,
+    placeTitle,
+    flag,
+    plusCode,
+    brand,
+    customText,
+    note,
+    direction,
+  ].join('\u0000');
 
   /// True when a map of the capture location may be shown.
   bool get canShowMap =>

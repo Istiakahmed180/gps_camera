@@ -97,14 +97,16 @@ GalleryIndex scanGallery(String photosDir, String watermarkedDir) {
   );
 }
 
-/// `IMG_x_wm.jpg` / `IMG_x_wm_3.jpg` → `IMG_x.jpg`, for records that are
-/// missing or unreadable.
+/// `IMG_x_wm.jpg` / `IMG_x_wm_3.jpg` → `IMG_x.jpg` (and `VID_x_wm.mp4` →
+/// `VID_x.mp4`), for records that are missing or unreadable.
 String? sourceNameFromOutput(String outputName) {
   final match = RegExp(
-    r'^(.+)_wm(?:_\d+)?\.jpe?g$',
+    r'^(.+)_wm(?:_\d+)?\.(jpe?g|mp4)$',
     caseSensitive: false,
   ).firstMatch(outputName);
-  return match == null ? null : '${match.group(1)}.jpg';
+  if (match == null) return null;
+  final video = match.group(2)!.toLowerCase() == 'mp4';
+  return '${match.group(1)}.${video ? 'mp4' : 'jpg'}';
 }
 
 class ImageDimensions {
@@ -131,7 +133,8 @@ ImageDimensions? readJpegDimensions(String path) {
   }
 }
 
-/// Null when the folder exists but cannot be listed.
+/// Photos and videos in [dir]. Null when the folder exists but cannot be
+/// listed.
 List<File>? _images(String dir) {
   final directory = Directory(dir);
   if (!directory.existsSync()) return const [];
@@ -140,7 +143,8 @@ List<File>? _images(String dir) {
         .listSync(followLinks: false)
         .whereType<File>()
         .where(
-          (f) => RegExp(r'\.jpe?g$', caseSensitive: false).hasMatch(f.path),
+          (f) =>
+              RegExp(r'\.(jpe?g|mp4)$', caseSensitive: false).hasMatch(f.path),
         )
         .toList();
   } on FileSystemException {

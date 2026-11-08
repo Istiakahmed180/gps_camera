@@ -10,6 +10,9 @@ abstract final class AppColors {
 
   static const Color success = Color(0xFF2E9E6A);
   static const Color warning = Color(0xFFE0A100);
+
+  /// The record button and recording badge.
+  static const Color recording = Color(0xFFE53935);
   static const Color errorLight = Color(0xFFC93C3C);
   static const Color errorDark = Color(0xFFFF8A80);
 

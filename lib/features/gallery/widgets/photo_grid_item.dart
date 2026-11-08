@@ -6,6 +6,7 @@ import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
 import 'package:gps_camera/features/gallery/utils/photo_info_formatter.dart';
+import 'package:gps_camera/shared/widgets/media_thumbnail.dart';
 
 class PhotoGridItem extends StatelessWidget {
   const PhotoGridItem({
@@ -35,9 +36,12 @@ class PhotoGridItem extends StatelessWidget {
         ? ('No capture data'.tr, null)
         : PhotoInfoFormatter.captureParts(metadata);
     final caption = time == null ? date : '$date · $time';
-    final label = photo.isOriginal
-        ? 'Original photo, @caption'.trParams({'caption': caption})
-        : 'Watermarked photo, @caption'.trParams({'caption': caption});
+    final label = switch ((photo.isOriginal, photo.isVideo)) {
+      (true, false) => 'Original photo, @caption',
+      (false, false) => 'Watermarked photo, @caption',
+      (true, true) => 'Original video, @caption',
+      (false, true) => 'Stamped video, @caption',
+    }.trParams({'caption': caption});
 
     return Semantics(
       button: true,
@@ -53,16 +57,11 @@ class PhotoGridItem extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.file(
-                photo.file,
+              MediaThumbnail(
+                photo.path,
                 key: ValueKey('${photo.path}:${photo.modifiedAt}'),
-                fit: BoxFit.cover,
                 cacheWidth: decodeWidth,
-                gaplessPlayback: true,
-                errorBuilder: (_, _, _) => Icon(
-                  Icons.broken_image_outlined,
-                  color: context.colors.onSurfaceVariant,
-                ),
+                duration: photo.videoDuration,
               ),
               const DecoratedBox(
                 decoration: BoxDecoration(

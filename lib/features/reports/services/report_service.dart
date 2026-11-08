@@ -6,6 +6,7 @@ import 'dart:ui' show Locale;
 
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/features/video/services/video_service.dart';
 import 'package:gps_camera/features/location/services/static_map_service.dart';
 import 'package:gps_camera/features/reports/models/report_map.dart';
 import 'package:gps_camera/core/settings/display_format.dart';
@@ -103,7 +104,8 @@ class ReportService extends GetxService {
     File? target;
     File? temp;
     try {
-      job = (await _withOverviewMap(job)).withLanguage(currentLanguage());
+      job = (await _withOverviewMap(await _withVideoStills(job)))
+          .withLanguage(currentLanguage());
       final fonts = await _fonts();
       target = await _storage.reserveReportFile(baseNameFor(job));
       temp = File('${target.path}.tmp');
@@ -268,6 +270,24 @@ class ReportService extends GetxService {
         .replaceAll(RegExp(r'^-+|-+$'), '');
     if (slug.isEmpty) return 'Project';
     return slug.length > 40 ? slug.substring(0, 40) : slug;
+  }
+
+  /// Videos are shown in the report by a frame of each.
+  Future<ReportJob> _withVideoStills(ReportJob job) async {
+    if (!job.entries.any((e) => e.images.any((i) => i.isVideo))) return job;
+    final video = Get.isRegistered<VideoService>()
+        ? Get.find<VideoService>()
+        : null;
+    if (video == null) return job;
+    return job.withEntries([
+      for (final entry in job.entries)
+        entry.withImages([
+          for (final image in entry.images)
+            image.isVideo
+                ? image.withStill((await video.thumbnail(image.path))?.path)
+                : image,
+        ]),
+    ]);
   }
 
   /// The app language now, with its text, for the rendering isolate.

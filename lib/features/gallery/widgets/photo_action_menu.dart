@@ -17,7 +17,16 @@ class PhotoActionBar extends StatelessWidget {
     required this.onShare,
     required this.onWatermark,
     required this.onOpenOriginal,
+    this.isVideo = false,
+    this.stampProgress,
   });
+
+  /// A video: the second button makes a stamped copy instead of opening
+  /// the watermark editor.
+  final bool isVideo;
+
+  /// 0 to 1 while the video is being stamped.
+  final double? stampProgress;
 
   final bool isOriginal;
   final bool hasSource;
@@ -54,8 +63,16 @@ class PhotoActionBar extends StatelessWidget {
               Expanded(
                 child: isOriginal
                     ? AppButton(
-                        label: 'Add watermark'.tr,
-                        icon: Icons.branding_watermark_outlined,
+                        label: !isVideo
+                            ? 'Add watermark'.tr
+                            : stampProgress == null
+                            ? 'Stamp video'.tr
+                            : 'Stamping @percent%'.trParams({
+                                'percent': '${(stampProgress! * 100).round()}',
+                              }),
+                        icon: isVideo
+                            ? Icons.video_settings_outlined
+                            : Icons.branding_watermark_outlined,
                         isExpanded: true,
                         onPressed: isBusy ? null : onWatermark,
                       )

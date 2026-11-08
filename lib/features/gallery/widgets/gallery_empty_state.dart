@@ -44,6 +44,11 @@ class GalleryEmptyState extends StatelessWidget {
                     'watermarked copy.')
                 .tr,
       ),
+      GalleryFilter.videos => EmptyStateView(
+        icon: Icons.videocam_outlined,
+        title: 'No videos'.tr,
+        message: 'Switch the camera to Video to record one.'.tr,
+      ),
     };
   }
 }

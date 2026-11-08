@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:get/get.dart';
+import 'package:gps_camera/features/camera/models/video_details.dart';
 import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/core/utils/script.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
@@ -74,7 +75,11 @@ Future<ReportRenderStats> renderReportPdf(
   for (final (i, entry) in job.entries.indexed) {
     final entryImages = <(ReportImage, Uint8List?)>[];
     for (final image in entry.images) {
-      final bytes = _prepareImage(image.path, maxSide: large ? 640 : 900);
+      // A video without a still frame shows as missing; the video itself
+      // is never read.
+      final bytes = image.isVideo && image.stillPath == null
+          ? null
+          : _prepareImage(image.imagePath, maxSide: large ? 640 : 900);
       bytes == null ? missing++ : images++;
       entryImages.add((image, bytes));
     }
@@ -677,9 +682,12 @@ pw.Widget _images(List<(ReportImage, Uint8List?)> images, _Styles s, _Tx tx) {
               ),
               pw.SizedBox(height: 3),
               tx(
-                image.role == ReportImageRole.original
-                    ? 'Original'.tr
-                    : 'Watermarked'.tr,
+                switch ((image.role, image.isVideo)) {
+                  (ReportImageRole.original, false) => 'Original'.tr,
+                  (ReportImageRole.watermarked, false) => 'Watermarked'.tr,
+                  (ReportImageRole.original, true) => 'Original video'.tr,
+                  (ReportImageRole.watermarked, true) => 'Stamped video'.tr,
+                },
                 s.small.copyWith(
                   color: image.role == ReportImageRole.original
                       ? _Styles.muted
@@ -718,6 +726,8 @@ List<(String, String, bool)> reportEntryRows(
           : PhotoInfoFormatter.captureFull(metadata),
       false,
     ),
+    if (metadata?.video case final video?)
+      ('Video length'.tr, formatVideoDuration(video.duration), false),
     if (metadata?.note != null) ('Note'.tr, metadata!.note!, false),
     (
       'Original file'.tr,

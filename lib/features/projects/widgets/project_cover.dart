@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
+import 'package:gps_camera/shared/widgets/media_thumbnail.dart';
 
 /// A project's cover image, or a folder placeholder.
 class ProjectCover extends StatelessWidget {
@@ -26,15 +25,13 @@ class ProjectCover extends StatelessWidget {
     if (current == null) return placeholder;
 
     return LayoutBuilder(
-      builder: (context, constraints) => Image.file(
-        File(current),
-        fit: BoxFit.cover,
+      builder: (context, constraints) => MediaThumbnail(
+        current,
         cacheWidth: constraints.maxWidth.isFinite
             ? (constraints.maxWidth * MediaQuery.devicePixelRatioOf(context))
                   .round()
             : 400,
-        gaplessPlayback: true,
-        errorBuilder: (_, _, _) => placeholder,
+        showPlayMark: false,
       ),
     );
   }

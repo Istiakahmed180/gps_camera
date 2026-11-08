@@ -4,7 +4,8 @@ import 'package:gps_camera/features/projects/models/project.dart';
 enum GalleryFilter {
   all('All'),
   originals('Originals'),
-  watermarked('Watermarked');
+  watermarked('Watermarked'),
+  videos('Videos');
 
   const GalleryFilter(this.label);
 
@@ -14,6 +15,7 @@ enum GalleryFilter {
     GalleryFilter.all => true,
     GalleryFilter.originals => photo.isOriginal,
     GalleryFilter.watermarked => photo.isWatermarked,
+    GalleryFilter.videos => photo.isVideo,
   };
 }
 

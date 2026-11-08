@@ -13,6 +13,7 @@ import 'package:gps_camera/features/export/services/gallery_export_service.dart'
 import 'package:gps_camera/features/gallery/services/gallery_scanner.dart';
 import 'package:gps_camera/features/location/models/location_fix.dart';
 import 'package:gps_camera/features/location/models/place_info.dart';
+import 'package:gps_camera/features/video/services/video_stamp_service.dart';
 import 'package:gps_camera/features/watermark/services/watermark_renderer.dart';
 import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
 
@@ -32,7 +33,11 @@ class CaptureEnricher implements CapturePostProcessor {
     required this._grabMap,
     this._gallery,
     this._imageSize = readImageSize,
+    this._videoStamper,
   });
+
+  /// Makes stamped copies of videos; found through GetX when null.
+  final VideoStampService? _videoStamper;
 
   final PhotoStorageService _storage;
   final WatermarkRenderer _renderer;
@@ -125,6 +130,7 @@ class CaptureEnricher implements CapturePostProcessor {
     String? mapName,
     Uint8List? map,
   ) async {
+    if (metadata.isVideo) return _stampVideo(photo, metadata);
     try {
       final size = await _imageSize(photo.path);
       if (size == null) {
@@ -146,6 +152,35 @@ class CaptureEnricher implements CapturePostProcessor {
       );
     } catch (_) {
       return (null, 'Watermarked copy not saved'.tr);
+    }
+  }
+
+  /// The stamped copy of a video, with the stamp live for every second.
+  Future<(File?, String)> _stampVideo(
+    File video,
+    PhotoMetadata metadata,
+  ) async {
+    final stamper =
+        _videoStamper ??
+        (Get.isRegistered<VideoStampService>()
+            ? Get.find<VideoStampService>()
+            : null);
+    if (stamper == null) return (null, 'Stamped video not saved'.tr);
+    try {
+      final result = await stamper.stamp(
+        original: video,
+        metadata: metadata,
+        config: _settings.load(),
+        automatic: true,
+      );
+      return (result.output, 'Stamped video saved'.tr);
+    } on WatermarkException catch (e) {
+      return (
+        null,
+        'Stamped video not saved: @error'.trParams({'error': e.message}),
+      );
+    } catch (_) {
+      return (null, 'Stamped video not saved'.tr);
     }
   }
 

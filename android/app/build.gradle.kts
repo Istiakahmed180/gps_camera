@@ -65,4 +65,8 @@ flutter {
 dependencies {
     // FileProvider for opening report PDFs in other apps.
     implementation("androidx.core:core:1.13.1")
+    // Burns the location stamp into videos.
+    implementation("androidx.media3:media3-transformer:1.8.0")
+    implementation("androidx.media3:media3-effect:1.8.0")
+    implementation("androidx.media3:media3-common:1.8.0")
 }

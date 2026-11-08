@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
+import 'package:gps_camera/shared/widgets/media_thumbnail.dart';
 
 /// Preview of the most recent capture. Tapping it opens the watermark
 /// editor for that photo.
@@ -30,17 +29,7 @@ class LastPhotoThumbnail extends StatelessWidget {
       ),
       child: current == null
           ? null
-          : Image.file(
-              File(current),
-              key: ValueKey(current),
-              fit: BoxFit.cover,
-              cacheWidth: 160,
-              gaplessPlayback: true,
-              errorBuilder: (_, _, _) => const Icon(
-                Icons.broken_image_outlined,
-                color: AppColors.onViewfinderMuted,
-              ),
-            ),
+          : MediaThumbnail(current, key: ValueKey(current), cacheWidth: 160),
     );
 
     if (current == null || onTap == null) return frame;

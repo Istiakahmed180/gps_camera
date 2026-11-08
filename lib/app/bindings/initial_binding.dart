@@ -20,6 +20,8 @@ import 'package:gps_camera/features/watermark/services/logo_service.dart';
 import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
 import 'package:gps_camera/features/projects/services/project_repository.dart';
 import 'package:gps_camera/features/reports/services/report_service.dart';
+import 'package:gps_camera/features/video/services/video_service.dart';
+import 'package:gps_camera/features/video/services/video_stamp_service.dart';
 
 /// App-wide services that live for the whole session.
 /// Requires `GetStorage.init()` to have completed.
@@ -34,6 +36,17 @@ class InitialBinding extends Bindings {
     Get.lazyPut(PhotoStorageService.new, fenix: true);
     Get.lazyPut(ShareService.new, fenix: true);
     Get.lazyPut(MapCache.new, fenix: true);
+    Get.lazyPut(
+      () => VideoService(Get.find<PhotoStorageService>()),
+      fenix: true,
+    );
+    Get.lazyPut(
+      () => VideoStampService(
+        Get.find<PhotoStorageService>(),
+        Get.find<VideoService>(),
+      ),
+      fenix: true,
+    );
     Get.lazyPut(ProjectExportService.new, fenix: true);
     Get.lazyPut(() {
       final logo = LogoService(Get.find<PhotoStorageService>());

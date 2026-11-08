@@ -15,6 +15,8 @@ import 'package:gps_camera/features/projects/models/project.dart';
 import 'package:gps_camera/features/projects/widgets/project_picker_sheet.dart';
 import 'package:gps_camera/shared/widgets/note_dialog.dart';
 import 'package:gps_camera/shared/widgets/section_header.dart';
+import 'package:gps_camera/features/video/widgets/video_preview.dart';
+import 'package:gps_camera/shared/widgets/media_thumbnail.dart';
 
 class PhotoDetailsView extends GetView<PhotoDetailsController> {
   const PhotoDetailsView({super.key, required this.photo});
@@ -33,7 +35,7 @@ class PhotoDetailsView extends GetView<PhotoDetailsController> {
           Obx(
             () => IconButton(
               tooltip: 'Delete'.tr,
-              onPressed: controller.isBusy.value
+              onPressed: controller.isBusy.value || controller.isBeingStamped
                   ? null
                   : () => _delete(context),
               icon: const Icon(Icons.delete_outline_rounded),
@@ -92,8 +94,17 @@ class PhotoDetailsView extends GetView<PhotoDetailsController> {
           isOriginal: photo.isOriginal,
           hasSource: controller.source != null,
           isBusy: controller.isBusy.value,
+          isVideo: photo.isVideo,
+          stampProgress: controller.stampProgress.value,
           onShare: () => _share(context),
-          onWatermark: controller.openWatermarkEditor,
+          onWatermark: () async {
+            await controller.openWatermarkEditor();
+            final result = controller.stampResult.value;
+            controller.stampResult.value = null;
+            if (result != null && context.mounted) {
+              _snack(context, result.$1, isError: result.$2);
+            }
+          },
           onOpenOriginal: () {
             final source = controller.source;
             if (source != null) controller.openRelated(source);
@@ -137,7 +148,7 @@ class PhotoDetailsView extends GetView<PhotoDetailsController> {
       Get.until((route) => route.settings.name != AppRoutes.photoDetails);
       _snack(
         Get.context ?? context,
-        result.deleted.where((n) => n.endsWith('.jpg')).length > 1
+        result.removedPhotos.length > 1
             ? 'Photos deleted'.tr
             : 'Photo deleted'.tr,
       );
@@ -206,6 +217,18 @@ class _Preview extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final dpr = MediaQuery.devicePixelRatioOf(context);
+        if (photo.isVideo) {
+          return ColoredBox(
+            color: AppColors.viewfinderBackground,
+            child: VideoPreview(
+              key: ValueKey('${photo.path}:${photo.modifiedAt}'),
+              path: photo.path,
+              semanticLabel: photo.isOriginal
+                  ? 'Original video'.tr
+                  : 'Stamped video'.tr,
+            ),
+          );
+        }
         return ColoredBox(
           color: AppColors.viewfinderBackground,
           child: InteractiveViewer(
@@ -377,16 +400,14 @@ class _Related extends StatelessWidget {
                     onTap: () => controller.openRelated(item),
                     leading: ClipRRect(
                       borderRadius: AppRadius.smAll,
-                      child: Image.file(
-                        item.file,
-                        width: 48,
-                        height: 48,
-                        fit: BoxFit.cover,
-                        cacheWidth:
-                            (48 * MediaQuery.devicePixelRatioOf(context))
-                                .round(),
-                        errorBuilder: (_, _, _) =>
-                            const Icon(Icons.broken_image_outlined),
+                      child: SizedBox.square(
+                        dimension: 48,
+                        child: MediaThumbnail(
+                          item.path,
+                          cacheWidth:
+                              (48 * MediaQuery.devicePixelRatioOf(context))
+                                  .round(),
+                        ),
                       ),
                     ),
                     title: Text(

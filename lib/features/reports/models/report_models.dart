@@ -1,3 +1,4 @@
+import 'package:gps_camera/features/camera/models/video_details.dart';
 import 'package:gps_camera/core/settings/display_format.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
 import 'package:gps_camera/features/reports/models/report_map.dart';
@@ -21,11 +22,23 @@ class ReportImage {
     required this.path,
     required this.fileName,
     required this.role,
+    this.stillPath,
   });
 
   final String path;
   final String fileName;
   final ReportImageRole role;
+
+  /// For a video: a JPEG frame of it, shown in the report instead.
+  final String? stillPath;
+
+  bool get isVideo => isVideoPath(fileName);
+
+  /// The JPEG to place in the report.
+  String get imagePath => stillPath ?? path;
+
+  ReportImage withStill(String? still) =>
+      ReportImage(path: path, fileName: fileName, role: role, stillPath: still);
 }
 
 /// A watermarked version of the entry's photo, from its render record.
@@ -73,6 +86,17 @@ class ReportEntry {
 
   /// Selected watermarked copies that did not fit as images.
   final List<String> otherSelectedCopies;
+
+  ReportEntry withImages(List<ReportImage> value) => ReportEntry(
+    fileName: fileName,
+    originalAvailable: originalAvailable,
+    images: value,
+    metadata: metadata,
+    metadataProblem: metadataProblem,
+    watermarks: watermarks,
+    projectName: projectName,
+    otherSelectedCopies: otherSelectedCopies,
+  );
 }
 
 /// Everything needed to render a report. Plain data, so it can be sent to a
@@ -105,6 +129,21 @@ class ReportJob {
     format: format,
     map: map,
     mapUnavailable: unavailable,
+    language: language,
+  );
+
+  /// The same job with [value] as its entries.
+  ReportJob withEntries(List<ReportEntry> value) => ReportJob(
+    type: type,
+    title: title,
+    generatedAt: generatedAt,
+    entries: value,
+    projectId: projectId,
+    projectName: projectName,
+    projectDescription: projectDescription,
+    format: format,
+    map: map,
+    mapUnavailable: mapUnavailable,
     language: language,
   );
 

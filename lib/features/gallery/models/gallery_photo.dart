@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
+import 'package:gps_camera/features/camera/models/video_details.dart';
 import 'package:gps_camera/features/watermark/models/watermark_record.dart';
 
 enum GalleryPhotoKind { original, watermarked }
@@ -60,6 +61,12 @@ class GalleryPhoto {
   bool get isOriginal => kind == GalleryPhotoKind.original;
 
   bool get isWatermarked => kind == GalleryPhotoKind.watermarked;
+
+  /// A recorded video (or its stamped copy) rather than a photo.
+  bool get isVideo => isVideoPath(path);
+
+  /// Length of a video, when recorded.
+  Duration? get videoDuration => metadata?.video?.duration;
 
   DateTime? get capturedAt => metadata?.capturedAt;
 

@@ -42,10 +42,18 @@ class StorageUsage {
   final MapCache _mapCache;
 
   Future<StorageUsageReport> measure() async {
-    final photos = await _folder(await _storage.photosDirectory(), '.jpg');
-    final copies = await _folder(await _storage.watermarkedDirectory(), '.jpg');
-    final maps = await _folder(await _storage.mapsDirectory(), '.png');
-    final reports = await _folder(await _storage.reportsDirectory(), '.pdf');
+    final photos = await _folder(await _storage.photosDirectory(), const [
+      '.jpg',
+      '.mp4',
+    ]);
+    final copies = await _folder(await _storage.watermarkedDirectory(), const [
+      '.jpg',
+      '.mp4',
+    ]);
+    final maps = await _folder(await _storage.mapsDirectory(), const ['.png']);
+    final reports = await _folder(await _storage.reportsDirectory(), const [
+      '.pdf',
+    ]);
     final (cacheBytes, cacheCount) = await _mapCache.usage();
     return StorageUsageReport(
       photos: photos.$1,
@@ -62,15 +70,19 @@ class StorageUsage {
 
   Future<void> clearMapCache() => _mapCache.clear();
 
-  /// Total bytes in [dir], and how many files end with [countSuffix].
-  static Future<(int, int)> _folder(Directory dir, String countSuffix) async {
+  /// Bytes of every file in [dir], and how many end with one of
+  /// [countSuffixes].
+  static Future<(int, int)> _folder(
+    Directory dir,
+    List<String> countSuffixes,
+  ) async {
     var bytes = 0;
     var count = 0;
     try {
       await for (final entity in dir.list(followLinks: false)) {
         if (entity is! File) continue;
         bytes += await entity.length();
-        if (entity.path.endsWith(countSuffix)) count++;
+        if (countSuffixes.any(entity.path.endsWith)) count++;
       }
     } on FileSystemException {
       // An unreadable folder counts as empty.

@@ -9,7 +9,15 @@ class ShutterButton extends StatelessWidget {
     required this.onPressed,
     this.isCapturing = false,
     this.isCountingDown = false,
+    this.isVideo = false,
+    this.isRecording = false,
   });
+
+  /// Video mode: a red record button.
+  final bool isVideo;
+
+  /// Recording: a red stop square.
+  final bool isRecording;
 
   final VoidCallback? onPressed;
   final bool isCapturing;
@@ -20,6 +28,12 @@ class ShutterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = onPressed != null && !isCapturing;
+    final fill = isRecording || (isVideo && !isCapturing && !isCountingDown)
+        ? AppColors.recording
+        : isCapturing || isCountingDown
+        ? AppColors.accent
+        : AppColors.onViewfinder;
+    final innerScale = isRecording ? 0.45 : (isCapturing ? 0.7 : 1.0);
     const ring = 4.0;
     const gap = AppSpacing.xs + AppSpacing.xxs;
     const innerSize = AppSizes.shutter - (ring + gap) * 2;
@@ -27,10 +41,14 @@ class ShutterButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: enabled,
-      label: isCapturing
-          ? 'Capturing photo'.tr
+      label: isRecording
+          ? 'Stop recording'.tr
+          : isCapturing
+          ? (isVideo ? 'Saving video'.tr : 'Capturing photo'.tr)
           : isCountingDown
           ? 'Cancel timer'.tr
+          : isVideo
+          ? 'Start recording'.tr
           : 'Capture photo'.tr,
       child: GestureDetector(
         onTap: enabled ? onPressed : null,
@@ -48,13 +66,13 @@ class ShutterButton extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
               curve: Curves.easeOut,
-              width: isCapturing ? innerSize * 0.7 : innerSize,
-              height: isCapturing ? innerSize * 0.7 : innerSize,
+              width: innerSize * innerScale,
+              height: innerSize * innerScale,
               decoration: BoxDecoration(
-                color: isCapturing || isCountingDown
-                    ? AppColors.accent
-                    : AppColors.onViewfinder,
-                shape: BoxShape.circle,
+                color: fill,
+                borderRadius: BorderRadius.circular(
+                  isRecording ? 8 : innerSize,
+                ),
               ),
               child: isCountingDown
                   ? const Icon(

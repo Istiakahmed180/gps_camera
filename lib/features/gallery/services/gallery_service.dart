@@ -1,7 +1,10 @@
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:get/get.dart';
+
 import 'package:gps_camera/core/services/photo_storage_service.dart';
+import 'package:gps_camera/features/video/services/video_service.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
 import 'package:gps_camera/features/gallery/models/gallery_index.dart';
 import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
@@ -81,6 +84,9 @@ class GalleryService {
     if (record != null) {
       return ImageDimensions(record.imageWidth, record.imageHeight);
     }
+    final video = photo.metadata?.video;
+    if (video != null) return ImageDimensions(video.width, video.height);
+    if (photo.isVideo) return null;
     final path = photo.path;
     return Isolate.run(() => readJpegDimensions(path));
   }
@@ -135,6 +141,16 @@ class GalleryService {
             deleted,
             failures,
           );
+        }
+        // A video's thumbnail is a cache, so it goes quietly.
+        if (photo.isVideo) {
+          if (Get.isRegistered<VideoService>()) {
+            await Get.find<VideoService>().forgetThumbnail(photo.path);
+          } else {
+            try {
+              await (await _storage.thumbnailFileFor(photo.path)).delete();
+            } catch (_) {}
+          }
         }
       }
     }

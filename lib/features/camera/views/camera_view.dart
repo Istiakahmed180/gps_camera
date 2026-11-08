@@ -9,13 +9,16 @@ import 'package:gps_camera/features/camera/widgets/camera_controls_bar.dart';
 import 'package:gps_camera/features/camera/widgets/camera_top_bar.dart';
 import 'package:gps_camera/features/camera/widgets/viewfinder_layer.dart';
 import 'package:gps_camera/features/camera/widgets/camera_viewfinder.dart';
+import 'package:gps_camera/features/camera/widgets/capture_mode_switch.dart';
 import 'package:gps_camera/features/camera/widgets/capture_toast.dart';
+import 'package:gps_camera/features/camera/widgets/recording_badge.dart';
 import 'package:gps_camera/features/camera/widgets/last_photo_thumbnail.dart';
 import 'package:gps_camera/features/camera/widgets/shutter_button.dart';
 import 'package:gps_camera/features/location/controllers/location_controller.dart';
 import 'package:gps_camera/features/location/controllers/live_map_controller.dart';
 import 'package:gps_camera/features/location/controllers/place_controller.dart';
 import 'package:gps_camera/features/location/widgets/gps_status_panel.dart';
+import 'package:gps_camera/features/video/services/video_stamp_service.dart';
 import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
 import 'package:gps_camera/features/watermark/widgets/live_watermark_overlay.dart';
 import 'package:gps_camera/shared/widgets/note_dialog.dart';
@@ -96,6 +99,26 @@ class CameraView extends GetView<CaptureController> {
                             ),
                           ),
                           Positioned(
+                            top: AppSpacing.md,
+                            left: 0,
+                            right: 0,
+                            child: Center(
+                              child: Obx(
+                                () => RecordingBadge(
+                                  isRecording: controller.isRecording.value,
+                                  elapsed: controller.recordingTime.value,
+                                  limit: CaptureController.maxVideoLength,
+                                  stampProgress:
+                                      Get.isRegistered<VideoStampService>()
+                                      ? Get.find<VideoStampService>()
+                                            .progress
+                                            .value
+                                      : null,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
                             left: AppSpacing.lg,
                             right: AppSpacing.lg,
                             bottom: AppSpacing.lg,
@@ -167,7 +190,9 @@ class CameraView extends GetView<CaptureController> {
                         Obx(
                           () => LastPhotoThumbnail(
                             path: controller.lastPhotoPath.value,
-                            onTap: controller.openWatermarkEditor,
+                            onTap: controller.isRecording.value
+                                ? null
+                                : controller.openWatermarkEditor,
                           ),
                         ),
                         Expanded(
@@ -177,16 +202,25 @@ class CameraView extends GetView<CaptureController> {
                                 isCapturing: controller.isCapturing.value,
                                 isCountingDown:
                                     controller.countdown.value != null,
-                                onPressed:
-                                    controller.canCapture ||
-                                        controller.countdown.value != null
+                                isVideo: controller.mode.value.isVideo,
+                                isRecording: controller.isRecording.value,
+                                onPressed: controller.canPressShutter
                                     ? controller.shutter
                                     : null,
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: LastPhotoThumbnail.size),
+                        Obx(
+                          () => CaptureModeSwitch(
+                            mode: controller.mode.value,
+                            onChanged:
+                                controller.canCapture &&
+                                    controller.countdown.value == null
+                                ? controller.setMode
+                                : null,
+                          ),
+                        ),
                       ],
                     ),
                   ),

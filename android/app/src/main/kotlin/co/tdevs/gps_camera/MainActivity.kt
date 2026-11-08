@@ -33,6 +33,7 @@ class MainActivity : FlutterActivity() {
     private var volumeChannel: MethodChannel? = null
     private var compass: CompassStream? = null
 
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
@@ -65,6 +66,7 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+        VideoStamper(applicationContext, flutterEngine.dartExecutor.binaryMessenger)
         compass = CompassStream(this).also {
             EventChannel(flutterEngine.dartExecutor.binaryMessenger, COMPASS_CHANNEL)
                 .setStreamHandler(it)
@@ -161,8 +163,8 @@ class MainActivity : FlutterActivity() {
     private fun galleryAvailable(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
     /**
-     * Copies a JPEG from GPSCamera/Photos or GPSCamera/Watermarked into
-     * Pictures/GPS Camera. The app's own file is only read. A gallery photo
+     * Copies a JPEG (or MP4) from GPSCamera/Photos or GPSCamera/Watermarked
+     * into Pictures/GPS Camera (videos: Movies/GPS Camera). The app's own file is only read. A gallery photo
      * with the same name that this app added earlier is left as it is.
      */
     private fun saveToGallery(path: String?, name: String?, takenAt: Long?): String {
@@ -173,25 +175,33 @@ class MainActivity : FlutterActivity() {
         val fromApp = folder.parentFile == appRoot() && folder.name in GALLERY_SOURCES
         // Copies with fresh EXIF are prepared in this cache folder.
         val fromExport = folder == File(cacheDir, "gallery_export").canonicalFile
-        if (!(fromApp || fromExport) || !source.name.endsWith(".jpg")) return "invalid"
+        val video = source.name.endsWith(".mp4")
+        // The gallery name must have the same type as the file.
+        if (video != name.endsWith(".mp4")) return "invalid"
+        if (!(fromApp || fromExport) || !(video || source.name.endsWith(".jpg"))) return "invalid"
         if (!source.isFile) return "missing"
 
         val resolver = contentResolver
-        val images = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        val images = if (video) {
+            MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        } else {
+            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        }
+        val dir = if (video) VIDEO_DIR else GALLERY_DIR
         resolver.query(
             images,
-            arrayOf(MediaStore.Images.Media._ID),
-            "${MediaStore.Images.Media.DISPLAY_NAME}=? AND ${MediaStore.Images.Media.RELATIVE_PATH}=?",
-            arrayOf(name, "$GALLERY_DIR/"),
+            arrayOf(MediaStore.MediaColumns._ID),
+            "${MediaStore.MediaColumns.DISPLAY_NAME}=? AND ${MediaStore.MediaColumns.RELATIVE_PATH}=?",
+            arrayOf(name, "$dir/"),
             null,
         )?.use { if (it.moveToFirst()) return "exists" }
 
         val values = ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, name)
-            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-            put(MediaStore.Images.Media.RELATIVE_PATH, GALLERY_DIR)
-            put(MediaStore.Images.Media.DATE_TAKEN, takenAt ?: source.lastModified())
-            put(MediaStore.Images.Media.IS_PENDING, 1)
+            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+            put(MediaStore.MediaColumns.MIME_TYPE, if (video) "video/mp4" else "image/jpeg")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, dir)
+            put(MediaStore.MediaColumns.DATE_TAKEN, takenAt ?: source.lastModified())
+            put(MediaStore.MediaColumns.IS_PENDING, 1)
         }
         val uri = resolver.insert(images, values) ?: return "failed"
         return try {
@@ -199,7 +209,7 @@ class MainActivity : FlutterActivity() {
             out.use { stream -> source.inputStream().use { it.copyTo(stream) } }
             resolver.update(
                 uri,
-                ContentValues().apply { put(MediaStore.Images.Media.IS_PENDING, 0) },
+                ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) },
                 null,
                 null,
             )
@@ -387,8 +397,9 @@ class MainActivity : FlutterActivity() {
         private const val VOLUME_CHANNEL = "co.tdevs.gps_camera/volume"
         private const val COMPASS_CHANNEL = "co.tdevs.gps_camera/compass"
         private const val GALLERY_DIR = "Pictures/GPS Camera"
+        private const val VIDEO_DIR = "Movies/GPS Camera"
         private val GALLERY_SOURCES = setOf("Photos", "Watermarked")
-        private val SAFE_NAME = Regex("[A-Za-z0-9_.-]{1,120}\\.jpg")
+        private val SAFE_NAME = Regex("[A-Za-z0-9_.-]{1,120}\\.(jpg|mp4)")
         private const val REQUEST_SAVE = 4101
         private const val REQUEST_PICK = 4102
         private const val REQUEST_IMAGE = 4103

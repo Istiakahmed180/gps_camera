@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -13,6 +11,7 @@ import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
 import 'package:gps_camera/features/gallery/models/photo_spots.dart';
 import 'package:gps_camera/features/gallery/utils/photo_info_formatter.dart';
 import 'package:gps_camera/shared/widgets/empty_state_view.dart';
+import 'package:gps_camera/shared/widgets/media_thumbnail.dart';
 
 /// Every photo with a GPS location as a pin. Uses the gallery's current
 /// filter and search, so the map shows what the list shows.
@@ -123,14 +122,9 @@ class _PhotoMapViewState extends State<PhotoMapView> {
               ListTile(
                 leading: ClipRRect(
                   borderRadius: AppRadius.mdAll,
-                  child: Image.file(
-                    photo.file,
-                    width: 48,
-                    height: 48,
-                    fit: BoxFit.cover,
-                    cacheWidth: 144,
-                    errorBuilder: (_, _, _) =>
-                        const Icon(Icons.broken_image_outlined),
+                  child: SizedBox.square(
+                    dimension: 48,
+                    child: MediaThumbnail(photo.path, cacheWidth: 144),
                   ),
                 ),
                 title: Text(
@@ -251,14 +245,10 @@ class _Pin extends StatelessWidget {
               ],
             ),
             child: ClipOval(
-              child: Image.file(
-                File(spot.photos.first.path),
-                fit: BoxFit.cover,
+              child: MediaThumbnail(
+                spot.photos.first.path,
                 cacheWidth: 156,
-                errorBuilder: (_, _, _) => const ColoredBox(
-                  color: AppColors.accent,
-                  child: Icon(Icons.photo_outlined, color: Colors.white),
-                ),
+                showPlayMark: false,
               ),
             ),
           ),

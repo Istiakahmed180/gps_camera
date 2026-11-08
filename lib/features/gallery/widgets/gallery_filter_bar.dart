@@ -32,13 +32,17 @@ class GalleryFilterBar extends StatelessWidget {
           showSelectedIcon: false,
           segments: [
             for (final filter in GalleryFilter.values)
-              ButtonSegment(
-                value: filter,
-                label: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text('${filter.label.tr} ${index.count(filter)}'),
+              // The video filter appears once there are videos.
+              if (filter != GalleryFilter.videos ||
+                  selected == GalleryFilter.videos ||
+                  index.count(filter) > 0)
+                ButtonSegment(
+                  value: filter,
+                  label: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('${filter.label.tr} ${index.count(filter)}'),
+                  ),
                 ),
-              ),
           ],
           selected: {selected},
           onSelectionChanged: (s) => onChanged(s.first),

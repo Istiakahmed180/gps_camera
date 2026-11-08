@@ -275,10 +275,16 @@ Future<void> _writeZip(
       if (file.existsSync()) {
         var name = item.name;
         for (var n = 1; used.contains(name); n++) {
-          name = item.name.replaceFirst('.jpg', '_$n.jpg');
+          final dot = item.name.lastIndexOf('.');
+          name = dot < 0
+              ? '${item.name}_$n'
+              : '${item.name.substring(0, dot)}_$n${item.name.substring(dot)}';
         }
         used.add(name);
-        final exif = item.exif;
+        // EXIF is for photos; videos are added as they are.
+        final exif = item.name.toLowerCase().endsWith('.mp4')
+            ? null
+            : item.exif;
         final bytes = exif == null ? null : file.readAsBytesSync();
         final hasGps =
             bytes != null &&

@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:gps_camera/features/camera/models/capture_timer.dart';
 import 'package:gps_camera/features/camera/models/photo_quality.dart';
 import 'package:gps_camera/features/camera/services/volume_shutter.dart';
@@ -13,10 +14,13 @@ import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
 import 'package:gps_camera/features/camera/models/camera_status.dart';
 import 'package:gps_camera/features/camera/models/capture_assignment.dart';
+import 'package:gps_camera/features/camera/models/capture_mode.dart';
+import 'package:gps_camera/features/camera/models/video_details.dart';
 import 'package:gps_camera/features/camera/models/capture_post_processing.dart';
 import 'package:gps_camera/features/camera/models/capture_feedback.dart';
 import 'package:gps_camera/features/camera/services/capture_saver.dart';
 import 'package:gps_camera/features/location/controllers/location_controller.dart';
+import 'package:gps_camera/features/video/services/video_stamp_service.dart';
 import 'package:gps_camera/features/location/models/camera_direction.dart';
 import 'package:gps_camera/features/location/models/gps_accuracy_level.dart';
 import 'package:gps_camera/features/location/models/location_snapshot.dart';
@@ -119,6 +123,28 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
   final RxBool isFlashSupported = false.obs;
   final RxBool canSwitchCamera = false.obs;
   final RxBool isCapturing = false.obs;
+
+  /// Photo or video. Changing it restarts the camera with the right
+  /// settings (video: Full HD, sound when allowed).
+  final Rx<CaptureMode> mode = CaptureMode.photo.obs;
+
+  /// True while a video is being recorded.
+  final RxBool isRecording = false.obs;
+
+  /// How long the current video has been recording.
+  final Rx<Duration> recordingTime = Duration.zero.obs;
+
+  /// Longest video recorded in one go; recording stops by itself after it.
+  static const Duration maxVideoLength = Duration(minutes: 10);
+
+  _Recording? _recording;
+  Timer? _recordTimer;
+
+  /// Whether sound may be recorded; checked when video mode starts.
+  bool _microphone = false;
+
+  /// True between leaving the app and coming back.
+  bool _inBackground = false;
   final RxnString errorMessage = RxnString();
   final Rxn<CaptureFeedback> feedback = Rxn<CaptureFeedback>();
 
@@ -140,7 +166,12 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
   bool get canCapture =>
       status.value == CameraStatus.ready &&
       !isCapturing.value &&
+      !isRecording.value &&
       (camera.value?.value.isInitialized ?? false);
+
+  /// The shutter can be pressed: to capture, or to stop a recording.
+  bool get canPressShutter =>
+      canCapture || isRecording.value || countdown.value != null;
 
   bool get canToggleCamera => canSwitchCamera.value && canCapture;
 
@@ -167,7 +198,7 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     _focusReset?.cancel();
     _cancelCountdown();
     _setVolumeShutter(false);
-    unawaited(_serial(_disposeCamera));
+    unawaited(stopRecording().then((_) => _serial(_disposeCamera)));
     super.onClose();
   }
 
@@ -176,12 +207,19 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     if (_permissions.isRequesting || _isClosed || _isSuspended) return;
 
     switch (state) {
+      // Pulling down the notification shade only makes the app inactive;
+      // a recording keeps going until the app is really left.
+      case AppLifecycleState.inactive when isRecording.value:
+        break;
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
+        if (state != AppLifecycleState.inactive) _inBackground = true;
         _cancelCountdown();
-        unawaited(_serial(_disposeCamera));
+        // A recording is saved before the camera is let go.
+        unawaited(stopRecording().then((_) => _serial(_disposeCamera)));
       case AppLifecycleState.resumed:
+        _inBackground = false;
         unawaited(_checkPermissionAndStart(requestIfNeeded: false));
       case AppLifecycleState.detached:
         break;
@@ -203,7 +241,12 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
   /// are released while the editor is open and restarted afterwards.
   Future<void> openWatermarkEditor() async {
     final path = lastPhotoPath.value;
-    if (path == null || isCapturing.value || _isSuspended) return;
+    if (path == null ||
+        isCapturing.value ||
+        isRecording.value ||
+        _isSuspended) {
+      return;
+    }
 
     _isSuspended = true;
     _cancelCountdown();
@@ -211,7 +254,12 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     _location.suspend();
     await _serial(_disposeCamera);
     try {
-      await Get.toNamed<void>(AppRoutes.watermark, arguments: path);
+      // Videos are stamped automatically; their thumbnail opens the gallery.
+      if (isVideoPath(path)) {
+        await Get.toNamed<void>(AppRoutes.gallery);
+      } else {
+        await Get.toNamed<void>(AppRoutes.watermark, arguments: path);
+      }
     } finally {
       _isSuspended = false;
       if (!_isClosed) {
@@ -267,10 +315,15 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
       _cancelCountdown();
       return;
     }
+    if (isRecording.value) {
+      unawaited(stopRecording());
+      return;
+    }
     if (!canCapture) return;
     final seconds = _timer().seconds;
+    Future<void> go() => mode.value.isVideo ? startRecording() : capture();
     if (seconds == 0) {
-      unawaited(capture());
+      unawaited(go());
       return;
     }
     countdown.value = seconds;
@@ -281,8 +334,166 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
         return;
       }
       _cancelCountdown();
-      unawaited(capture());
+      unawaited(go());
     });
+  }
+
+  /// Switches between photo and video. The first switch to video asks for
+  /// the microphone; without it videos are recorded silently.
+  Future<void> setMode(CaptureMode value) async {
+    if (value == mode.value || isRecording.value || isCapturing.value) return;
+    _cancelCountdown();
+    if (value.isVideo) {
+      var access = await _safePermission(_permissions.microphoneStatus);
+      if (access == PermissionAccess.denied) {
+        access = await _safePermission(_permissions.requestMicrophone);
+      }
+      _microphone = access == PermissionAccess.granted;
+      if (_isClosed) return;
+    }
+    mode.value = value;
+    await _serial(() async {
+      await _disposeCamera();
+      await _startCamera();
+    });
+  }
+
+  /// Starts recording a video; its start time, location, note and
+  /// direction are taken once recording has begun, and the location every
+  /// second after.
+  Future<void> startRecording() async {
+    if (!canCapture || !mode.value.isVideo) return;
+    final controller = camera.value!;
+    final note = _note();
+    final map = _postProcessor?.grabMap();
+    isCapturing.value = true;
+    // Stamping another video now would compete for the video encoder.
+    _holdStamps(true);
+    try {
+      await _serial(controller.startVideoRecording);
+    } on CameraException catch (e) {
+      _holdStamps(false);
+      _showFeedback(
+        'Recording failed: @error'.trParams({'error': _describe(e)}),
+        isError: true,
+      );
+      return;
+    } finally {
+      isCapturing.value = false;
+    }
+    // The screen closed, the app was left or the camera changed while
+    // recording started: drop this start instead of a recording that
+    // nothing can stop.
+    if (_isClosed ||
+        _inBackground ||
+        camera.value != controller ||
+        !controller.value.isRecordingVideo) {
+      _holdStamps(false);
+      try {
+        final file = await controller.stopVideoRecording();
+        await File(file.path).delete();
+      } catch (_) {}
+      return;
+    }
+
+    final startedAt = DateTime.now();
+    final recording = _Recording(
+      startedAt: startedAt,
+      location: _location.snapshotAt(startedAt),
+      note: note,
+      direction: _direction(),
+      map: map,
+    )..mark(0, _location.snapshotAt(startedAt), _direction());
+    _recording = recording;
+    recordingTime.value = Duration.zero;
+    isRecording.value = true;
+    unawaited(_saver.writeJournal(recording.journal));
+    _recordTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      final now = DateTime.now();
+      final elapsed = now.difference(startedAt);
+      recordingTime.value = elapsed;
+      recording.mark(
+        elapsed.inMilliseconds,
+        _location.snapshotAt(now),
+        _direction(),
+      );
+      if (elapsed.inSeconds % 5 == 0) {
+        unawaited(_saver.writeJournal(recording.journal));
+      }
+      if (elapsed >= maxVideoLength) unawaited(stopRecording());
+    });
+  }
+
+  void _holdStamps(bool on) {
+    if (Get.isRegistered<VideoStampService>()) {
+      Get.find<VideoStampService>().hold.value = on;
+    }
+  }
+
+  /// Stops a recording and saves it; does nothing when not recording.
+  Future<void> stopRecording() async {
+    final recording = _recording;
+    if (recording == null || !isRecording.value) return;
+    _recording = null;
+    _recordTimer?.cancel();
+    _recordTimer = null;
+    isRecording.value = false;
+    isCapturing.value = true;
+    try {
+      var saved = await _serial(() async {
+        final controller = camera.value;
+        // The camera stops recording by itself when the app is left.
+        if (controller == null || !controller.value.isRecordingVideo) {
+          return null;
+        }
+        final file = await controller.stopVideoRecording();
+        return _saver.saveVideo(
+          file,
+          startedAt: recording.startedAt,
+          location: recording.location,
+          track: recording.track,
+          note: recording.note,
+          direction: recording.direction,
+        );
+      });
+      // The camera finishes the file in the cache by itself; give it a
+      // moment, then save it from the journal.
+      if (saved == null) await Future<void>.delayed(const Duration(seconds: 2));
+      saved ??= await _saver.recoverRecording(
+        temporaryDirectory: getTemporaryDirectory,
+        settled: const Duration(milliseconds: 1500),
+      );
+      if (saved == null) {
+        throw CameraException('CameraClosed', 'The recording was stopped.');
+      }
+      lastCapture.value = saved;
+      lastPhotoPath.value = saved.photo.path;
+      final assignment = await _assign(saved.photo);
+      _showFeedback(
+        captureFeedbackMessage(saved, assignment),
+        isError: !saved.hasMetadataFile || assignment is AssignmentFailed,
+      );
+      // Saved: the journal is no longer needed for recovery.
+      unawaited(_saver.clearJournal());
+      _postProcess(saved, recording.map);
+    } on CameraException catch (e) {
+      // The journal stays, so the recording can be recovered next time.
+      _showFeedback(
+        'Recording failed: @error'.trParams({'error': _describe(e)}),
+        isError: true,
+      );
+    } on FileSystemException catch (e) {
+      _showFeedback(
+        'Video could not be saved: @error'.trParams({'error': e.message}),
+        isError: true,
+      );
+    } catch (_) {
+      _showFeedback('Something went wrong while recording.'.tr, isError: true);
+    } finally {
+      isCapturing.value = false;
+      recordingTime.value = Duration.zero;
+      _holdStamps(false);
+    }
   }
 
   void _cancelCountdown() {
@@ -532,10 +743,12 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     canSwitchCamera.value =
         _cameras.map((c) => c.lensDirection).toSet().length > 1;
 
+    final video = mode.value.isVideo;
     final controller = CameraController(
       _cameras[_cameraIndex],
-      _quality().preset,
-      enableAudio: false,
+      // Full HD keeps videos a sensible size and quick to stamp.
+      video ? ResolutionPreset.veryHigh : _quality().preset,
+      enableAudio: video && _microphone,
       imageFormatGroup: ImageFormatGroup.jpeg,
     );
 
@@ -656,19 +869,62 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
   }
 
   static String _locationMessage(SavedCapture saved) {
+    final video = saved.metadata.isVideo;
     if (!saved.hasMetadataFile) {
-      return 'Photo saved, but its location data could not be saved'.tr;
+      return video
+          ? 'Video saved, but its location data could not be saved'.tr
+          : 'Photo saved, but its location data could not be saved'.tr;
     }
     final location = saved.metadata.location;
     return switch (location.status) {
-      LocationRecordStatus.unavailable => 'Photo saved · no location'.tr,
-      LocationRecordStatus.stale => 'Photo saved · last known location'.tr,
+      LocationRecordStatus.unavailable =>
+        (video ? 'Video saved · no location' : 'Photo saved · no location').tr,
+      LocationRecordStatus.stale =>
+        (video
+                ? 'Video saved · last known location'
+                : 'Photo saved · last known location')
+            .tr,
       LocationRecordStatus.current
           when location.accuracyLevel == GpsAccuracyLevel.poor =>
-        'Photo saved · poor GPS accuracy'.tr,
-      LocationRecordStatus.current => 'Photo saved with location'.tr,
+        (video
+                ? 'Video saved · poor GPS accuracy'
+                : 'Photo saved · poor GPS accuracy')
+            .tr,
+      LocationRecordStatus.current =>
+        (video ? 'Video saved with location' : 'Photo saved with location').tr,
     };
   }
 
   String _describe(CameraException e) => e.description ?? e.code;
+}
+
+/// What is known about a video while it records.
+class _Recording {
+  _Recording({
+    required this.startedAt,
+    required this.location,
+    this.note,
+    this.direction,
+    this.map,
+  });
+
+  final DateTime startedAt;
+  final LocationSnapshot location;
+  final String? note;
+  final CameraDirection? direction;
+  final Future<Uint8List?>? map;
+  final List<VideoTrackPoint> track = [];
+
+  RecordingJournal get journal => RecordingJournal(
+    startedAt: startedAt,
+    location: location,
+    note: note,
+    direction: direction,
+    track: List.of(track),
+  );
+
+  void mark(int atMs, LocationSnapshot location, CameraDirection? direction) =>
+      track.add(
+        VideoTrackPoint(atMs: atMs, location: location, direction: direction),
+      );
 }

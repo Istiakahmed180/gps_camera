@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:gps_camera/core/constants/storage_keys.dart';
 import 'package:gps_camera/core/services/storage_service.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
+import 'package:gps_camera/features/camera/models/video_details.dart';
 import 'package:gps_camera/features/camera/services/photo_exif.dart';
 import 'package:gps_camera/features/export/models/gallery_save_mode.dart';
 import 'package:gps_camera/features/export/services/phone_gallery.dart';
@@ -94,7 +95,10 @@ class GalleryExportService {
     required bool upright,
   }) async {
     final takenAt = metadata?.capturedAt;
-    if (metadata == null) return _gallery.save(file, takenAt: takenAt);
+    // EXIF is for photos; a video is copied as it is.
+    if (metadata == null || isVideoPath(file.path)) {
+      return _gallery.save(file, takenAt: takenAt);
+    }
     File? temp;
     try {
       final dir = await Directory(

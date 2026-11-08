@@ -2,6 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:get/get.dart';
+import 'package:gps_camera/features/video/services/video_service.dart';
+import 'package:gps_camera/features/video/services/video_stamp_service.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
 import 'package:gps_camera/features/camera/services/capture_enricher.dart';
@@ -206,16 +209,32 @@ class DetailsBackfill {
     if (!addsAddress && !addsMap) return false;
 
     try {
-      final size = await _imageSize(original.path);
-      if (size == null) return false;
-      final result = await _renderer.render(
-        original: original,
-        metadata: metadata,
-        config: config,
-        imageSize: Size(size.width, size.height),
-        mapImage: metadata.mapImageFileName == null ? null : map,
-        automatic: true,
-      );
+      final WatermarkResult result;
+      if (copy.isVideo) {
+        // Videos are stamped again with the new details, live as before.
+        final stamper = Get.isRegistered<VideoStampService>()
+            ? Get.find<VideoStampService>()
+            : null;
+        // Waits for its turn behind any other video being stamped.
+        if (stamper == null) return false;
+        result = await stamper.stamp(
+          original: original,
+          metadata: metadata,
+          config: config,
+          automatic: true,
+        );
+      } else {
+        final size = await _imageSize(original.path);
+        if (size == null) return false;
+        result = await _renderer.render(
+          original: original,
+          metadata: metadata,
+          config: config,
+          imageSize: Size(size.width, size.height),
+          mapImage: metadata.mapImageFileName == null ? null : map,
+          automatic: true,
+        );
+      }
       try {
         await _export?.exportEdited(
           result.output,
@@ -223,6 +242,9 @@ class DetailsBackfill {
         );
       } catch (_) {}
       // The new copy is saved; only now remove the incomplete one.
+      if (copy.isVideo && Get.isRegistered<VideoService>()) {
+        await Get.find<VideoService>().forgetThumbnail(copy.path);
+      }
       for (final file in [copy.file, _storage.metadataFileFor(copy.file)]) {
         try {
           await file.delete();

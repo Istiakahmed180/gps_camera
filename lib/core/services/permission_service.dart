@@ -19,6 +19,12 @@ class PermissionService extends GetxService {
 
   Future<PermissionAccess> requestCamera() => _request(Permission.camera);
 
+  /// For sound in videos. Videos are recorded silently without it.
+  Future<PermissionAccess> microphoneStatus() => _status(Permission.microphone);
+
+  Future<PermissionAccess> requestMicrophone() =>
+      _request(Permission.microphone);
+
   /// Foreground ("while in use") location only.
   Future<PermissionAccess> locationStatus() =>
       _status(Permission.locationWhenInUse);

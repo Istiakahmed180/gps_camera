@@ -1,3 +1,4 @@
+import 'package:gps_camera/features/camera/models/video_details.dart';
 import 'package:gps_camera/features/location/models/camera_direction.dart';
 import 'package:gps_camera/features/location/models/location_snapshot.dart';
 import 'package:gps_camera/features/location/models/place_info.dart';
@@ -14,6 +15,7 @@ class PhotoMetadata {
     this.mapImageFileName,
     this.note,
     this.direction,
+    this.video,
     this.schemaVersion = currentSchemaVersion,
   });
 
@@ -35,6 +37,7 @@ class PhotoMetadata {
     required LocationSnapshot location,
     String? note,
     CameraDirection? direction,
+    VideoDetails? video,
   }) {
     final local = capturedAt.toLocal();
     return PhotoMetadata(
@@ -45,6 +48,7 @@ class PhotoMetadata {
       location: location,
       note: cleanNote(note),
       direction: direction,
+      video: video,
     );
   }
 
@@ -68,6 +72,10 @@ class PhotoMetadata {
         final Map<String, dynamic> d => CameraDirection.fromJson(d),
         _ => null,
       },
+      video: switch (json['video']) {
+        final Map<String, dynamic> v => VideoDetails.fromJson(v),
+        _ => null,
+      },
     );
   }
 
@@ -84,6 +92,7 @@ class PhotoMetadata {
         mapImageFileName: mapImageFileName ?? this.mapImageFileName,
         note: note,
         direction: direction,
+        video: video,
       );
 
   /// The same photo with a new note (null or blank removes it). Nothing
@@ -99,6 +108,42 @@ class PhotoMetadata {
     mapImageFileName: mapImageFileName,
     note: cleanNote(value),
     direction: direction,
+    video: video,
+  );
+
+  /// The same capture at [atMs] into its video: the time moves on, and the
+  /// location and direction recorded at that moment replace the start ones.
+  /// Used to draw the live stamp.
+  PhotoMetadata atVideoTime(int atMs) {
+    final point = video?.pointAt(atMs);
+    return PhotoMetadata(
+      schemaVersion: schemaVersion,
+      imageFileName: imageFileName,
+      capturedAt: capturedAt.add(Duration(milliseconds: atMs)),
+      timeZoneOffset: timeZoneOffset,
+      timeZoneName: timeZoneName,
+      location: point?.location ?? location,
+      place: place,
+      mapImageFileName: mapImageFileName,
+      note: note,
+      direction: point?.direction ?? direction,
+      video: video,
+    );
+  }
+
+  /// The same capture with its video details filled in.
+  PhotoMetadata withVideo(VideoDetails value) => PhotoMetadata(
+    schemaVersion: schemaVersion,
+    imageFileName: imageFileName,
+    capturedAt: capturedAt,
+    timeZoneOffset: timeZoneOffset,
+    timeZoneName: timeZoneName,
+    location: location,
+    place: place,
+    mapImageFileName: mapImageFileName,
+    note: note,
+    direction: direction,
+    video: value,
   );
 
   /// 2 adds [place] and [mapImageFileName]; version 1 files still load.
@@ -127,6 +172,12 @@ class PhotoMetadata {
   /// Which way the camera faced, from the compass; null when unknown.
   final CameraDirection? direction;
 
+  /// For videos: length, size and the per-second location track. The
+  /// other fields describe the moment recording started.
+  final VideoDetails? video;
+
+  bool get isVideo => video != null || isVideoPath(imageFileName);
+
   Map<String, dynamic> toJson() => {
     'schemaVersion': schemaVersion,
     'imageFileName': imageFileName,
@@ -139,5 +190,6 @@ class PhotoMetadata {
     // Written only when set, so older files stay unchanged until edited.
     if (note != null) 'note': note,
     if (direction != null) 'direction': direction!.toJson(),
+    if (video != null) 'video': video!.toJson(),
   };
 }

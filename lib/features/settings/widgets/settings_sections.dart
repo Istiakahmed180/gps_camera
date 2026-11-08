@@ -238,8 +238,9 @@ class StorageSettings extends StatelessWidget {
           ),
           const Divider(height: 1),
           _row(
-            'Original photos'.tr,
-            '@n photo'.trCount('@n photos', u.photoCount, {
+            // Videos are originals too.
+            'Originals'.tr,
+            '@n file'.trCount('@n files', u.photoCount, {
               'n': '${u.photoCount}',
             }),
             size(u.photos),
