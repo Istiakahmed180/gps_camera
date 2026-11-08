@@ -14,11 +14,32 @@ bool hasRtlLetters(String text) => text.runes.any(
 /// `23.91° N, 90.40° E`. Separators like `·` end a run, so list items
 /// still follow the right-to-left order.
 final _ltrRun = RegExp(
-  r"[A-Za-z0-9±≈+\-−]([A-Za-z0-9°±≈+\-−.,:/()'#_% ]*[A-Za-z0-9°)%])?",
+  r"[A-Za-z0-9±≈+\-−<>(]([A-Za-z0-9°±≈+\-−<>.,:/()'#_% ]*[A-Za-z0-9°)%])?",
 );
 
 /// In right-to-left text, keeps each number, unit and Latin phrase in its
 /// own left-to-right order, so `240° SW` does not turn into `SW °240`.
-/// Display only: the added marks are invisible but are part of the string.
-String keepLtrRuns(String text, {required bool rtl}) =>
-    rtl ? text.replaceAllMapped(_ltrRun, (m) => '\u2066${m[0]}\u2069') : text;
+/// Brackets stay outside a run unless both are inside it, so pairs like
+/// `(… ±10°)` still match. Display only: the added marks are invisible but
+/// are part of the string.
+String keepLtrRuns(String text, {required bool rtl}) {
+  if (!rtl) return text;
+  return text.replaceAllMapped(_ltrRun, (m) {
+    var run = m[0]!;
+    var before = '';
+    var after = '';
+    while (run.isNotEmpty &&
+        (run.startsWith('(') && !run.contains(')') ||
+            run.endsWith(')') && !run.contains('('))) {
+      if (run.startsWith('(')) {
+        before += '(';
+        run = run.substring(1);
+      } else {
+        after = ')$after';
+        run = run.substring(0, run.length - 1);
+      }
+    }
+    if (!run.contains(RegExp('[A-Za-z0-9]'))) return m[0]!;
+    return '$before\u2066$run\u2069$after';
+  });
+}

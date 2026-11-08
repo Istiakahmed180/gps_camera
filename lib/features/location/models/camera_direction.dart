@@ -1,3 +1,5 @@
+import 'package:get/get.dart';
+
 /// Which way the camera faced when a photo was taken, from the phone's
 /// compass.
 class CameraDirection {
@@ -49,9 +51,9 @@ class CameraDirection {
   /// `45° NE (true north, ±12°)`, noting magnetic north or a flat phone.
   String get description {
     final parts = [
-      trueNorth ? 'true north' : 'magnetic north',
+      (trueNorth ? 'true north' : 'magnetic north').tr,
       if (accuracy != null) '±${accuracy!.round()}°',
-      if (flat) 'phone held flat',
+      if (flat) 'phone held flat'.tr,
     ];
     return '$label (${parts.join(', ')})';
   }

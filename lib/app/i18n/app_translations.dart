@@ -14,9 +14,9 @@ import 'package:gps_camera/app/i18n/pt/pt.dart';
 /// * Values: `'Adding photo @done of @total'.trParams({...})`.
 /// * Counts: `'@n photo'.trCount('@n photos', n, {'n': '$n'})`;
 ///   languages with one form map both keys to the same text.
-/// * PDF reports and CSV exports stay in English (the PDF library cannot
-///   shape Bangla, Hindi or Arabic script), so never translate text used
-///   only there.
+/// * PDF reports are written in the app language (Bangla, Hindi and
+///   Arabic text is drawn by Flutter, see `ReportTextShaper`). CSV exports
+///   stay in English.
 /// * Every new key needs an entry in each table below, and every new
 ///   count its Arabic forms in `arPlurals`.
 class AppTranslations extends Translations {

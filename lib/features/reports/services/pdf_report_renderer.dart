@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
+import 'package:gps_camera/core/utils/script.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
 import 'package:gps_camera/features/gallery/utils/photo_info_formatter.dart';
 import 'package:gps_camera/features/location/models/gps_accuracy_level.dart';
@@ -9,6 +12,7 @@ import 'package:gps_camera/features/location/models/location_snapshot.dart';
 import 'package:gps_camera/features/location/models/place_info.dart';
 import 'package:gps_camera/features/reports/models/report_map.dart';
 import 'package:gps_camera/features/reports/models/report_models.dart';
+import 'package:gps_camera/features/reports/services/report_text.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 import 'package:gps_camera/features/watermark/utils/capture_time_formatter.dart';
 import 'package:image/image.dart' as img;
@@ -43,11 +47,17 @@ class ReportRenderStats {
 /// Builds the report PDF and writes it to [outputPath]. Pure Dart: runs in
 /// a background isolate. Photos are decoded one at a time at reduced size,
 /// so memory stays bounded however large the project.
+///
+/// Text is written in the language set by `Get.locale`. The PDF library
+/// cannot join Bangla, Hindi or Arabic letters, so [shaper] draws that text
+/// (on the main isolate) and it is placed as images; without a shaper it
+/// falls back to plain PDF text.
 Future<ReportRenderStats> renderReportPdf(
   ReportJob job,
   ReportFonts fonts,
   String outputPath, {
   void Function(ReportProgress progress)? onProgress,
+  TextShaper? shaper,
 }) async {
   final theme = pw.ThemeData.withFont(
     base: pw.Font.ttf(fonts.regular.buffer.asByteData()),
@@ -56,20 +66,45 @@ Future<ReportRenderStats> renderReportPdf(
   final medium = pw.Font.ttf(fonts.medium.buffer.asByteData());
   final style = _Styles(medium);
   final large = job.entries.length > 60;
+  final rtl = job.language.isRtl;
 
-  final blocks = <pw.Widget>[];
+  final prepared = <List<(ReportImage, Uint8List?)>>[];
   var images = 0;
   var missing = 0;
   for (final (i, entry) in job.entries.indexed) {
-    final prepared = <(ReportImage, Uint8List?)>[];
+    final entryImages = <(ReportImage, Uint8List?)>[];
     for (final image in entry.images) {
       final bytes = _prepareImage(image.path, maxSide: large ? 640 : 900);
       bytes == null ? missing++ : images++;
-      prepared.add((image, bytes));
+      entryImages.add((image, bytes));
     }
-    blocks.add(_entryBlock(i + 1, entry, prepared, job.type, style));
+    prepared.add(entryImages);
     onProgress?.call(ReportProgress(i + 1, job.entries.length));
   }
+
+  List<pw.Widget> content(_Tx tx) => [
+    _summary(job, style, missing, tx),
+    ?_overview(job, style, tx),
+    for (final (i, entry) in job.entries.indexed)
+      _entryBlock(i + 1, entry, prepared[i], job.type, style, tx),
+  ];
+
+  // First pass: find the text that has to be drawn, and draw it.
+  final collect = _Tx(rtl: rtl);
+  content(collect);
+  _runningHeader(job, style, collect);
+  _generatedLine(job, style, collect);
+  final requests = collect.requests.toList();
+  final shapes = shaper == null || requests.isEmpty
+      ? const <ShapedText?>[]
+      : await shaper(requests);
+  final tx = _Tx(
+    rtl: rtl,
+    shaped: {
+      for (final (i, request) in requests.indexed)
+        if (i < shapes.length && shapes[i] != null) request: shapes[i]!,
+    },
+  );
 
   final doc = pw.Document(
     theme: theme,
@@ -82,14 +117,12 @@ Future<ReportRenderStats> renderReportPdf(
       pageFormat: PdfPageFormat.a4,
       margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 32),
       maxPages: 1000,
-      header: (context) =>
-          context.pageNumber == 1 ? pw.SizedBox() : _runningHeader(job, style),
-      footer: (context) => _footer(context, job, style),
-      build: (context) => [
-        _summary(job, style, missing),
-        ?_overview(job, style),
-        ...blocks,
-      ],
+      textDirection: rtl ? pw.TextDirection.rtl : pw.TextDirection.ltr,
+      header: (context) => context.pageNumber == 1
+          ? pw.SizedBox()
+          : _runningHeader(job, style, tx),
+      footer: (context) => _footer(context, job, style, tx),
+      build: (context) => content(tx),
     ),
   );
 
@@ -144,6 +177,73 @@ Uint8List? _prepareImage(String path, {required int maxSide}) {
   }
 }
 
+/// Places text: plain PDF text where the PDF library can draw it, otherwise
+/// the shaped image. Without [shaped] it only records what needs shaping.
+class _Tx {
+  _Tx({required this.rtl, this.shaped});
+
+  final bool rtl;
+  final Map<TextRequest, ShapedText>? shaped;
+  final Set<TextRequest> requests = {};
+  final Map<TextRequest, pw.MemoryImage> _images = {};
+
+  pw.Widget call(
+    String text,
+    pw.TextStyle style, {
+    required double width,
+    int? maxLines,
+    bool center = false,
+  }) {
+    if (!needsShaping(text)) {
+      return pw.Text(
+        text,
+        style: style,
+        maxLines: maxLines,
+        overflow: maxLines == null ? null : pw.TextOverflow.clip,
+        textAlign: center ? pw.TextAlign.center : null,
+      );
+    }
+    final request = TextRequest(
+      // Numbers and units keep their order inside Arabic text.
+      text: keepLtrRuns(text, rtl: rtl),
+      fontSize: style.fontSize ?? 8.5,
+      weight: style.fontWeight == pw.FontWeight.bold
+          ? 700
+          : (style.font != null ? 500 : 400),
+      color: (style.color ?? _Styles.ink).toInt(),
+      letterSpacing: style.letterSpacing ?? 0,
+      maxWidth: width,
+      maxLines: maxLines,
+      rtl: rtl,
+      center: center,
+    );
+    final shapes = shaped;
+    if (shapes == null) {
+      requests.add(request);
+      return pw.SizedBox();
+    }
+    final shape = shapes[request];
+    if (shape == null) {
+      return pw.Text(text, style: style, maxLines: maxLines);
+    }
+    final image = _images[request] ??= pw.MemoryImage(shape.png);
+    return pw.Align(
+      alignment: center
+          ? pw.Alignment.topCenter
+          : (rtl ? pw.Alignment.topRight : pw.Alignment.topLeft),
+      // Sized to the text; the blank inset around it spills over.
+      child: pw.SizedBox(
+        width: shape.width - shape.inset * 2,
+        height: shape.height,
+        child: pw.OverflowBox(
+          maxWidth: shape.width,
+          child: pw.Image(image, width: shape.width, height: shape.height),
+        ),
+      ),
+    );
+  }
+}
+
 class _Styles {
   _Styles(this.medium);
 
@@ -184,7 +284,20 @@ class _Styles {
   pw.TextStyle get small => const pw.TextStyle(fontSize: 7.5, color: muted);
 }
 
-pw.Widget _runningHeader(ReportJob job, _Styles s) {
+/// A4 width minus the 36 pt left and right margins.
+final double _contentWidth = PdfPageFormat.a4.width - 72;
+
+/// Table cells clip their content, so leave room for marks that reach
+/// past the text (like the Bangla ি).
+const _cellPadding = pw.EdgeInsets.symmetric(horizontal: 4, vertical: 3);
+
+/// Inside a photo block: its padding and border.
+final double _blockWidth = _contentWidth - 22;
+
+/// The value column next to a photo's images and labels.
+final double _entryValueWidth = _blockWidth - 196 - 12 - 92;
+
+pw.Widget _runningHeader(ReportJob job, _Styles s, _Tx tx) {
   return pw.Container(
     margin: const pw.EdgeInsets.only(bottom: 10),
     padding: const pw.EdgeInsets.only(bottom: 4),
@@ -196,27 +309,29 @@ pw.Widget _runningHeader(ReportJob job, _Styles s) {
         pw.Text('GPS CAMERA', style: s.brand),
         pw.SizedBox(width: 8),
         pw.Expanded(
-          child: pw.Text(
-            job.title,
-            style: s.small,
-            maxLines: 1,
-            overflow: pw.TextOverflow.clip,
-          ),
+          child: tx(job.title, s.small, width: _contentWidth - 80, maxLines: 1),
         ),
       ],
     ),
   );
 }
 
-pw.Widget _footer(pw.Context context, ReportJob job, _Styles s) {
+pw.Widget _generatedLine(ReportJob job, _Styles s, _Tx tx) => tx(
+  'Generated @time'.trParams({'time': _localTime(job.generatedAt)}),
+  s.small,
+  width: _contentWidth * 0.75,
+  maxLines: 1,
+);
+
+pw.Widget _footer(pw.Context context, ReportJob job, _Styles s, _Tx tx) {
   return pw.Container(
     margin: const pw.EdgeInsets.only(top: 8),
     child: pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        pw.Text('Generated ${_localTime(job.generatedAt)}', style: s.small),
+        pw.Flexible(child: _generatedLine(job, s, tx)),
         pw.Text(
-          'Page ${context.pageNumber} of ${context.pagesCount}',
+          '${context.pageNumber} / ${context.pagesCount}',
           style: s.small,
         ),
       ],
@@ -224,7 +339,7 @@ pw.Widget _footer(pw.Context context, ReportJob job, _Styles s) {
   );
 }
 
-pw.Widget _summary(ReportJob job, _Styles s, int missingImages) {
+pw.Widget _summary(ReportJob job, _Styles s, int missingImages, _Tx tx) {
   final entries = job.entries;
   int count(LocationRecordStatus status) =>
       entries.where((e) => e.metadata?.location.status == status).length;
@@ -232,23 +347,27 @@ pw.Widget _summary(ReportJob job, _Styles s, int missingImages) {
   final originalsMissing = entries.where((e) => !e.originalAvailable).length;
 
   final rows = <(String, String)>[
-    ('Report type', job.type.label),
-    if (job.projectName != null) ('Project', job.projectName!),
-    ('Generated', _localTime(job.generatedAt)),
-    ('Photos', '${entries.length}'),
+    ('Report type'.tr, job.type.label.tr),
+    if (job.projectName != null) ('Project'.tr, job.projectName!),
+    ('Generated'.tr, _localTime(job.generatedAt)),
+    ('Photos'.tr, '${entries.length}'),
     (
-      'Watermarked versions',
+      'Watermarked versions'.tr,
       job.type == ReportType.project
           ? '${job.watermarkedVersionCount}'
-          : '${job.watermarkedVersionCount} (of the included photos)',
+          : '@n (of the included photos)'.trParams({
+              'n': '${job.watermarkedVersionCount}',
+            }),
     ),
-    ('Current location', '${count(LocationRecordStatus.current)}'),
-    ('Last known location', '${count(LocationRecordStatus.stale)}'),
-    ('No location recorded', '${count(LocationRecordStatus.unavailable)}'),
-    if (noMetadata > 0) ('Metadata unavailable', '$noMetadata'),
-    if (originalsMissing > 0) ('Original file deleted', '$originalsMissing'),
-    if (missingImages > 0) ('Image files missing', '$missingImages'),
+    ('Current location'.tr, '${count(LocationRecordStatus.current)}'),
+    ('Last known location'.tr, '${count(LocationRecordStatus.stale)}'),
+    ('No location recorded'.tr, '${count(LocationRecordStatus.unavailable)}'),
+    if (noMetadata > 0) ('Metadata unavailable'.tr, '$noMetadata'),
+    if (originalsMissing > 0) ('Original file deleted'.tr, '$originalsMissing'),
+    if (missingImages > 0) ('Image files missing'.tr, '$missingImages'),
   ];
+  const labelWidth = 130.0;
+  final valueWidth = _contentWidth - 24 - labelWidth;
 
   return pw.Container(
     margin: const pw.EdgeInsets.only(bottom: 18),
@@ -257,12 +376,18 @@ pw.Widget _summary(ReportJob job, _Styles s, int missingImages) {
       children: [
         pw.Text('GPS CAMERA', style: s.brand),
         pw.SizedBox(height: 6),
-        pw.Text(job.projectName ?? job.title, style: s.title, maxLines: 3),
+        tx(
+          job.projectName ?? job.title,
+          s.title,
+          width: _contentWidth,
+          maxLines: 3,
+        ),
         if (job.projectDescription?.isNotEmpty ?? false) ...[
           pw.SizedBox(height: 6),
-          pw.Text(
+          tx(
             job.projectDescription!,
-            style: s.value.copyWith(color: _Styles.muted),
+            s.value.copyWith(color: _Styles.muted),
+            width: _contentWidth,
             maxLines: 6,
           ),
         ],
@@ -282,11 +407,16 @@ pw.Widget _summary(ReportJob job, _Styles s, int missingImages) {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.SizedBox(
-                        width: 130,
-                        child: pw.Text(label, style: s.label),
+                        width: labelWidth,
+                        child: tx(label, s.label, width: labelWidth - 4),
                       ),
                       pw.Expanded(
-                        child: pw.Text(value, style: s.value, maxLines: 3),
+                        child: tx(
+                          value,
+                          s.value,
+                          width: valueWidth,
+                          maxLines: 3,
+                        ),
                       ),
                     ],
                   ),
@@ -295,35 +425,37 @@ pw.Widget _summary(ReportJob job, _Styles s, int missingImages) {
           ),
         ),
         pw.SizedBox(height: 10),
-        pw.Text(
-          'All values come from the metadata recorded when each photo was '
-          'taken. Capture times are shown in the time zone recorded at '
-          'capture. Coordinates and GPS accuracy are reproduced as recorded; '
-          'accuracy is the device\'s own estimate. Altitude is shown with '
-          'its reference: on Android it is height above the WGS84 ellipsoid, '
-          'not sea level. Missing values are marked Unavailable.',
-          style: s.small,
+        tx(
+          ('All values come from the metadata recorded when each photo was '
+                  'taken. Capture times are shown in the time zone recorded at '
+                  'capture. Coordinates and GPS accuracy are reproduced as '
+                  'recorded; accuracy is the device\'s own estimate. Altitude '
+                  'is shown with its reference: on Android it is height above '
+                  'the WGS84 ellipsoid, not sea level. Missing values are '
+                  'marked Unavailable.')
+              .tr,
+          s.small,
+          width: _contentWidth,
         ),
       ],
     ),
   );
 }
 
-/// A4 width minus the 36 pt left and right margins.
-final double _contentWidth = PdfPageFormat.a4.width - 72;
-
 /// Where the photos were taken: the map with numbered pins (numbers match
 /// the # of each photo below), and which photos each pin stands for.
-pw.Widget? _overview(ReportJob job, _Styles s) {
+pw.Widget? _overview(ReportJob job, _Styles s, _Tx tx) {
   final map = job.map;
   if (map == null) {
     if (!job.mapUnavailable) return null;
     return pw.Padding(
       padding: const pw.EdgeInsets.only(bottom: 16),
-      child: pw.Text(
-        'Location map not included: there was no internet connection when '
-        'this report was made.',
-        style: s.small,
+      child: tx(
+        ('Location map not included: there was no internet connection when '
+                'this report was made.')
+            .tr,
+        s.small,
+        width: _contentWidth,
       ),
     );
   }
@@ -332,9 +464,28 @@ pw.Widget? _overview(ReportJob job, _Styles s) {
     if (entries.length == 1) return '#${entries.single}';
     final shown = entries.take(12).map((n) => '#$n').join(', ');
     return entries.length > 12
-        ? '$shown and ${entries.length - 12} more'
+        ? '@shown and @n more'.trParams({
+            'shown': shown,
+            'n': '${entries.length - 12}',
+          })
         : shown;
   }
+
+  const pinWidth = 40.0;
+  final photosWidth = (_contentWidth - pinWidth) * 3 / 7;
+  final placeWidth = (_contentWidth - pinWidth) * 4 / 7;
+  final widths = [pinWidth, photosWidth, placeWidth];
+  final note = [
+    'Pin numbers match the photo numbers below. Photos taken within '
+            '@radius m of each other share a pin.'
+        .trParams({'radius': '${ReportMapPins.radiusMeters.round()}'}),
+    if (map.omitted > 0)
+      '@n more location is not shown on the map.'.trCount(
+        '@n more locations are not shown on the map.',
+        map.omitted,
+        {'n': '${map.omitted}'},
+      ),
+  ].join(' ');
 
   return pw.Inseparable(
     child: pw.Container(
@@ -342,7 +493,7 @@ pw.Widget? _overview(ReportJob job, _Styles s) {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text('Locations', style: s.heading),
+          tx('Locations'.tr, s.heading, width: _contentWidth),
           pw.SizedBox(height: 6),
           pw.ClipRRect(
             horizontalRadius: 6,
@@ -356,19 +507,13 @@ pw.Widget? _overview(ReportJob job, _Styles s) {
             ),
           ),
           pw.SizedBox(height: 4),
-          pw.Text(
-            'Pin numbers match the photo numbers below. Photos taken within '
-            '${ReportMapPins.radiusMeters.round()} m of each other share a '
-            'pin.${map.omitted > 0 ? ' ${map.omitted} more locations are '
-                      'not shown on the map.' : ''}',
-            style: s.small,
-          ),
+          tx(note, s.small, width: _contentWidth),
           if (map.pins.any((p) => p.entries.length > 1) ||
               map.pins.length > 1) ...[
             pw.SizedBox(height: 8),
             pw.Table(
               columnWidths: const {
-                0: pw.FixedColumnWidth(40),
+                0: pw.FixedColumnWidth(pinWidth),
                 1: pw.FlexColumnWidth(3),
                 2: pw.FlexColumnWidth(4),
               },
@@ -378,10 +523,10 @@ pw.Widget? _overview(ReportJob job, _Styles s) {
               children: [
                 pw.TableRow(
                   children: [
-                    for (final h in ['PIN', 'PHOTOS', 'PLACE'])
+                    for (final (i, h) in ['PIN', 'PHOTOS', 'PLACE'].indexed)
                       pw.Padding(
-                        padding: const pw.EdgeInsets.symmetric(vertical: 3),
-                        child: pw.Text(h, style: s.label),
+                        padding: _cellPadding,
+                        child: tx(h.tr, s.label, width: widths[i] - 8),
                       ),
                   ],
                 ),
@@ -389,23 +534,28 @@ pw.Widget? _overview(ReportJob job, _Styles s) {
                   pw.TableRow(
                     children: [
                       pw.Padding(
-                        padding: const pw.EdgeInsets.symmetric(vertical: 3),
+                        padding: _cellPadding,
                         child: pw.Text(
                           '${pin.label}',
                           style: s.value.copyWith(color: _Styles.accent),
                         ),
                       ),
                       pw.Padding(
-                        padding: const pw.EdgeInsets.symmetric(vertical: 3),
-                        child: pw.Text(photos(pin.entries), style: s.value),
+                        padding: _cellPadding,
+                        child: tx(
+                          photos(pin.entries),
+                          s.value,
+                          width: photosWidth - 8,
+                        ),
                       ),
                       pw.Padding(
-                        padding: const pw.EdgeInsets.symmetric(vertical: 3),
-                        child: pw.Text(
+                        padding: _cellPadding,
+                        child: tx(
                           pin.place ??
                               '${pin.latitude.toStringAsFixed(5)}, '
                                   '${pin.longitude.toStringAsFixed(5)}',
-                          style: s.value,
+                          s.value,
+                          width: placeWidth - 8,
                           maxLines: 2,
                         ),
                       ),
@@ -426,6 +576,7 @@ pw.Widget _entryBlock(
   List<(ReportImage, Uint8List?)> images,
   ReportType type,
   _Styles s,
+  _Tx tx,
 ) {
   final rows = reportEntryRows(entry, type);
 
@@ -450,11 +601,11 @@ pw.Widget _entryBlock(
               ),
               pw.SizedBox(width: 6),
               pw.Expanded(
-                child: pw.Text(
+                child: tx(
                   entry.fileName,
-                  style: s.heading,
+                  s.heading,
+                  width: _blockWidth - 40,
                   maxLines: 1,
-                  overflow: pw.TextOverflow.clip,
                 ),
               ),
             ],
@@ -463,7 +614,7 @@ pw.Widget _entryBlock(
           pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.SizedBox(width: 196, child: _images(images, s)),
+              pw.SizedBox(width: 196, child: _images(images, s, tx)),
               pw.SizedBox(width: 12),
               pw.Expanded(
                 child: pw.Column(
@@ -476,16 +627,16 @@ pw.Widget _entryBlock(
                           children: [
                             pw.SizedBox(
                               width: 92,
-                              child: pw.Text(label, style: s.label),
+                              child: tx(label, s.label, width: 88),
                             ),
                             pw.Expanded(
-                              child: pw.Text(
+                              child: tx(
                                 value,
-                                style: warn
+                                warn
                                     ? s.value.copyWith(color: _Styles.warning)
                                     : s.value,
+                                width: _entryValueWidth,
                                 maxLines: 4,
-                                overflow: pw.TextOverflow.clip,
                               ),
                             ),
                           ],
@@ -502,8 +653,8 @@ pw.Widget _entryBlock(
   );
 }
 
-pw.Widget _images(List<(ReportImage, Uint8List?)> images, _Styles s) {
-  if (images.isEmpty) return _missingImage('No image', s);
+pw.Widget _images(List<(ReportImage, Uint8List?)> images, _Styles s, _Tx tx) {
+  if (images.isEmpty) return _missingImage('No image'.tr, 196, s, tx);
   final width = images.length == 1 ? 196.0 : 95.0;
   return pw.Row(
     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -521,21 +672,21 @@ pw.Widget _images(List<(ReportImage, Uint8List?)> images, _Styles s) {
                 alignment: pw.Alignment.center,
                 color: _Styles.panel,
                 child: bytes == null
-                    ? _missingImage('Image file missing', s)
+                    ? _missingImage('Image file missing'.tr, width, s, tx)
                     : pw.Image(pw.MemoryImage(bytes)),
               ),
               pw.SizedBox(height: 3),
-              pw.Text(
+              tx(
                 image.role == ReportImageRole.original
-                    ? 'Original'
-                    : 'Watermarked',
-                style: s.small.copyWith(
+                    ? 'Original'.tr
+                    : 'Watermarked'.tr,
+                s.small.copyWith(
                   color: image.role == ReportImageRole.original
                       ? _Styles.muted
                       : _Styles.amber,
                 ),
+                width: width,
                 maxLines: 2,
-                overflow: pw.TextOverflow.clip,
               ),
             ],
           ),
@@ -544,11 +695,12 @@ pw.Widget _images(List<(ReportImage, Uint8List?)> images, _Styles s) {
   );
 }
 
-pw.Widget _missingImage(String text, _Styles s) => pw.Container(
-  height: 210,
-  alignment: pw.Alignment.center,
-  child: pw.Text(text, style: s.small, textAlign: pw.TextAlign.center),
-);
+pw.Widget _missingImage(String text, double width, _Styles s, _Tx tx) =>
+    pw.Container(
+      height: 210,
+      alignment: pw.Alignment.center,
+      child: tx(text, s.small, width: width - 8, center: true),
+    );
 
 /// The detail rows shown for one photo: (label, value, highlight). Values
 /// come only from stored metadata; anything missing reads "Unavailable".
@@ -560,31 +712,31 @@ List<(String, String, bool)> reportEntryRows(
   final metadata = entry.metadata;
   return <(String, String, bool)>[
     (
-      'Captured',
+      'Captured'.tr,
       metadata == null
-          ? 'Unavailable'
+          ? 'Unavailable'.tr
           : PhotoInfoFormatter.captureFull(metadata),
       false,
     ),
-    if (metadata?.note != null) ('Note', metadata!.note!, false),
+    if (metadata?.note != null) ('Note'.tr, metadata!.note!, false),
     (
-      'Original file',
+      'Original file'.tr,
       entry.originalAvailable
           ? entry.fileName
-          : '${entry.fileName} (original deleted)',
+          : '@file (original deleted)'.trParams({'file': entry.fileName}),
       !entry.originalAvailable,
     ),
     if (type == ReportType.selection)
-      ('Project', entry.projectName ?? 'None', false),
+      ('Project'.tr, entry.projectName ?? 'None'.tr, false),
     if (metadata == null)
-      ('Metadata', entry.metadataProblem ?? 'Unavailable', true)
+      ('Metadata'.tr, entry.metadataProblem?.tr ?? 'Unavailable'.tr, true)
     else
       ..._locationRows(metadata),
     if (metadata?.direction != null)
-      ('Camera direction', metadata!.direction!.description, false),
+      ('Camera direction'.tr, metadata!.direction!.description, false),
     ..._watermarkRows(entry),
     if (entry.otherSelectedCopies.isNotEmpty)
-      ('Also selected', entry.otherSelectedCopies.join(', '), false),
+      ('Also selected'.tr, entry.otherSelectedCopies.join(', '), false),
   ];
 }
 
@@ -592,64 +744,80 @@ List<(String, String, bool)> _locationRows(PhotoMetadata metadata) {
   final location = metadata.location;
   final fix = location.fix;
   final status = switch (location.status) {
-    LocationRecordStatus.current => 'Current',
-    LocationRecordStatus.stale => 'Stale (last known location)',
-    LocationRecordStatus.unavailable =>
-      'Unavailable (${_reason(location.reason)})',
+    LocationRecordStatus.current => 'Current'.tr,
+    LocationRecordStatus.stale => 'Stale (last known location)'.tr,
+    LocationRecordStatus.unavailable => 'Unavailable (@reason)'.trParams({
+      'reason': _reason(location.reason),
+    }),
   };
   return [
     (
-      'Location status',
+      'Location status'.tr,
       status,
       location.status != LocationRecordStatus.current,
     ),
     if (fix == null) ...[
-      ('Latitude', 'Unavailable', false),
-      ('Longitude', 'Unavailable', false),
-      ('GPS accuracy', 'Unavailable', false),
+      ('Latitude'.tr, 'Unavailable'.tr, false),
+      ('Longitude'.tr, 'Unavailable'.tr, false),
+      ('GPS accuracy'.tr, 'Unavailable'.tr, false),
     ] else ...[
-      ('Latitude', '${fix.latitude}°', false),
-      ('Longitude', '${fix.longitude}°', false),
+      ('Latitude'.tr, '${fix.latitude}°', false),
+      ('Longitude'.tr, '${fix.longitude}°', false),
       (
-        'GPS accuracy',
+        'GPS accuracy'.tr,
         '±${PhotoInfoFormatter.length(fix.accuracy)} '
             '(${_level(GpsAccuracyLevel.fromMeters(fix.accuracy))})',
         GpsAccuracyLevel.fromMeters(fix.accuracy) == GpsAccuracyLevel.poor,
       ),
       if (location.fixAge != null)
         (
-          'Fix age',
-          '${CaptureTimeFormatter.age(location.fixAge!)} before capture',
+          'Fix age'.tr,
+          '@age before capture'.trParams({
+            'age': CaptureTimeFormatter.age(location.fixAge!),
+          }),
           false,
         ),
-      if (fix.altitude != null) ('Altitude', _altitude(fix), false),
+      if (fix.altitude != null) ('Altitude'.tr, _altitude(fix), false),
       if (fix.heading != null)
         (
-          'Direction of travel',
+          'Direction of travel'.tr,
           '${PhotoInfoFormatter.measured(fix.heading!, maxDecimals: 1)}°',
           false,
         ),
       ..._placeRows(metadata.place, fix),
-      if (fix.isMocked) ('Source', 'Mock location provider', true),
+      if (fix.isMocked) ('Source'.tr, 'Mock location provider'.tr, true),
     ],
   ];
 }
 
 List<(String, String, bool)> _watermarkRows(ReportEntry entry) {
-  if (entry.watermarks.isEmpty) return const [('Watermark', 'None', false)];
+  if (entry.watermarks.isEmpty) {
+    return [('Watermark'.tr, 'None'.tr, false)];
+  }
   final latest = entry.watermarks.first;
   final count = entry.watermarks.length;
   final config = latest.config;
+  final versions = '@n version · latest @file'.trCount(
+    '@n versions · latest @file',
+    count,
+    {'n': '$count', 'file': latest.fileName},
+  );
   return [
     (
-      'Watermark',
-      '$count version${count == 1 ? '' : 's'} · latest ${latest.fileName}'
-          '${latest.renderedAt == null ? '' : ', rendered ${_localTime(latest.renderedAt!)}'}',
+      'Watermark'.tr,
+      latest.renderedAt == null
+          ? versions
+          : '@versions, rendered @time'.trParams({
+              'versions': versions,
+              'time': _localTime(latest.renderedAt!),
+            }),
       false,
     ),
     (
-      'Watermark settings',
-      config == null ? 'Unavailable (render record missing)' : _config(config),
+      'Watermark settings'.tr,
+      config == null
+          ? 'Unavailable (render record missing)'.tr
+          : _config(config),
       config == null,
     ),
   ];
@@ -657,42 +825,54 @@ List<(String, String, bool)> _watermarkRows(ReportEntry entry) {
 
 List<(String, String, bool)> _placeRows(PlaceInfo? place, LocationFix fix) {
   if (place == null) {
-    return [if (fix.address != null) ('Address', fix.address!, false)];
+    return [if (fix.address != null) ('Address'.tr, fix.address!, false)];
   }
   return [
-    if (place.title != null) ('Place', place.title!, false),
+    if (place.title != null) ('Place'.tr, place.title!, false),
     (
-      'Address',
-      place.addressLine ?? 'Unavailable (no address found)',
+      'Address'.tr,
+      place.addressLine ?? 'Unavailable (no address found)'.tr,
       place.addressLine == null,
     ),
-    ('Plus Code', place.plusCode, false),
+    ('Plus Code'.tr, place.plusCode, false),
   ];
 }
 
 String _config(WatermarkConfig c) {
   final shown = [
-    if (c.showDate) 'date',
-    if (c.showTime) 'time',
-    if (c.showCoordinates) 'coordinates',
-    if (c.showAccuracy) 'accuracy',
-    if (c.showAddress) 'address (when recorded)',
+    if (c.showDate) 'date'.tr,
+    if (c.showTime) 'time'.tr,
+    if (c.showCoordinates) 'coordinates'.tr,
+    if (c.showAccuracy) 'accuracy'.tr,
+    if (c.showAddress) 'address (when recorded)'.tr,
   ];
   final position = switch (c.position) {
-    WatermarkPosition.bottomLeft => 'bottom left',
-    WatermarkPosition.bottomCenter => 'bottom center',
-    WatermarkPosition.bottomRight => 'bottom right',
+    WatermarkPosition.bottomLeft => 'bottom left'.tr,
+    WatermarkPosition.bottomCenter => 'bottom center'.tr,
+    WatermarkPosition.bottomRight => 'bottom right'.tr,
   };
-  return '${c.template.label} · $position · ${c.textSize.name} text · '
-      '${(c.opacity * 100).round()}% opacity · shows '
-      '${shown.isEmpty ? 'nothing' : shown.join(', ')}';
+  final size = switch (c.textSize) {
+    WatermarkTextSize.small => 'small text'.tr,
+    WatermarkTextSize.medium => 'medium text'.tr,
+    WatermarkTextSize.large => 'large text'.tr,
+  };
+  return [
+    c.template.label.tr,
+    position,
+    size,
+    '@n% opacity'.trParams({'n': '${(c.opacity * 100).round()}'}),
+    'shows @items'.trParams({
+      'items': shown.isEmpty ? 'nothing'.tr : shown.join(', '),
+    }),
+  ].join(' · ');
 }
 
 String _altitude(LocationFix fix) {
   final reference = switch (fix.altitudeReference) {
-    AltitudeReference.wgs84Ellipsoid => 'above WGS84 ellipsoid (not sea level)',
-    AltitudeReference.meanSeaLevel => 'above mean sea level',
-    null => 'reference unknown',
+    AltitudeReference.wgs84Ellipsoid =>
+      'above WGS84 ellipsoid (not sea level)'.tr,
+    AltitudeReference.meanSeaLevel => 'above mean sea level'.tr,
+    null => 'reference unknown'.tr,
   };
   final accuracy = fix.altitudeAccuracy == null
       ? ''
@@ -701,17 +881,18 @@ String _altitude(LocationFix fix) {
 }
 
 String _level(GpsAccuracyLevel level) => switch (level) {
-  GpsAccuracyLevel.good => 'Good',
-  GpsAccuracyLevel.moderate => 'Moderate',
-  GpsAccuracyLevel.poor => 'Poor',
+  GpsAccuracyLevel.good => 'Good'.tr,
+  GpsAccuracyLevel.moderate => 'Moderate'.tr,
+  GpsAccuracyLevel.poor => 'Poor'.tr,
 };
 
 String _reason(LocationUnavailableReason? reason) => switch (reason) {
-  LocationUnavailableReason.permissionDenied => 'permission denied',
-  LocationUnavailableReason.locationServicesDisabled => 'location services off',
-  LocationUnavailableReason.noFixYet => 'no GPS fix yet',
-  LocationUnavailableReason.gpsUnavailable => 'GPS unavailable',
-  null => 'not recorded',
+  LocationUnavailableReason.permissionDenied => 'permission denied'.tr,
+  LocationUnavailableReason.locationServicesDisabled =>
+    'location services off'.tr,
+  LocationUnavailableReason.noFixYet => 'no GPS fix yet'.tr,
+  LocationUnavailableReason.gpsUnavailable => 'GPS unavailable'.tr,
+  null => 'not recorded'.tr,
 };
 
 /// Report generation time in the device zone, with its UTC offset.

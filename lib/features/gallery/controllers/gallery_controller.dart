@@ -246,7 +246,7 @@ class GalleryController extends GetxController implements PhotoLibrary {
     return ReportJob(
       format: DisplayFormat.current,
       type: ReportType.selection,
-      title: 'Selected photos report',
+      title: 'Selected photos report'.tr,
       generatedAt: now ?? DateTime.now(),
       entries: entries,
     );

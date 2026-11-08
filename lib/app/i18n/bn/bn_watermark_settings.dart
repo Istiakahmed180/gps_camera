@@ -97,7 +97,7 @@ const Map<String, String> bnWatermarkSettings = {
   'Small': 'ছোট',
   'Medium': 'মাঝারি',
   'Large': 'বড়',
-  'Opacity': 'স্বচ্ছতা',
+  'Opacity': 'অস্বচ্ছতা',
 
   // Branding.
   'Branding': 'ব্র্যান্ডিং',
@@ -150,8 +150,6 @@ const Map<String, String> bnWatermarkSettings = {
       'ক্যামেরার বাইরে অ্যাপটি কেমন দেখাবে তা বাছাই করুন।',
   'Light': 'লাইট',
   'Dark': 'ডার্ক',
-  'Text in the app and on new watermarks. PDF reports stay in English.':
-      'অ্যাপের লেখা ও নতুন ওয়াটারমার্কে। PDF রিপোর্ট ইংরেজিতেই থাকবে।',
   'About': 'অ্যাপ সম্পর্কে',
   'Geo-tagged photos, albums and reports': 'লোকেশনসহ ছবি, অ্যালবাম ও রিপোর্ট',
   'Not available on this phone': 'এই ফোনে চালু নেই',

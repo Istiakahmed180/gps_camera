@@ -198,6 +198,15 @@ void main() {
       keepLtrRuns('23.91° N, 90.40° E', rtl: true),
       '${i}23.91° N, 90.40° E$p',
     );
+    // Brackets stay paired.
+    expect(
+      keepLtrRuns('339° N (الشمال الحقيقي, ±10°)', rtl: true),
+      '${i}339° N$p (الشمال الحقيقي, $i±10°$p)',
+    );
+    expect(
+      keepLtrRuns('11:03 م (UTC+06:00)', rtl: true),
+      '${i}11:03$p م $i(UTC+06:00)$p',
+    );
     expect(keepLtrRuns('240° SW', rtl: false), '240° SW');
     expect(hasRtlLetters('العربية'), isTrue);
     expect(hasRtlLetters('23.91° N'), isFalse);

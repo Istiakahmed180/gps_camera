@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:ui' show Locale;
 
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,8 @@ import 'package:gps_camera/core/services/share_service.dart';
 import 'package:gps_camera/features/reports/models/report_models.dart';
 import 'package:gps_camera/features/reports/models/report_record.dart';
 import 'package:gps_camera/features/reports/services/pdf_report_renderer.dart';
+import 'package:gps_camera/features/reports/services/report_text.dart';
+import 'package:gps_camera/features/reports/services/report_text_shaper.dart';
 
 class ReportException implements Exception {
   const ReportException(this.message);
@@ -100,7 +103,7 @@ class ReportService extends GetxService {
     File? target;
     File? temp;
     try {
-      job = await _withOverviewMap(job);
+      job = (await _withOverviewMap(job)).withLanguage(currentLanguage());
       final fonts = await _fonts();
       target = await _storage.reserveReportFile(baseNameFor(job));
       temp = File('${target.path}.tmp');
@@ -267,6 +270,20 @@ class ReportService extends GetxService {
     return slug.length > 40 ? slug.substring(0, 40) : slug;
   }
 
+  /// The app language now, with its text, for the rendering isolate.
+  static ReportLanguage currentLanguage() {
+    final locale = Get.locale;
+    if (locale == null) return const ReportLanguage();
+    final strings =
+        Get.translations['${locale.languageCode}_${locale.countryCode}'];
+    if (strings == null) return const ReportLanguage();
+    return ReportLanguage(
+      languageCode: locale.languageCode,
+      countryCode: locale.countryCode,
+      strings: strings,
+    );
+  }
+
   static Future<ReportFonts> loadBundledFonts() async {
     Future<Uint8List> load(String name) async =>
         (await rootBundle.load('assets/fonts/$name')).buffer.asUint8List();
@@ -293,6 +310,10 @@ class ReportService extends GetxService {
         case ReportRenderStats():
           done.complete(message);
           port.close();
+        // Text the PDF library cannot shape is drawn here, where Flutter's
+        // text engine is available.
+        case (final SendPort reply, final List<TextRequest> requests):
+          unawaited(ReportTextShaper.shape(requests).then(reply.send));
         case [final Object error, final Object _]:
           done.completeError(ReportException('$error'));
           port.close();
@@ -324,11 +345,26 @@ class ReportService extends GetxService {
     final (send, job, fonts, path) = args;
     // Statics are not shared with this isolate.
     DisplayFormat.current = job.format;
+    final language = job.language;
+    if (language.strings.isNotEmpty) {
+      final locale = Locale(language.languageCode, language.countryCode);
+      Get.addTranslations({locale.toString(): language.strings});
+      Get.locale = locale;
+    }
+    Future<List<ShapedText?>> shape(List<TextRequest> requests) async {
+      final reply = ReceivePort();
+      send.send((reply.sendPort, requests));
+      final shaped = await reply.first;
+      reply.close();
+      return (shaped as List).cast<ShapedText?>();
+    }
+
     final stats = await renderReportPdf(
       job,
       fonts,
       path,
       onProgress: send.send,
+      shaper: shape,
     );
     send.send(stats);
   }

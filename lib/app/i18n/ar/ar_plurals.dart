@@ -77,4 +77,14 @@ const Map<String, Map<String, String>> arPlurals = {
         'other': '@n صورة. تُكتب في الصور الأصلية وقت الالتقاط وموقع GPS، لتتمكن التطبيقات الأخرى من قراءتها.',
       },
   '@n pages': {'two': 'صفحتان', 'other': '@n صفحة'},
+  '@n more locations are not shown on the map.': {
+    'two': 'موقعان إضافيان لا يظهران على الخريطة.',
+    'few': '@n مواقع إضافية لا تظهر على الخريطة.',
+    'other': '@n موقعًا إضافيًا لا تظهر على الخريطة.',
+  },
+  '@n versions · latest @file': {
+    'two': 'نسختان · الأحدث: @file',
+    'few': '@n نسخ · الأحدث: @file',
+    'other': '@n نسخة · الأحدث: @file',
+  },
 };

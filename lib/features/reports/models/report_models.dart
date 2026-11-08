@@ -89,6 +89,7 @@ class ReportJob {
     this.format = const DisplayFormat(),
     this.map,
     this.mapUnavailable = false,
+    this.language = const ReportLanguage(),
   });
 
   /// The same job with its overview map, or noting that one could not be
@@ -104,6 +105,22 @@ class ReportJob {
     format: format,
     map: map,
     mapUnavailable: unavailable,
+    language: language,
+  );
+
+  /// The same job written in [language].
+  ReportJob withLanguage(ReportLanguage language) => ReportJob(
+    type: type,
+    title: title,
+    generatedAt: generatedAt,
+    entries: entries,
+    projectId: projectId,
+    projectName: projectName,
+    projectDescription: projectDescription,
+    format: format,
+    map: map,
+    mapUnavailable: mapUnavailable,
+    language: language,
   );
 
   final ReportType type;
@@ -125,8 +142,30 @@ class ReportJob {
   /// Photos have locations but the map could not be fetched (offline).
   final bool mapUnavailable;
 
+  /// The app language when the report was made.
+  final ReportLanguage language;
+
   int get watermarkedVersionCount =>
       entries.fold(0, (sum, e) => sum + e.watermarks.length);
+}
+
+/// The language a report is written in, as plain data so it can be sent
+/// to the rendering isolate.
+class ReportLanguage {
+  const ReportLanguage({
+    this.languageCode = 'en',
+    this.countryCode,
+    this.strings = const {},
+  });
+
+  final String languageCode;
+  final String? countryCode;
+
+  /// The app's text for this language, keyed by the English text; empty
+  /// for English.
+  final Map<String, String> strings;
+
+  bool get isRtl => languageCode == 'ar';
 }
 
 class ReportProgress {

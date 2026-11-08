@@ -117,7 +117,7 @@ class ProjectDetailsController extends GetxController implements PhotoLibrary {
     return ReportJob(
       format: DisplayFormat.current,
       type: ReportType.project,
-      title: 'Project report: ${current.name}',
+      title: 'Project report: @name'.trParams({'name': current.name}),
       projectId: current.id,
       projectName: current.name,
       projectDescription: current.description,

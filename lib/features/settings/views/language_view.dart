@@ -55,8 +55,8 @@ class LanguageView extends StatelessWidget {
                     AppSpacing.lg,
                   ),
                   child: Text(
-                    'Text in the app and on new watermarks. PDF reports '
-                            'stay in English.'
+                    'Text in the app, on new watermarks and in new PDF '
+                            'reports.'
                         .tr,
                     style: context.text.bodySmall,
                   ),
