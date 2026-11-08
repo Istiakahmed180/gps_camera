@@ -14,6 +14,7 @@ import 'package:gps_camera/features/export/services/gallery_export_service.dart'
 import 'package:gps_camera/features/export/services/phone_gallery.dart';
 import 'package:gps_camera/features/gallery/services/gallery_service.dart';
 import 'package:gps_camera/features/location/services/map_cache.dart';
+import 'package:gps_camera/features/projects/services/project_export_service.dart';
 import 'package:gps_camera/features/watermark/services/logo_service.dart';
 import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
 import 'package:gps_camera/features/projects/services/project_repository.dart';
@@ -31,6 +32,7 @@ class InitialBinding extends Bindings {
     Get.lazyPut(PhotoStorageService.new, fenix: true);
     Get.lazyPut(ShareService.new, fenix: true);
     Get.lazyPut(MapCache.new, fenix: true);
+    Get.lazyPut(ProjectExportService.new, fenix: true);
     Get.lazyPut(() {
       final logo = LogoService(Get.find<PhotoStorageService>());
       // A logo recovered after a restart should also be switched on.

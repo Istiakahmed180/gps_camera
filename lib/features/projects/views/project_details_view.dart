@@ -6,12 +6,13 @@ import 'package:gps_camera/features/gallery/utils/photo_info_formatter.dart';
 import 'package:gps_camera/features/gallery/widgets/gallery_filter_bar.dart';
 import 'package:gps_camera/features/gallery/widgets/photo_grid.dart';
 import 'package:gps_camera/features/projects/controllers/project_details_controller.dart';
+import 'package:gps_camera/features/projects/widgets/project_zip_share.dart';
 import 'package:gps_camera/features/reports/services/report_service.dart';
 import 'package:gps_camera/features/reports/widgets/report_generation.dart';
 import 'package:gps_camera/shared/widgets/app_button.dart';
 import 'package:gps_camera/shared/widgets/empty_state_view.dart';
 
-enum _MenuAction { archive, restore, delete }
+enum _MenuAction { shareZip, archive, restore, delete }
 
 class ProjectDetailsView extends GetView<ProjectDetailsController> {
   const ProjectDetailsView({super.key});
@@ -42,6 +43,14 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
                 enabled: !controller.isBusy.value,
                 onSelected: (a) => _onMenu(context, a),
                 itemBuilder: (_) => [
+                  if (controller.originalCount > 0)
+                    const PopupMenuItem(
+                      value: _MenuAction.shareZip,
+                      child: ListTile(
+                        leading: Icon(Icons.folder_zip_outlined),
+                        title: Text('Share photos as ZIP'),
+                      ),
+                    ),
                   if (project.isArchived)
                     const PopupMenuItem(
                       value: _MenuAction.restore,
@@ -215,6 +224,12 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
     final project = controller.project.value;
     if (project == null) return;
     switch (action) {
+      case _MenuAction.shareZip:
+        await shareProjectZip(
+          context,
+          projectName: project.name,
+          index: controller.index.value,
+        );
       case _MenuAction.archive:
       case _MenuAction.restore:
         final archiving = action == _MenuAction.archive;
