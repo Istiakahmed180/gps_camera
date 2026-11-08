@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
@@ -125,7 +126,7 @@ class GalleryView extends GetView<GalleryController> {
         builder: (dialog, setState) => AlertDialog(
           icon: Icon(Icons.delete_outline_rounded, color: dialog.colors.error),
           title: Text(
-            'Delete @n photo?'.trPluralParams('Delete @n photos?', count, {
+            'Delete @n photo?'.trCount('Delete @n photos?', count, {
               'n': '$count',
             }),
           ),
@@ -145,12 +146,11 @@ class GalleryView extends GetView<GalleryController> {
                   value: includeCopies,
                   onChanged: (v) => setState(() => includeCopies = v ?? true),
                   title: Text(
-                    'Also delete watermarked copies of @n original'
-                        .trPluralParams(
-                          'Also delete watermarked copies of @n originals',
-                          withCopies,
-                          {'n': '$withCopies'},
-                        ),
+                    'Also delete watermarked copies of @n original'.trCount(
+                      'Also delete watermarked copies of @n originals',
+                      withCopies,
+                      {'n': '$withCopies'},
+                    ),
                   ),
                 ),
             ],
@@ -182,15 +182,14 @@ class GalleryView extends GetView<GalleryController> {
     _snack(
       context,
       failed == 0
-          ? 'Deleted @n photo'.trPluralParams('Deleted @n photos', removed, {
+          ? 'Deleted @n photo'.trCount('Deleted @n photos', removed, {
               'n': '$removed',
             })
-          : 'Deleted @removed, but @failed file could not be removed'
-                .trPluralParams(
-                  'Deleted @removed, but @failed files could not be removed',
-                  failed,
-                  {'removed': '$removed', 'failed': '$failed'},
-                ),
+          : 'Deleted @removed, but @failed file could not be removed'.trCount(
+              'Deleted @removed, but @failed files could not be removed',
+              failed,
+              {'removed': '$removed', 'failed': '$failed'},
+            ),
       isError: failed > 0,
     );
   }

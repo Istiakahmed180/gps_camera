@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
@@ -101,8 +102,8 @@ Future<void> _showReady(
             const SizedBox(height: AppSpacing.xs),
             Text(
               '${record.fileName}\n'
-              '${'@n photo'.trPluralParams('@n photos', record.photoCount, {'n': '${record.photoCount}'})}'
-              ' · ${'@n page'.trPluralParams('@n pages', record.pageCount, {'n': '${record.pageCount}'})}',
+              '${'@n photo'.trCount('@n photos', record.photoCount, {'n': '${record.photoCount}'})}'
+              ' · ${'@n page'.trCount('@n pages', record.pageCount, {'n': '${record.pageCount}'})}',
               style: sheet.text.bodyMedium,
             ),
             const SizedBox(height: AppSpacing.lg),

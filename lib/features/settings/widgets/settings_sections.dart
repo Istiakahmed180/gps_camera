@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/core/settings/display_format.dart';
@@ -181,13 +182,13 @@ class LocationDetailsSettings extends StatelessWidget {
       _snack(
         context,
         [
-          'Updated @n photo'.trPluralParams(
+          'Updated @n photo'.trCount(
             'Updated @n photos',
             result.updatedPhotos,
             {'n': '${result.updatedPhotos}'},
           ),
           if (result.replacedCopies > 0)
-            'remade @n watermarked copy'.trPluralParams(
+            'remade @n watermarked copy'.trCount(
               'remade @n watermarked copies',
               result.replacedCopies,
               {'n': '${result.replacedCopies}'},
@@ -201,7 +202,7 @@ class LocationDetailsSettings extends StatelessWidget {
         context,
         ('@n photo still need details. Check the internet connection and '
                 'try again.')
-            .trPluralParams(
+            .trCount(
               '@n photos still need details. Check the internet connection '
               'and try again.',
               result.remaining,
@@ -238,14 +239,14 @@ class StorageSettings extends StatelessWidget {
           const Divider(height: 1),
           _row(
             'Original photos'.tr,
-            '@n photo'.trPluralParams('@n photos', u.photoCount, {
+            '@n photo'.trCount('@n photos', u.photoCount, {
               'n': '${u.photoCount}',
             }),
             size(u.photos),
           ),
           _row(
             'Watermarked copies'.tr,
-            '@n copy'.trPluralParams('@n copies', u.watermarkedCount, {
+            '@n copy'.trCount('@n copies', u.watermarkedCount, {
               'n': '${u.watermarkedCount}',
             }),
             size(u.watermarked),
@@ -253,7 +254,7 @@ class StorageSettings extends StatelessWidget {
           _row('Maps saved with photos'.tr, null, size(u.maps)),
           _row(
             'Reports'.tr,
-            '@n PDF'.trPluralParams('@n PDFs', u.reportCount, {
+            '@n PDF'.trCount('@n PDFs', u.reportCount, {
               'n': '${u.reportCount}',
             }),
             size(u.reports),
@@ -265,7 +266,7 @@ class StorageSettings extends StatelessWidget {
             subtitle: Text(
               ('@n map kept so places you visit again need no download. '
                       'Clearing it never affects your photos.')
-                  .trPluralParams(
+                  .trCount(
                     '@n maps kept so places you visit again need no '
                     'download. Clearing it never affects your photos.',
                     u.mapCacheCount,

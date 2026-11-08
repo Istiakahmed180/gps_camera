@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/core/utils/script.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
@@ -231,9 +232,19 @@ class _Section extends StatelessWidget {
                             ),
                           ),
                           Expanded(
+                            // Coordinates and other Latin values keep their
+                            // order in Arabic; marks would end up in copies.
                             child: SelectableText(
                               row.value,
                               style: context.text.bodyMedium,
+                              textDirection: hasRtlLetters(row.value)
+                                  ? null
+                                  : TextDirection.ltr,
+                              textAlign:
+                                  Directionality.of(context) ==
+                                      TextDirection.rtl
+                                  ? TextAlign.right
+                                  : TextAlign.left,
                             ),
                           ),
                         ],

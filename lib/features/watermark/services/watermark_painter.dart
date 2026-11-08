@@ -165,10 +165,7 @@ class WatermarkPainter {
       if (label != null) {
         label.paint(
           canvas,
-          Offset(
-            _x(textLeft, label.width),
-            y + (row.height - label.height),
-          ),
+          Offset(_x(textLeft, label.width), y + (row.height - label.height)),
         );
         row.value.paint(
           canvas,
@@ -535,7 +532,10 @@ class WatermarkPainter {
 
   TextPainter _text(String text, TextStyle style, double maxWidth) {
     return TextPainter(
-      text: TextSpan(text: text, style: style),
+      text: TextSpan(
+        text: keepLtrRuns(text, rtl: rtl),
+        style: style,
+      ),
       textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
       textScaler: TextScaler.noScaling,
       maxLines: 2,

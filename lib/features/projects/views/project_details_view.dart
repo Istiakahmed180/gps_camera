@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/features/gallery/utils/photo_info_formatter.dart';
@@ -162,7 +163,7 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                '${'@n original'.trPluralParams('@n originals', controller.originalCount, {'n': '${controller.originalCount}'})} · '
+                '${'@n original'.trCount('@n originals', controller.originalCount, {'n': '${controller.originalCount}'})} · '
                 '${'@n watermarked'.trParams({'n': '${controller.watermarkedCount}'})}',
                 style: context.text.labelLarge,
               ),

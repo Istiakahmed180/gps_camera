@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/i18n/app_language.dart';
 import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
@@ -209,7 +210,7 @@ class _GallerySettings extends StatelessWidget {
         content: Text(
           ('@n photo will be copied to Pictures/GPS Camera. The photos in '
                   'the app are not changed.')
-              .trPluralParams(
+              .trCount(
                 '@n photos will be copied to Pictures/GPS Camera. The '
                 'photos in the app are not changed.',
                 count,

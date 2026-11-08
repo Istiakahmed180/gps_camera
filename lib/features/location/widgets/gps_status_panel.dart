@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/core/utils/script.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/app/theme/app_text_styles.dart';
@@ -64,7 +65,10 @@ class GpsStatusPanel extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(right: AppSpacing.xs),
                 child: Text(
-                  view.trailing!,
+                  keepLtrRuns(
+                    view.trailing!,
+                    rtl: Directionality.of(context) == TextDirection.rtl,
+                  ),
                   style: context.text.titleSmall
                       ?.merge(AppTextStyles.tabularFigures)
                       .copyWith(color: view.color),
@@ -207,9 +211,12 @@ class _Texts extends StatelessWidget {
         if (view.detail != null)
           FittedBox(
             fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: Text(
-              view.detail!.tr,
+              keepLtrRuns(
+                view.detail!.tr,
+                rtl: Directionality.of(context) == TextDirection.rtl,
+              ),
               maxLines: 1,
               style: context.text.bodySmall
                   ?.merge(AppTextStyles.tabularFigures)

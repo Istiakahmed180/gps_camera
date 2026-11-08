@@ -11,9 +11,13 @@ import 'package:gps_camera/app/app.dart';
 import 'package:gps_camera/app/bindings/initial_binding.dart';
 import 'package:gps_camera/app/i18n/app_language.dart';
 import 'package:gps_camera/app/i18n/app_translations.dart';
+import 'package:gps_camera/app/i18n/ar/ar.dart';
+import 'package:gps_camera/app/i18n/ar/ar_plurals.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/i18n/bn/bn.dart';
 import 'package:gps_camera/core/constants/storage_keys.dart';
 import 'package:gps_camera/core/database/database_service.dart';
+import 'package:gps_camera/core/utils/script.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
 import 'package:gps_camera/features/gallery/services/gallery_service.dart';
 import 'package:gps_camera/features/location/services/location_service.dart';
@@ -181,6 +185,75 @@ void main() {
       await switchTo(tester, AppLanguage.system);
     },
   );
+  test('Arabic keeps numbers and units in their order', () {
+    const i = '\u2066', p = '\u2069';
+    expect(keepLtrRuns('الاتجاه 240° SW', rtl: true), 'الاتجاه ${i}240° SW$p');
+    expect(keepLtrRuns('دقة GPS: ±12 m', rtl: true), 'دقة ${i}GPS: ±12 m$p');
+    // List items stay separate so they follow right-to-left order.
+    expect(
+      keepLtrRuns('07 نوفمبر 2026 · 11:58 ص', rtl: true),
+      '${i}07$p نوفمبر ${i}2026$p · ${i}11:58$p ص',
+    );
+    expect(
+      keepLtrRuns('23.91° N, 90.40° E', rtl: true),
+      '${i}23.91° N, 90.40° E$p',
+    );
+    expect(keepLtrRuns('240° SW', rtl: false), '240° SW');
+    expect(hasRtlLetters('العربية'), isTrue);
+    expect(hasRtlLetters('23.91° N'), isFalse);
+  });
+  test('Arabic counts use the dual, 3 to 10 and 11-and-up forms', () {
+    expect([0, 1, 2, 3, 10, 11, 99, 100, 102, 105].map(arabicCountForm), [
+      'other',
+      'one',
+      'two',
+      'few',
+      'few',
+      'other',
+      'other',
+      'other',
+      'other',
+      'few',
+    ]);
+    Get.addTranslations(AppTranslations().keys);
+    String photos(int n) => '@n photo'.trCount('@n photos', n, {'n': '$n'});
+
+    Get.locale = AppLanguage.arabic.locale;
+    expect(photos(1), '1 صورة');
+    expect(photos(2), 'صورتان');
+    expect(photos(5), '5 صور');
+    expect(photos(15), '15 صورة');
+    expect(photos(100), '100 صورة');
+    expect(
+      'Deleted @removed, but @failed file could not be removed'.trCount(
+        'Deleted @removed, but @failed files could not be removed',
+        2,
+        {'removed': '4', 'failed': '2'},
+      ),
+      'تم حذف 4، لكن تعذّر حذف ملفين',
+    );
+
+    Get.locale = AppLanguage.english.locale;
+    expect(photos(2), '2 photos');
+    expect(photos(1), '1 photo');
+  });
+
+  test('every Arabic count form belongs to a plural text', () {
+    for (final MapEntry(key: key, value: forms) in arPlurals.entries) {
+      expect(ar, contains(key), reason: key);
+      final params = RegExp(r'@\w+').allMatches(key).map((m) => m[0]!);
+      for (final MapEntry(key: form, value: text) in forms.entries) {
+        expect(['two', 'few', 'other'], contains(form), reason: key);
+        final missing = params.where((p) => !text.contains(p)).toList();
+        // The dual names the counted number in the word itself.
+        expect(
+          missing.length,
+          form == 'two' ? lessThanOrEqualTo(1) : 0,
+          reason: '$form of "$key" misses $missing',
+        );
+      }
+    }
+  });
 }
 
 String _reportDate(DateTime day) => CaptureTimeFormatter.date(day);

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
@@ -58,7 +59,7 @@ class _PhotoMapViewState extends State<PhotoMapView> {
           return Text(
             photos == 0
                 ? 'Map'.tr
-                : 'Map · @n photo'.trPluralParams('Map · @n photos', photos, {
+                : 'Map · @n photo'.trCount('Map · @n photos', photos, {
                     'n': '$photos',
                   }),
           );
@@ -227,8 +228,8 @@ class _Pin extends StatelessWidget {
     return Semantics(
       button: true,
       label: spot.title == null
-          ? '@n photo'.trPluralParams('@n photos', count, {'n': '$count'})
-          : '@n photo at @place'.trPluralParams('@n photos at @place', count, {
+          ? '@n photo'.trCount('@n photos', count, {'n': '$count'})
+          : '@n photo at @place'.trCount('@n photos at @place', count, {
               'n': '$count',
               'place': spot.title!,
             }),

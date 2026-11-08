@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
@@ -106,11 +107,9 @@ class ProjectPhotoPickerView extends GetView<ProjectPhotoPickerController> {
                   AppButton(
                     label: count == 0
                         ? 'Select photos'.tr
-                        : 'Add @n photo'.trPluralParams(
-                            'Add @n photos',
-                            count,
-                            {'n': '$count'},
-                          ),
+                        : 'Add @n photo'.trCount('Add @n photos', count, {
+                            'n': '$count',
+                          }),
                     icon: Icons.check_rounded,
                     isExpanded: true,
                     isLoading: controller.isSaving.value,

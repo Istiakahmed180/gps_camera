@@ -12,12 +12,13 @@ import 'package:gps_camera/app/i18n/pt/pt.dart';
 /// Rules for adding text:
 /// * Wrap every user-facing string: `'Open camera'.tr`.
 /// * Values: `'Adding photo @done of @total'.trParams({...})`.
-/// * Counts: `'@n photo'.trPluralParams('@n photos', n, {'n': '$n'})`;
+/// * Counts: `'@n photo'.trCount('@n photos', n, {'n': '$n'})`;
 ///   languages with one form map both keys to the same text.
 /// * PDF reports and CSV exports stay in English (the PDF library cannot
 ///   shape Bangla, Hindi or Arabic script), so never translate text used
 ///   only there.
-/// * Every new key needs an entry in each table below.
+/// * Every new key needs an entry in each table below, and every new
+///   count its Arabic forms in `arPlurals`.
 class AppTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {

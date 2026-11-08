@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/features/gallery/utils/photo_info_formatter.dart';
@@ -59,7 +60,7 @@ class ProjectCard extends StatelessWidget {
                     ],
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      '${'@n photo'.trPluralParams('@n photos', count, {'n': '$count'})} · '
+                      '${'@n photo'.trCount('@n photos', count, {'n': '$count'})} · '
                       '${'Updated @date'.trParams({'date': PhotoInfoFormatter.instant(project.updatedAt).split(' · ').first})}',
                       style: context.text.labelSmall,
                     ),

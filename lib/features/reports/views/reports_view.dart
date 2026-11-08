@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/features/gallery/utils/photo_info_formatter.dart';
@@ -83,7 +84,7 @@ class _ReportTile extends GetView<ReportsController> {
     final details = [
       PhotoInfoFormatter.instant(report.generatedAt),
       if (record != null)
-        '@n photo'.trPluralParams('@n photos', record.photoCount, {
+        '@n photo'.trCount('@n photos', record.photoCount, {
           'n': '${record.photoCount}',
         }),
       PhotoInfoFormatter.fileSize(report.sizeBytes),

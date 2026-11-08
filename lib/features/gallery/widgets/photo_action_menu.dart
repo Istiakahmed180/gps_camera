@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/features/gallery/services/gallery_service.dart';
@@ -88,7 +89,7 @@ Future<bool?> confirmDelete(BuildContext context, DeletePlan plan) {
         builder: (context, setState) {
           final colors = context.colors;
           final count = plan.related.length;
-          final copies = '@n watermarked copy'.trPluralParams(
+          final copies = '@n watermarked copy'.trCount(
             '@n watermarked copies',
             count,
             {'n': '$count'},

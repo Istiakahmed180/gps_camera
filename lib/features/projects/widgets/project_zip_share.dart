@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/core/services/share_service.dart';
@@ -153,7 +154,7 @@ class _ChoiceDialogState extends State<_ChoiceDialog> {
                 ('@n photo. Original photos get '
                         'their capture time and GPS location written in, so other '
                         'apps can read them.')
-                    .trPluralParams(
+                    .trCount(
                       '@n photos. Original photos get '
                       'their capture time and GPS location written in, so other '
                       'apps can read them.',

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/features/backup/services/backup_service.dart';
@@ -73,7 +74,7 @@ class BackupActions extends StatelessWidget {
         case BackupSaveOutcome.saved:
           _snack(
             context,
-            'Backup saved: @n photo, @files files'.trPluralParams(
+            'Backup saved: @n photo, @files files'.trCount(
               'Backup saved: @n photos, @files files',
               backup.photoCount,
               {'n': '${backup.photoCount}', 'files': '${backup.fileCount}'},
@@ -215,7 +216,7 @@ class BackupActions extends StatelessWidget {
   }
 
   Future<void> _showSummary(BuildContext context, RestoreSummary s) {
-    String files(int n) => '@n file'.trPluralParams('@n files', n, {'n': '$n'});
+    String files(int n) => '@n file'.trCount('@n files', n, {'n': '$n'});
     final nothing = s.addedFiles == 0 && s.addedProjects == 0;
     return showDialog<void>(
       context: context,
@@ -227,19 +228,19 @@ class BackupActions extends StatelessWidget {
             if (nothing)
               'Everything in this backup is already on this phone.'.tr
             else ...[
-              'Added @n photo (@files in total).'.trPluralParams(
+              'Added @n photo (@files in total).'.trCount(
                 'Added @n photos (@files in total).',
                 s.addedPhotos,
                 {'n': '${s.addedPhotos}', 'files': files(s.addedFiles)},
               ),
               if (s.addedProjects > 0)
-                'Added @n project.'.trPluralParams(
+                'Added @n project.'.trCount(
                   'Added @n projects.',
                   s.addedProjects,
                   {'n': '${s.addedProjects}'},
                 ),
               if (s.addedAssignments > 0)
-                '@n photo put back in their projects.'.trPluralParams(
+                '@n photo put back in their projects.'.trCount(
                   '@n photos put back in their projects.',
                   s.addedAssignments,
                   {'n': '${s.addedAssignments}'},
@@ -247,7 +248,7 @@ class BackupActions extends StatelessWidget {
               if (s.restoredSettings) 'Watermark settings restored.'.tr,
             ],
             if (s.skippedFiles > 0)
-              '@n file skipped because they already exist.'.trPluralParams(
+              '@n file skipped because they already exist.'.trCount(
                 '@n files skipped because they already exist.',
                 s.skippedFiles,
                 {'n': '${s.skippedFiles}'},
