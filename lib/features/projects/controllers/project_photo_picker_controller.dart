@@ -84,7 +84,7 @@ class ProjectPhotoPickerController extends GetxController {
     } on ProjectValidationException catch (e) {
       error.value = e.message;
     } catch (_) {
-      error.value = 'Photos could not be added. Try again.';
+      error.value = 'Photos could not be added. Try again.'.tr;
     } finally {
       isSaving.value = false;
     }

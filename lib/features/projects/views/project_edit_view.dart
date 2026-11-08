@@ -17,7 +17,7 @@ class ProjectEditView extends GetView<ProjectEditController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(controller.isNew ? 'New project' : 'Edit project'),
+        title: Text(controller.isNew ? 'New project'.tr : 'Edit project'.tr),
       ),
       body: ResponsiveCenter(
         child: ListView(
@@ -32,8 +32,8 @@ class ProjectEditView extends GetView<ProjectEditController> {
                 textInputAction: TextInputAction.next,
                 onChanged: (_) => controller.clearNameError(),
                 decoration: InputDecoration(
-                  labelText: 'Project name',
-                  hintText: 'e.g. North Bridge inspection',
+                  labelText: 'Project name'.tr,
+                  hintText: 'e.g. North Bridge inspection'.tr,
                   errorText: controller.nameError.value,
                 ),
               ),
@@ -45,14 +45,14 @@ class ProjectEditView extends GetView<ProjectEditController> {
               minLines: 2,
               maxLength: ProjectRepository.maxDescriptionLength,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Description (optional)',
+              decoration: InputDecoration(
+                labelText: 'Description (optional)'.tr,
                 alignLabelWithHint: true,
               ),
             ),
             if (!controller.isNew) ...[
               const SizedBox(height: AppSpacing.lg),
-              const SectionHeader('Cover photo'),
+              SectionHeader('Cover photo'.tr),
               const _CoverPicker(),
             ],
             Obx(
@@ -69,7 +69,9 @@ class ProjectEditView extends GetView<ProjectEditController> {
             const SizedBox(height: AppSpacing.xl),
             Obx(
               () => AppButton(
-                label: controller.isNew ? 'Create project' : 'Save changes',
+                label: controller.isNew
+                    ? 'Create project'.tr
+                    : 'Save changes'.tr,
                 isExpanded: true,
                 isLoading: controller.isSaving.value,
                 onPressed: controller.save,
@@ -93,8 +95,9 @@ class _CoverPicker extends GetView<ProjectEditController> {
         final options = controller.coverOptions;
         if (options.isEmpty) {
           return Text(
-            'Add photos to this project to choose a cover. Until then, the '
-            'latest photo is used.',
+            ('Add photos to this project to choose a cover. Until then, the '
+                    'latest photo is used.')
+                .tr,
             style: context.text.bodySmall,
           );
         }
@@ -107,7 +110,7 @@ class _CoverPicker extends GetView<ProjectEditController> {
               _CoverOption(
                 selected: selected == null,
                 onTap: () => controller.selectCover(null),
-                child: const Center(child: Text('Latest')),
+                child: Center(child: Text('Latest'.tr)),
               ),
               for (final photo in options)
                 _CoverOption(

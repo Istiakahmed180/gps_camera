@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ThemeModeSelector extends StatelessWidget {
   const ThemeModeSelector({
@@ -14,21 +15,21 @@ class ThemeModeSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return SegmentedButton<ThemeMode>(
       showSelectedIcon: false,
-      segments: const [
+      segments: [
         ButtonSegment(
           value: ThemeMode.system,
-          label: Text('System'),
-          icon: Icon(Icons.brightness_auto_outlined),
+          label: Text('System'.tr),
+          icon: const Icon(Icons.brightness_auto_outlined),
         ),
         ButtonSegment(
           value: ThemeMode.light,
-          label: Text('Light'),
-          icon: Icon(Icons.light_mode_outlined),
+          label: Text('Light'.tr),
+          icon: const Icon(Icons.light_mode_outlined),
         ),
         ButtonSegment(
           value: ThemeMode.dark,
-          label: Text('Dark'),
-          icon: Icon(Icons.dark_mode_outlined),
+          label: Text('Dark'.tr),
+          icon: const Icon(Icons.dark_mode_outlined),
         ),
       ],
       selected: {selected},

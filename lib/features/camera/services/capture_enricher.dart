@@ -3,7 +3,9 @@ import 'dart:isolate';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:get/get.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
+import 'package:gps_camera/features/camera/models/capture_feedback.dart';
 import 'package:gps_camera/features/camera/models/capture_post_processing.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
 import 'package:gps_camera/features/camera/services/capture_saver.dart';
@@ -52,7 +54,7 @@ class CaptureEnricher implements CapturePostProcessor {
   }
 
   @override
-  Future<String?> process(SavedCapture saved, Uint8List? map) async {
+  Future<CaptureFeedback?> process(SavedCapture saved, Uint8List? map) async {
     final fix = saved.metadata.location.fix;
     PlaceInfo? place;
     try {
@@ -87,8 +89,10 @@ class CaptureEnricher implements CapturePostProcessor {
 
     String? message;
     File? copy;
+    var failed = false;
     if (_settings.loadAutoWatermark()) {
       (copy, message) = await _renderCopy(saved.photo, metadata, mapName, map);
+      failed = copy == null;
     }
 
     final gallery = _gallery;
@@ -104,12 +108,15 @@ class CaptureEnricher implements CapturePostProcessor {
         exported = false;
       }
       if (!exported) {
+        failed = true;
         message = message == null
-            ? 'Not saved to phone gallery'
-            : '$message · not saved to phone gallery';
+            ? 'Not saved to phone gallery'.tr
+            : '@message · not saved to phone gallery'.trParams({
+                'message': message,
+              });
       }
     }
-    return message;
+    return message == null ? null : CaptureFeedback(message, isError: failed);
   }
 
   Future<(File?, String)> _renderCopy(
@@ -121,7 +128,7 @@ class CaptureEnricher implements CapturePostProcessor {
     try {
       final size = await _imageSize(photo.path);
       if (size == null) {
-        return (null, 'Watermarked copy not saved: photo unreadable');
+        return (null, 'Watermarked copy not saved: photo unreadable'.tr);
       }
       final result = await _renderer.render(
         original: photo,
@@ -131,11 +138,14 @@ class CaptureEnricher implements CapturePostProcessor {
         mapImage: mapName == null ? null : map,
         automatic: true,
       );
-      return (result.output, 'Watermarked copy saved');
+      return (result.output, 'Watermarked copy saved'.tr);
     } on WatermarkException catch (e) {
-      return (null, 'Watermarked copy not saved: ${e.message}');
+      return (
+        null,
+        'Watermarked copy not saved: @error'.trParams({'error': e.message}),
+      );
     } catch (_) {
-      return (null, 'Watermarked copy not saved');
+      return (null, 'Watermarked copy not saved'.tr);
     }
   }
 

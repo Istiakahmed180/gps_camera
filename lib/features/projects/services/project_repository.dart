@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:drift/drift.dart';
+import 'package:get/get.dart' show Trans;
 import 'package:gps_camera/core/database/app_database.dart';
 import 'package:gps_camera/features/projects/models/project.dart';
 
@@ -133,7 +134,7 @@ class ProjectRepository {
           ),
         );
     if (updated == 0) {
-      throw const ProjectValidationException('This project no longer exists.');
+      throw ProjectValidationException('This project no longer exists.'.tr);
     }
     return (await find(id))!;
   }
@@ -158,11 +159,11 @@ class ProjectRepository {
   Future<void> assign(String originalRef, String projectId) async {
     final project = await find(projectId);
     if (project == null) {
-      throw const ProjectValidationException('This project no longer exists.');
+      throw ProjectValidationException('This project no longer exists.'.tr);
     }
     if (project.isArchived) {
-      throw const ProjectValidationException(
-        'Archived projects cannot receive photos. Restore it first.',
+      throw ProjectValidationException(
+        'Archived projects cannot receive photos. Restore it first.'.tr,
       );
     }
     await _db
@@ -288,11 +289,11 @@ class ProjectRepository {
   Future<String> _validName(String name, {String? excludingId}) async {
     final clean = name.trim().replaceAll(RegExp(r'\s+'), ' ');
     if (clean.isEmpty) {
-      throw const ProjectValidationException('Enter a project name.');
+      throw ProjectValidationException('Enter a project name.'.tr);
     }
     if (clean.length > maxNameLength) {
-      throw const ProjectValidationException(
-        'Use $maxNameLength characters or fewer.',
+      throw ProjectValidationException(
+        'Use @n characters or fewer.'.trParams({'n': '$maxNameLength'}),
       );
     }
     final clash =
@@ -306,7 +307,9 @@ class ProjectRepository {
             .getSingleOrNull();
     if (clash != null) {
       throw ProjectValidationException(
-        'A project named "${clash.name}" already exists.',
+        'A project named "@name" already exists.'.trParams({
+          'name': clash.name,
+        }),
       );
     }
     return clean;
@@ -315,8 +318,10 @@ class ProjectRepository {
   String _validDescription(String description) {
     final clean = description.trim();
     if (clean.length > maxDescriptionLength) {
-      throw const ProjectValidationException(
-        'Keep the description under $maxDescriptionLength characters.',
+      throw ProjectValidationException(
+        'Keep the description under @n characters.'.trParams({
+          'n': '$maxDescriptionLength',
+        }),
       );
     }
     return clean;

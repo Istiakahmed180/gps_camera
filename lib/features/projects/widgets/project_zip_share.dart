@@ -35,7 +35,7 @@ Future<void> shareProjectZip(
   } on ProjectExportException catch (e) {
     navigator.pop();
     messenger?.showSnackBar(
-      SnackBar(content: Text(e.message), backgroundColor: errorColor),
+      SnackBar(content: Text(e.message.tr), backgroundColor: errorColor),
     );
     return;
   }
@@ -46,8 +46,8 @@ Future<void> shareProjectZip(
     mimeType: 'application/zip',
   );
   final message = switch (outcome) {
-    ShareOutcome.failed => 'The share sheet could not be opened.',
-    ShareOutcome.missingFile => 'The ZIP could not be found.',
+    ShareOutcome.failed => 'The share sheet could not be opened.'.tr,
+    ShareOutcome.missingFile => 'The ZIP could not be found.'.tr,
     _ => null,
   };
   if (message != null) {
@@ -64,7 +64,7 @@ void _progressDialog(BuildContext context, ProjectExportService service) {
     builder: (dialog) => PopScope(
       canPop: false,
       child: AlertDialog(
-        title: const Text('Preparing ZIP'),
+        title: Text('Preparing ZIP'.tr),
         content: Obx(() {
           final p = service.progress.value;
           return Column(
@@ -76,7 +76,12 @@ void _progressDialog(BuildContext context, ProjectExportService service) {
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
-                p == null ? 'Preparing…' : 'Adding photo ${p.$1} of ${p.$2}',
+                p == null
+                    ? 'Preparing…'.tr
+                    : 'Adding photo @done of @total'.trParams({
+                        'done': '${p.$1}',
+                        'total': '${p.$2}',
+                      }),
                 style: dialog.text.bodyMedium,
               ),
             ],
@@ -104,7 +109,7 @@ class _ChoiceDialogState extends State<_ChoiceDialog> {
   Widget build(BuildContext context) {
     final count = ProjectExportService.plan(widget.index, _contents).length;
     return AlertDialog(
-      title: const Text('Share photos as ZIP'),
+      title: Text('Share photos as ZIP'.tr),
       contentPadding: const EdgeInsets.fromLTRB(0, AppSpacing.lg, 0, 0),
       content: SingleChildScrollView(
         child: Column(
@@ -120,8 +125,8 @@ class _ChoiceDialogState extends State<_ChoiceDialog> {
                   for (final option in ProjectZipContents.values)
                     RadioListTile<ProjectZipContents>(
                       value: option,
-                      title: Text(option.label),
-                      subtitle: Text(option.description),
+                      title: Text(option.label.tr),
+                      subtitle: Text(option.description.tr),
                     ),
                 ],
               ),
@@ -130,10 +135,11 @@ class _ChoiceDialogState extends State<_ChoiceDialog> {
             CheckboxListTile(
               value: _csv,
               onChanged: (v) => setState(() => _csv = v ?? true),
-              title: const Text('Add a location spreadsheet'),
-              subtitle: const Text(
-                'A CSV file with time, coordinates, address and note for '
-                'each photo. Opens in Excel or Google Sheets.',
+              title: Text('Add a location spreadsheet'.tr),
+              subtitle: Text(
+                ('A CSV file with time, coordinates, address and note for '
+                        'each photo. Opens in Excel or Google Sheets.')
+                    .tr,
               ),
             ),
             Padding(
@@ -144,9 +150,16 @@ class _ChoiceDialogState extends State<_ChoiceDialog> {
                 0,
               ),
               child: Text(
-                '$count photo${count == 1 ? '' : 's'}. Original photos get '
-                'their capture time and GPS location written in, so other '
-                'apps can read them.',
+                ('@n photo. Original photos get '
+                        'their capture time and GPS location written in, so other '
+                        'apps can read them.')
+                    .trPluralParams(
+                      '@n photos. Original photos get '
+                      'their capture time and GPS location written in, so other '
+                      'apps can read them.',
+                      count,
+                      {'n': '$count'},
+                    ),
                 style: context.text.bodySmall,
               ),
             ),
@@ -156,13 +169,13 @@ class _ChoiceDialogState extends State<_ChoiceDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text('Cancel'.tr),
         ),
         FilledButton(
           onPressed: count == 0
               ? null
               : () => Navigator.of(context).pop((_contents, _csv)),
-          child: const Text('Create ZIP'),
+          child: Text('Create ZIP'.tr),
         ),
       ],
     );

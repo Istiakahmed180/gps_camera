@@ -40,9 +40,10 @@ abstract final class BackgroundServices {
         SnackBar(
           content: Text(
             saved == BackupSaveOutcome.saved
-                ? 'Your backup was saved.'
-                : 'The backup could not be saved. Create it again in '
-                      'Settings.',
+                ? 'Your backup was saved.'.tr
+                : ('The backup could not be saved. Create it again in '
+                          'Settings.')
+                      .tr,
           ),
         ),
       );

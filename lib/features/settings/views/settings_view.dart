@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/app_language.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/constants/app_constants.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
@@ -17,42 +18,42 @@ class SettingsView extends GetView<SettingsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text('Settings'.tr)),
       body: SafeArea(
         top: false,
         child: ResponsiveCenter(
           child: ListView(
             padding: AppSpacing.page,
             children: [
-              const SectionHeader('Camera'),
+              SectionHeader('Camera'.tr),
               Card(child: CameraSettings(controller: controller)),
               const SizedBox(height: AppSpacing.xl),
-              const SectionHeader('Time and units'),
+              SectionHeader('Time and units'.tr),
               Card(child: DisplaySettings(controller: controller)),
               const SizedBox(height: AppSpacing.xl),
-              const SectionHeader('Phone gallery'),
+              SectionHeader('Phone gallery'.tr),
               Card(child: _GallerySettings(controller: controller)),
               const SizedBox(height: AppSpacing.xl),
-              const SectionHeader('Location details'),
+              SectionHeader('Location details'.tr),
               Card(child: LocationDetailsSettings(controller: controller)),
               const SizedBox(height: AppSpacing.xl),
-              const SectionHeader('Storage'),
+              SectionHeader('Storage'.tr),
               Card(child: StorageSettings(controller: controller)),
               const SizedBox(height: AppSpacing.xl),
-              const SectionHeader('Backup'),
+              SectionHeader('Backup'.tr),
               Card(child: BackupActions(service: controller.backup)),
               const SizedBox(height: AppSpacing.xl),
-              const SectionHeader('Appearance'),
+              SectionHeader('Appearance'.tr),
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text('Theme', style: context.text.titleMedium),
+                      Text('Theme'.tr, style: context.text.titleMedium),
                       const SizedBox(height: AppSpacing.xxs),
                       Text(
-                        'Choose how the app looks outside the camera.',
+                        'Choose how the app looks outside the camera.'.tr,
                         style: context.text.bodySmall,
                       ),
                       const SizedBox(height: AppSpacing.lg),
@@ -62,17 +63,46 @@ class SettingsView extends GetView<SettingsController> {
                           onChanged: controller.changeThemeMode,
                         ),
                       ),
+                      const SizedBox(height: AppSpacing.xl),
+                      Text('Language'.tr, style: context.text.titleMedium),
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        'Text in the app and on new watermarks. PDF reports '
+                                'stay in English.'
+                            .tr,
+                        style: context.text.bodySmall,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      Obx(
+                        () => SegmentedButton<AppLanguage>(
+                          showSelectedIcon: false,
+                          segments: [
+                            for (final l in AppLanguage.values)
+                              ButtonSegment(
+                                value: l,
+                                label: Text(
+                                  l == AppLanguage.system
+                                      ? l.label.tr
+                                      : l.label,
+                                ),
+                              ),
+                          ],
+                          selected: {controller.language.value},
+                          onSelectionChanged: (s) =>
+                              controller.setLanguage(s.first),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              const SectionHeader('About'),
-              const Card(
+              SectionHeader('About'.tr),
+              Card(
                 child: ListTile(
-                  leading: Icon(Icons.info_outline_rounded),
-                  title: Text(AppConstants.appName),
-                  subtitle: Text('Geo-tagged photos, albums and reports'),
+                  leading: const Icon(Icons.info_outline_rounded),
+                  title: const Text(AppConstants.appName),
+                  subtitle: Text('Geo-tagged photos, albums and reports'.tr),
                 ),
               ),
             ],
@@ -95,12 +125,13 @@ class _GallerySettings extends StatelessWidget {
       // The check is a quick platform call; show nothing until it answers.
       if (available == null) return const SizedBox(height: 72);
       if (!available) {
-        return const ListTile(
-          leading: Icon(Icons.info_outline_rounded),
-          title: Text('Not available on this phone'),
+        return ListTile(
+          leading: const Icon(Icons.info_outline_rounded),
+          title: Text('Not available on this phone'.tr),
           subtitle: Text(
-            'Saving to the phone gallery needs Android 10 or later. Use '
-            'Share or Backup to keep copies outside the app.',
+            ('Saving to the phone gallery needs Android 10 or later. Use '
+                    'Share or Backup to keep copies outside the app.')
+                .tr,
           ),
         );
       }
@@ -118,9 +149,10 @@ class _GallerySettings extends StatelessWidget {
               AppSpacing.xs,
             ),
             child: Text(
-              'New photos are also saved to Pictures/GPS Camera, so they '
-              'appear in the phone’s gallery and stay there if the app is '
-              'removed.',
+              ('New photos are also saved to Pictures/GPS Camera, so they '
+                      'appear in the phone’s gallery and stay there if the app '
+                      'is removed.')
+                  .tr,
               style: context.text.bodySmall,
             ),
           ),
@@ -134,8 +166,8 @@ class _GallerySettings extends StatelessWidget {
                 for (final option in GallerySaveMode.values)
                   RadioListTile<GallerySaveMode>(
                     value: option,
-                    title: Text(option.label),
-                    subtitle: Text(option.description),
+                    title: Text(option.label.tr),
+                    subtitle: Text(option.description.tr),
                   ),
               ],
             ),
@@ -143,14 +175,17 @@ class _GallerySettings extends StatelessWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.photo_library_outlined),
-            title: const Text('Copy existing photos to gallery'),
+            title: Text('Copy existing photos to gallery'.tr),
             subtitle: Text(
               progress == null
-                  ? 'Uses the choice above. Photos already copied are '
-                        'skipped.'
+                  ? 'Uses the choice above. Photos already copied are skipped.'
+                        .tr
                   : progress.total == 0
-                  ? 'Preparing…'
-                  : 'Copying ${progress.done} of ${progress.total}…',
+                  ? 'Preparing…'.tr
+                  : 'Copying @done of @total…'.trParams({
+                      'done': '${progress.done}',
+                      'total': '${progress.total}',
+                    }),
             ),
             trailing: progress == null
                 ? null
@@ -170,29 +205,35 @@ class _GallerySettings extends StatelessWidget {
     final count = await controller.existingToCopy();
     if (!context.mounted) return;
     if (count == null) {
-      _snack(context, 'Photos could not be read. Try again.', isError: true);
+      _snack(context, 'Photos could not be read. Try again.'.tr, isError: true);
       return;
     }
     if (count == 0) {
-      _snack(context, 'There are no photos to copy.');
+      _snack(context, 'There are no photos to copy.'.tr);
       return;
     }
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialog) => AlertDialog(
-        title: const Text('Copy to phone gallery?'),
+        title: Text('Copy to phone gallery?'.tr),
         content: Text(
-          '$count photo${count == 1 ? '' : 's'} will be copied to '
-          'Pictures/GPS Camera. The photos in the app are not changed.',
+          ('@n photo will be copied to Pictures/GPS Camera. The photos in '
+                  'the app are not changed.')
+              .trPluralParams(
+                '@n photos will be copied to Pictures/GPS Camera. The '
+                'photos in the app are not changed.',
+                count,
+                {'n': '$count'},
+              ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialog).pop(false),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialog).pop(true),
-            child: const Text('Copy'),
+            child: Text('Copy'.tr),
           ),
         ],
       ),
@@ -202,13 +243,18 @@ class _GallerySettings extends StatelessWidget {
     final summary = await controller.copyExistingToGallery();
     if (!context.mounted) return;
     if (summary == null) {
-      _snack(context, 'Photos could not be copied. Try again.', isError: true);
+      _snack(
+        context,
+        'Photos could not be copied. Try again.'.tr,
+        isError: true,
+      );
       return;
     }
     final parts = [
-      '${summary.saved} copied',
-      if (summary.alreadyThere > 0) '${summary.alreadyThere} already there',
-      if (summary.failed > 0) '${summary.failed} failed',
+      '@n copied'.trParams({'n': '${summary.saved}'}),
+      if (summary.alreadyThere > 0)
+        '@n already there'.trParams({'n': '${summary.alreadyThere}'}),
+      if (summary.failed > 0) '@n failed'.trParams({'n': '${summary.failed}'}),
     ];
     _snack(context, parts.join(' · '), isError: summary.failed > 0);
   }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/app_language.dart';
 import 'package:gps_camera/core/services/theme_service.dart';
 import 'package:gps_camera/core/settings/app_preferences.dart';
 import 'package:gps_camera/core/settings/display_format.dart';
@@ -57,6 +58,11 @@ class SettingsController extends GetxController {
   final Rxn<BackupProgress> galleryProgress = Rxn<BackupProgress>();
 
   Rx<ThemeMode> get themeMode => _themeService.themeMode;
+
+  Rx<AppLanguage> get language => Get.find<LanguageService>().language;
+
+  Future<void> setLanguage(AppLanguage value) =>
+      Get.find<LanguageService>().setLanguage(value);
 
   Rx<GallerySaveMode> get gallerySaveMode => _export.mode;
 

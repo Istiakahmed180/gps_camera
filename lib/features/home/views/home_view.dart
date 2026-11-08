@@ -17,26 +17,26 @@ class HomeView extends GetView<HomeController> {
     final actions = [
       QuickActionCard(
         icon: Icons.photo_library_outlined,
-        title: 'Gallery',
-        subtitle: 'Browse geo-tagged photos',
+        title: 'Gallery'.tr,
+        subtitle: 'Browse geo-tagged photos'.tr,
         onTap: controller.openGallery,
       ),
       QuickActionCard(
         icon: Icons.folder_outlined,
-        title: 'Projects',
-        subtitle: 'Organise photos by site or client',
+        title: 'Projects'.tr,
+        subtitle: 'Organise photos by site or client'.tr,
         onTap: controller.openProjects,
       ),
       QuickActionCard(
         icon: Icons.picture_as_pdf_outlined,
-        title: 'Reports',
-        subtitle: 'PDF reports you have created',
+        title: 'Reports'.tr,
+        subtitle: 'PDF reports you have created'.tr,
         onTap: controller.openReports,
       ),
       QuickActionCard(
         icon: Icons.tune_rounded,
-        title: 'Settings',
-        subtitle: 'Appearance and preferences',
+        title: 'Settings'.tr,
+        subtitle: 'Appearance and preferences'.tr,
         onTap: controller.openSettings,
       ),
     ];
@@ -46,7 +46,7 @@ class HomeView extends GetView<HomeController> {
         title: const Text(AppConstants.appName),
         actions: [
           IconButton(
-            tooltip: 'Settings',
+            tooltip: 'Settings'.tr,
             onPressed: controller.openSettings,
             icon: const Icon(Icons.settings_outlined),
           ),
@@ -59,7 +59,7 @@ class HomeView extends GetView<HomeController> {
             padding: AppSpacing.page,
             children: [
               Text(
-                'Document every site with verifiable location data.',
+                'Document every site with verifiable location data.'.tr,
                 style: context.text.bodyLarge?.copyWith(
                   color: context.colors.onSurfaceVariant,
                 ),
@@ -67,7 +67,7 @@ class HomeView extends GetView<HomeController> {
               const SizedBox(height: AppSpacing.xl),
               CaptureHeroCard(onTap: controller.openCamera),
               const SizedBox(height: AppSpacing.xxl),
-              const SectionHeader('Workspace'),
+              SectionHeader('Workspace'.tr),
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),

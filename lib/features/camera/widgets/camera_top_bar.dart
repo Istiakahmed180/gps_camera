@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/features/camera/widgets/camera_icon_button.dart';
 
@@ -38,7 +39,7 @@ class CameraTopBar extends StatelessWidget {
         children: [
           CameraIconButton(
             icon: Icons.close_rounded,
-            tooltip: 'Close camera',
+            tooltip: 'Close camera'.tr,
             onPressed: onClose,
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -52,14 +53,16 @@ class CameraTopBar extends StatelessWidget {
           if (showFlash)
             CameraIconButton(
               icon: _flashIcon(flashMode),
-              tooltip: 'Flash: ${_flashLabel(flashMode)}',
+              tooltip: 'Flash: @mode'.trParams({
+                'mode': _flashLabel(flashMode),
+              }),
               onPressed: controlsEnabled ? onFlash : null,
             ),
           if (showFlash && showSwitch) const SizedBox(width: AppSpacing.sm),
           if (showSwitch)
             CameraIconButton(
               icon: Icons.cameraswitch_outlined,
-              tooltip: 'Switch camera',
+              tooltip: 'Switch camera'.tr,
               onPressed: controlsEnabled ? onSwitch : null,
             ),
         ],
@@ -74,8 +77,8 @@ class CameraTopBar extends StatelessWidget {
   };
 
   static String _flashLabel(FlashMode mode) => switch (mode) {
-    FlashMode.auto => 'Auto',
-    FlashMode.always || FlashMode.torch => 'On',
-    FlashMode.off => 'Off',
+    FlashMode.auto => 'Auto'.tr,
+    FlashMode.always || FlashMode.torch => 'On'.tr,
+    FlashMode.off => 'Off'.tr,
   };
 }

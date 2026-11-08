@@ -15,7 +15,7 @@ class ProjectPhotoPickerView extends GetView<ProjectPhotoPickerController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add photos')),
+      appBar: AppBar(title: Text('Add photos'.tr)),
       body: Obx(() {
         switch (controller.status.value) {
           case PhotoPickerStatus.loading:
@@ -23,10 +23,10 @@ class ProjectPhotoPickerView extends GetView<ProjectPhotoPickerController> {
           case PhotoPickerStatus.error:
             return EmptyStateView(
               icon: Icons.error_outline_rounded,
-              title: 'Photos could not be loaded',
-              message: 'Try again.',
+              title: 'Photos could not be loaded'.tr,
+              message: 'Try again.'.tr,
               action: AppButton(
-                label: 'Try again',
+                label: 'Try again'.tr,
                 variant: AppButtonVariant.secondary,
                 onPressed: controller.load,
               ),
@@ -35,10 +35,10 @@ class ProjectPhotoPickerView extends GetView<ProjectPhotoPickerController> {
             break;
         }
         if (controller.originals.isEmpty) {
-          return const EmptyStateView(
+          return EmptyStateView(
             icon: Icons.photo_library_outlined,
-            title: 'No photos yet',
-            message: 'Capture photos first, then add them to this project.',
+            title: 'No photos yet'.tr,
+            message: 'Capture photos first, then add them to this project.'.tr,
           );
         }
         controller.selected.length;
@@ -54,8 +54,9 @@ class ProjectPhotoPickerView extends GetView<ProjectPhotoPickerController> {
                 0,
               ),
               child: Text(
-                'Choose original photos. Their watermarked copies are '
-                'included automatically.',
+                ('Choose original photos. Their watermarked copies are '
+                        'included automatically.')
+                    .tr,
                 style: context.text.bodySmall,
               ),
             ),
@@ -96,14 +97,20 @@ class ProjectPhotoPickerView extends GetView<ProjectPhotoPickerController> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                       child: Text(
-                        '$moving will move from another project.',
+                        '@n will move from another project.'.trParams({
+                          'n': '$moving',
+                        }),
                         style: context.text.bodySmall,
                       ),
                     ),
                   AppButton(
                     label: count == 0
-                        ? 'Select photos'
-                        : 'Add ${count == 1 ? '1 photo' : '$count photos'}',
+                        ? 'Select photos'.tr
+                        : 'Add @n photo'.trPluralParams(
+                            'Add @n photos',
+                            count,
+                            {'n': '$count'},
+                          ),
                     icon: Icons.check_rounded,
                     isExpanded: true,
                     isLoading: controller.isSaving.value,
@@ -160,10 +167,10 @@ class _Overlay extends StatelessWidget {
           ),
         ),
         if (inThis)
-          const Center(
+          Center(
             child: Text(
-              'Added',
-              style: TextStyle(
+              'Added'.tr,
+              style: const TextStyle(
                 color: AppColors.onViewfinder,
                 fontWeight: FontWeight.w600,
               ),
@@ -175,7 +182,7 @@ class _Overlay extends StatelessWidget {
             right: AppSpacing.sm,
             top: 30,
             child: Text(
-              'In ${other.name}',
+              'In @name'.trParams({'name': other.name}),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.text.labelSmall?.copyWith(

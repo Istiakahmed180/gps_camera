@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
@@ -74,7 +75,10 @@ class _TemplateCard extends StatelessWidget {
     return Semantics(
       button: true,
       selected: isSelected,
-      label: '${template.label} template. ${template.description}',
+      label: '@name template. @description'.trParams({
+        'name': template.label.tr,
+        'description': template.description.tr,
+      }),
       excludeSemantics: true,
       child: Material(
         color: colors.surface,
@@ -119,7 +123,7 @@ class _TemplateCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        template.label,
+                        template.label.tr,
                         style: context.text.labelLarge,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

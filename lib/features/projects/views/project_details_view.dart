@@ -23,48 +23,48 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
       final project = controller.project.value;
       return Scaffold(
         appBar: AppBar(
-          title: Text(project?.name ?? 'Project'),
+          title: Text(project?.name ?? 'Project'.tr),
           actions: [
             if (project != null) ...[
               IconButton(
-                tooltip: 'Create PDF report',
+                tooltip: 'Create PDF report'.tr,
                 onPressed: controller.isBusy.value
                     ? null
                     : () => _createReport(context),
                 icon: const Icon(Icons.picture_as_pdf_outlined),
               ),
               IconButton(
-                tooltip: 'Edit project',
+                tooltip: 'Edit project'.tr,
                 onPressed: controller.isBusy.value ? null : controller.edit,
                 icon: const Icon(Icons.edit_outlined),
               ),
               PopupMenuButton<_MenuAction>(
-                tooltip: 'More',
+                tooltip: 'More'.tr,
                 enabled: !controller.isBusy.value,
                 onSelected: (a) => _onMenu(context, a),
                 itemBuilder: (_) => [
                   if (controller.originalCount > 0)
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: _MenuAction.shareZip,
                       child: ListTile(
-                        leading: Icon(Icons.folder_zip_outlined),
-                        title: Text('Share photos as ZIP'),
+                        leading: const Icon(Icons.folder_zip_outlined),
+                        title: Text('Share photos as ZIP'.tr),
                       ),
                     ),
                   if (project.isArchived)
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: _MenuAction.restore,
                       child: ListTile(
-                        leading: Icon(Icons.unarchive_outlined),
-                        title: Text('Restore project'),
+                        leading: const Icon(Icons.unarchive_outlined),
+                        title: Text('Restore project'.tr),
                       ),
                     )
                   else
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: _MenuAction.archive,
                       child: ListTile(
-                        leading: Icon(Icons.archive_outlined),
-                        title: Text('Archive project'),
+                        leading: const Icon(Icons.archive_outlined),
+                        title: Text('Archive project'.tr),
                       ),
                     ),
                   PopupMenuItem(
@@ -75,7 +75,7 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
                         color: context.colors.error,
                       ),
                       title: Text(
-                        'Delete project',
+                        'Delete project'.tr,
                         style: TextStyle(color: context.colors.error),
                       ),
                     ),
@@ -90,7 +90,7 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
             : FloatingActionButton.extended(
                 onPressed: controller.addPhotos,
                 icon: const Icon(Icons.add_photo_alternate_outlined),
-                label: const Text('Add photos'),
+                label: Text('Add photos'.tr),
               ),
         body: _body(context),
       );
@@ -102,18 +102,18 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
       case ProjectDetailsStatus.loading:
         return const Center(child: CircularProgressIndicator());
       case ProjectDetailsStatus.missing:
-        return const EmptyStateView(
+        return EmptyStateView(
           icon: Icons.folder_off_outlined,
-          title: 'Project not found',
-          message: 'This project was deleted.',
+          title: 'Project not found'.tr,
+          message: 'This project was deleted.'.tr,
         );
       case ProjectDetailsStatus.error:
         return EmptyStateView(
           icon: Icons.error_outline_rounded,
-          title: 'Project could not be loaded',
-          message: 'Try again.',
+          title: 'Project could not be loaded'.tr,
+          message: 'Try again.'.tr,
           action: AppButton(
-            label: 'Try again',
+            label: 'Try again'.tr,
             variant: AppButtonVariant.secondary,
             onPressed: controller.reload,
           ),
@@ -138,11 +138,11 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (project.isArchived)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                   child: Chip(
-                    avatar: Icon(Icons.archive_outlined, size: 18),
-                    label: Text('Archived · restore to add photos'),
+                    avatar: const Icon(Icons.archive_outlined, size: 18),
+                    label: Text('Archived · restore to add photos'.tr),
                     visualDensity: VisualDensity.compact,
                   ),
                 ),
@@ -155,19 +155,22 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
                   ),
                 ),
               Text(
-                'Created ${PhotoInfoFormatter.instant(project.createdAt)}',
+                'Created @date'.trParams({
+                  'date': PhotoInfoFormatter.instant(project.createdAt),
+                }),
                 style: context.text.bodySmall,
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                '${controller.originalCount} original'
-                '${controller.originalCount == 1 ? '' : 's'} · '
-                '${controller.watermarkedCount} watermarked',
+                '${'@n original'.trPluralParams('@n originals', controller.originalCount, {'n': '${controller.originalCount}'})} · '
+                '${'@n watermarked'.trParams({'n': '${controller.watermarkedCount}'})}',
                 style: context.text.labelLarge,
               ),
               if (controller.missingCount > 0)
                 Text(
-                  '${controller.missingCount} assigned photo files are missing',
+                  '@n assigned photo files are missing'.trParams({
+                    'n': '${controller.missingCount}',
+                  }),
                   style: context.text.bodySmall?.copyWith(
                     color: context.colors.error,
                   ),
@@ -185,12 +188,13 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
           child: controller.index.value.isEmpty
               ? EmptyStateView(
                   icon: Icons.photo_library_outlined,
-                  title: 'No photos in this project',
+                  title: 'No photos in this project'.tr,
                   message: project.isArchived
-                      ? 'Restore the project to add photos.'
-                      : 'Add existing photos, or choose this project on the '
-                            'camera screen so new photos are added '
-                            'automatically.',
+                      ? 'Restore the project to add photos.'.tr
+                      : ('Add existing photos, or choose this project on the '
+                                'camera screen so new photos are added '
+                                'automatically.')
+                            .tr,
                 )
               : RefreshIndicator(
                   onRefresh: controller.reload,
@@ -214,7 +218,7 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
   Future<void> _createReport(BuildContext context) async {
     final job = controller.reportJob();
     if (job == null) {
-      _snack(context, 'Add photos to this project to create a report.');
+      _snack(context, 'Add photos to this project to create a report.'.tr);
       return;
     }
     await generateReportWithProgress(context, Get.find<ReportService>(), job);
@@ -239,8 +243,8 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
           context,
           error ??
               (archiving
-                  ? '${project.name} archived'
-                  : '${project.name} restored'),
+                  ? '@name archived'.trParams({'name': project.name})
+                  : '@name restored'.trParams({'name': project.name})),
           isError: error != null,
         );
       case _MenuAction.delete:
@@ -251,20 +255,24 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
               Icons.delete_outline_rounded,
               color: context.colors.error,
             ),
-            title: Text('Delete "${project.name}"?'),
+            title: Text('Delete "@name"?'.trParams({'name': project.name})),
             content: Text(
-              'The project and its photo assignments will be removed. '
-              '${switch (controller.originalCount) {
-                0 => '',
-                1 => 'Its photo stays in the gallery. ',
-                final n => 'Its $n photos stay in the gallery. ',
-              }}'
-              'No photo files are deleted.',
+              [
+                'The project and its photo assignments will be removed.'.tr,
+                ...switch (controller.originalCount) {
+                  0 => <String>[],
+                  1 => ['Its photo stays in the gallery.'.tr],
+                  final n => [
+                    'Its @n photos stay in the gallery.'.trParams({'n': '$n'}),
+                  ],
+                },
+                'No photo files are deleted.'.tr,
+              ].join(' '),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                child: Text('Cancel'.tr),
               ),
               FilledButton(
                 style: FilledButton.styleFrom(
@@ -272,7 +280,7 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
                   foregroundColor: context.colors.onError,
                 ),
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Delete project'),
+                child: Text('Delete project'.tr),
               ),
             ],
           ),
@@ -282,7 +290,10 @@ class ProjectDetailsView extends GetView<ProjectDetailsController> {
         if (!context.mounted) return;
         if (error == null) {
           Get.back<void>();
-          _snack(Get.context ?? context, '${project.name} deleted');
+          _snack(
+            Get.context ?? context,
+            '@name deleted'.trParams({'name': project.name}),
+          );
         } else {
           _snack(context, error, isError: true);
         }

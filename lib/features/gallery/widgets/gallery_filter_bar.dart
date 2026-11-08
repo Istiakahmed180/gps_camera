@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/features/gallery/models/gallery_filter.dart';
 import 'package:gps_camera/features/gallery/models/gallery_index.dart';
@@ -35,7 +36,7 @@ class GalleryFilterBar extends StatelessWidget {
                 value: filter,
                 label: FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text('${filter.label} ${index.count(filter)}'),
+                  child: Text('${filter.label.tr} ${index.count(filter)}'),
                 ),
               ),
           ],
@@ -60,7 +61,7 @@ class GallerySortMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<GallerySort>(
-      tooltip: 'Sort',
+      tooltip: 'Sort'.tr,
       icon: const Icon(Icons.sort_rounded),
       initialValue: selected,
       onSelected: onChanged,
@@ -69,7 +70,7 @@ class GallerySortMenu extends StatelessWidget {
           CheckedPopupMenuItem(
             value: sort,
             checked: sort == selected,
-            child: Text(sort.label),
+            child: Text(sort.label.tr),
           ),
       ],
     );
@@ -92,14 +93,14 @@ class GalleryProjectFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = selected.unassigned
-        ? 'No project'
+        ? 'No project'.tr
         : selected.projectId == null
-        ? 'All projects'
+        ? 'All projects'.tr
         : projects
                   .where((p) => p.id == selected.projectId)
                   .map((p) => p.name)
                   .firstOrNull ??
-              'All projects';
+              'All projects'.tr;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -111,18 +112,18 @@ class GalleryProjectFilter extends StatelessWidget {
       child: Align(
         alignment: Alignment.centerLeft,
         child: PopupMenuButton<ProjectFilter>(
-          tooltip: 'Filter by project',
+          tooltip: 'Filter by project'.tr,
           onSelected: onChanged,
           itemBuilder: (_) => [
             CheckedPopupMenuItem(
               value: ProjectFilter.any,
               checked: selected == ProjectFilter.any,
-              child: const Text('All projects'),
+              child: Text('All projects'.tr),
             ),
             CheckedPopupMenuItem(
               value: ProjectFilter.none,
               checked: selected == ProjectFilter.none,
-              child: const Text('No project'),
+              child: Text('No project'.tr),
             ),
             if (projects.isNotEmpty) const PopupMenuDivider(),
             for (final project in projects)

@@ -19,7 +19,7 @@ class ReportsView extends GetView<ReportsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Reports')),
+      appBar: AppBar(title: Text('Reports'.tr)),
       body: Obx(() {
         switch (controller.status.value) {
           case ReportsStatus.loading:
@@ -27,10 +27,10 @@ class ReportsView extends GetView<ReportsController> {
           case ReportsStatus.error:
             return EmptyStateView(
               icon: Icons.error_outline_rounded,
-              title: 'Reports could not be loaded',
-              message: 'Try again.',
+              title: 'Reports could not be loaded'.tr,
+              message: 'Try again.'.tr,
               action: AppButton(
-                label: 'Try again',
+                label: 'Try again'.tr,
                 variant: AppButtonVariant.secondary,
                 onPressed: controller.load,
               ),
@@ -39,12 +39,13 @@ class ReportsView extends GetView<ReportsController> {
             break;
         }
         if (controller.reports.isEmpty) {
-          return const EmptyStateView(
+          return EmptyStateView(
             icon: Icons.picture_as_pdf_outlined,
-            title: 'No reports yet',
+            title: 'No reports yet'.tr,
             message:
-                'Create a PDF report from a project, or select photos in '
-                'the gallery and choose Create report.',
+                ('Create a PDF report from a project, or select photos in '
+                        'the gallery and choose Create report.')
+                    .tr,
           );
         }
         return ResponsiveCenter(
@@ -73,14 +74,18 @@ class _ReportTile extends GetView<ReportsController> {
   Widget build(BuildContext context) {
     final record = report.record;
     final kind = switch (record?.type) {
-      ReportType.project => 'Project · ${record!.projectName ?? 'Unnamed'}',
-      ReportType.selection => 'Selected photos',
-      null => 'PDF report',
+      ReportType.project => 'Project · @name'.trParams({
+        'name': record!.projectName ?? 'Unnamed'.tr,
+      }),
+      ReportType.selection => 'Selected photos'.tr,
+      null => 'PDF report'.tr,
     };
     final details = [
       PhotoInfoFormatter.instant(report.generatedAt),
       if (record != null)
-        '${record.photoCount} photo${record.photoCount == 1 ? '' : 's'}',
+        '@n photo'.trPluralParams('@n photos', record.photoCount, {
+          'n': '${record.photoCount}',
+        }),
       PhotoInfoFormatter.fileSize(report.sizeBytes),
     ].join(' · ');
 
@@ -103,12 +108,12 @@ class _ReportTile extends GetView<ReportsController> {
         isThreeLine: true,
         onTap: () => openReport(context, controller.service, report.file),
         trailing: PopupMenuButton<_Action>(
-          tooltip: 'Report actions',
+          tooltip: 'Report actions'.tr,
           onSelected: (action) => _onAction(context, action),
-          itemBuilder: (_) => const [
-            PopupMenuItem(value: _Action.open, child: Text('Open')),
-            PopupMenuItem(value: _Action.share, child: Text('Share')),
-            PopupMenuItem(value: _Action.delete, child: Text('Delete')),
+          itemBuilder: (_) => [
+            PopupMenuItem(value: _Action.open, child: Text('Open'.tr)),
+            PopupMenuItem(value: _Action.share, child: Text('Share'.tr)),
+            PopupMenuItem(value: _Action.delete, child: Text('Delete'.tr)),
           ],
         ),
       ),
@@ -129,15 +134,16 @@ class _ReportTile extends GetView<ReportsController> {
               Icons.delete_outline_rounded,
               color: context.colors.error,
             ),
-            title: const Text('Delete report?'),
+            title: Text('Delete report?'.tr),
             content: Text(
-              '${report.fileName} will be deleted. Photos, projects and '
-              'their data are not affected.',
+              ('@file will be deleted. Photos, projects and '
+                      'their data are not affected.')
+                  .trParams({'file': report.fileName}),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                child: Text('Cancel'.tr),
               ),
               FilledButton(
                 style: FilledButton.styleFrom(
@@ -145,7 +151,7 @@ class _ReportTile extends GetView<ReportsController> {
                   foregroundColor: context.colors.onError,
                 ),
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Delete'),
+                child: Text('Delete'.tr),
               ),
             ],
           ),
@@ -155,7 +161,7 @@ class _ReportTile extends GetView<ReportsController> {
         if (!context.mounted) return;
         ScaffoldMessenger.maybeOf(context)?.showSnackBar(
           SnackBar(
-            content: Text(error ?? 'Report deleted'),
+            content: Text(error ?? 'Report deleted'.tr),
             backgroundColor: error == null ? null : context.colors.error,
           ),
         );

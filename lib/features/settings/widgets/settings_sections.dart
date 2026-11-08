@@ -35,7 +35,7 @@ class CameraSettings extends StatelessWidget {
               AppSpacing.lg,
               AppSpacing.xs,
             ),
-            child: Text('Photo quality', style: context.text.titleMedium),
+            child: Text('Photo quality'.tr, style: context.text.titleMedium),
           ),
           RadioGroup<PhotoQuality>(
             groupValue: controller.photoQuality.value,
@@ -47,8 +47,8 @@ class CameraSettings extends StatelessWidget {
                 for (final option in PhotoQuality.values)
                   RadioListTile<PhotoQuality>(
                     value: option,
-                    title: Text(option.label),
-                    subtitle: Text(option.description),
+                    title: Text(option.label.tr),
+                    subtitle: Text(option.description.tr),
                   ),
               ],
             ),
@@ -56,10 +56,11 @@ class CameraSettings extends StatelessWidget {
           const Divider(height: 1),
           SwitchListTile(
             secondary: const Icon(Icons.branding_watermark_outlined),
-            title: const Text('Save watermarked copy'),
-            subtitle: const Text(
-              'Also save a copy with the location overlay for every photo. '
-              'The original is always kept.',
+            title: Text('Save watermarked copy'.tr),
+            subtitle: Text(
+              ('Also save a copy with the location overlay for every photo. '
+                      'The original is always kept.')
+                  .tr,
             ),
             value: controller.autoWatermark.value,
             onChanged: controller.setAutoWatermark,
@@ -67,10 +68,11 @@ class CameraSettings extends StatelessWidget {
           const Divider(height: 1),
           SwitchListTile(
             secondary: const Icon(Icons.volume_up_outlined),
-            title: const Text('Volume buttons take photos'),
-            subtitle: const Text(
-              'While the camera is open. Volume works normally everywhere '
-              'else.',
+            title: Text('Volume buttons take photos'.tr),
+            subtitle: Text(
+              ('While the camera is open. Volume works normally everywhere '
+                      'else.')
+                  .tr,
             ),
             value: controller.volumeShutter.value,
             onChanged: controller.setVolumeShutter,
@@ -97,24 +99,28 @@ class DisplaySettings extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Used on new watermarks, the camera screen, photo details and '
-              'reports. Saved values are not changed.',
+              ('Used on new watermarks, the camera screen, photo details and '
+                      'reports. Saved values are not changed.')
+                  .tr,
               style: context.text.bodySmall,
             ),
             const SizedBox(height: AppSpacing.lg),
-            Text('Time', style: context.text.titleSmall),
+            Text('Time'.tr, style: context.text.titleSmall),
             const SizedBox(height: AppSpacing.sm),
             SegmentedButton<bool>(
               showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(value: false, label: Text('12-hour · 2:25 PM')),
-                ButtonSegment(value: true, label: Text('24-hour · 14:25')),
+              segments: [
+                ButtonSegment(
+                  value: false,
+                  label: Text('12-hour · 2:25 PM'.tr),
+                ),
+                ButtonSegment(value: true, label: Text('24-hour · 14:25'.tr)),
               ],
               selected: {format.use24Hour},
               onSelectionChanged: (s) => controller.setUse24Hour(s.first),
             ),
             const SizedBox(height: AppSpacing.lg),
-            Text('Accuracy and altitude', style: context.text.titleSmall),
+            Text('Accuracy and altitude'.tr, style: context.text.titleSmall),
             const SizedBox(height: AppSpacing.sm),
             SegmentedButton<UnitSystem>(
               showSelectedIcon: false,
@@ -122,7 +128,7 @@ class DisplaySettings extends StatelessWidget {
                 for (final unit in UnitSystem.values)
                   ButtonSegment(
                     value: unit,
-                    label: Text('${unit.label} (${unit.symbol})'),
+                    label: Text('${unit.label.tr} (${unit.symbol})'),
                   ),
               ],
               selected: {format.units},
@@ -147,13 +153,14 @@ class LocationDetailsSettings extends StatelessWidget {
       final running = controller.fillingDetails.value;
       return ListTile(
         leading: const Icon(Icons.travel_explore_rounded),
-        title: const Text('Add missing addresses and maps'),
+        title: Text('Add missing addresses and maps'.tr),
         subtitle: Text(
           running
-              ? 'Checking photos…'
-              : 'Photos taken without internet get them automatically when '
-                    'the phone is online. Automatic watermarked copies are '
-                    'made again with the new details.',
+              ? 'Checking photos…'.tr
+              : ('Photos taken without internet get them automatically when '
+                        'the phone is online. Automatic watermarked copies are '
+                        'made again with the new details.')
+                    .tr,
         ),
         trailing: running
             ? const SizedBox.square(
@@ -170,26 +177,39 @@ class LocationDetailsSettings extends StatelessWidget {
   Future<void> _run(BuildContext context) async {
     final result = await controller.fillMissingDetails();
     if (!context.mounted || result == null) return;
-    String plural(int n, String w) => '$n $w${n == 1 ? '' : 's'}';
     if (result.updatedPhotos > 0) {
       _snack(
         context,
         [
-          'Updated ${plural(result.updatedPhotos, 'photo')}',
+          'Updated @n photo'.trPluralParams(
+            'Updated @n photos',
+            result.updatedPhotos,
+            {'n': '${result.updatedPhotos}'},
+          ),
           if (result.replacedCopies > 0)
-            'remade ${result.replacedCopies} watermarked '
-                '${result.replacedCopies == 1 ? 'copy' : 'copies'}',
-          if (result.remaining > 0) '${result.remaining} still waiting',
+            'remade @n watermarked copy'.trPluralParams(
+              'remade @n watermarked copies',
+              result.replacedCopies,
+              {'n': '${result.replacedCopies}'},
+            ),
+          if (result.remaining > 0)
+            '@n still waiting'.trParams({'n': '${result.remaining}'}),
         ].join(' · '),
       );
     } else if (result.remaining > 0) {
       _snack(
         context,
-        '${plural(result.remaining, 'photo')} still need details. Check the '
-        'internet connection and try again.',
+        ('@n photo still need details. Check the internet connection and '
+                'try again.')
+            .trPluralParams(
+              '@n photos still need details. Check the internet connection '
+              'and try again.',
+              result.remaining,
+              {'n': '${result.remaining}'},
+            ),
       );
     } else {
-      _snack(context, 'All photos have their address and map.');
+      _snack(context, 'All photos have their address and map.'.tr);
     }
   }
 }
@@ -205,43 +225,63 @@ class StorageSettings extends StatelessWidget {
     return Obx(() {
       final u = controller.usage.value;
       if (u == null) {
-        return const ListTile(title: Text('Measuring…'));
+        return ListTile(title: Text('Measuring…'.tr));
       }
       String size(int bytes) => PhotoInfoFormatter.fileSize(bytes);
-      String count(int n, String w) => '$n $w${n == 1 ? '' : 's'}';
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ListTile(
-            title: const Text('Total'),
+            title: Text('Total'.tr),
             trailing: Text(size(u.total), style: context.text.titleMedium),
           ),
           const Divider(height: 1),
-          _row('Original photos', count(u.photoCount, 'photo'), size(u.photos)),
           _row(
-            'Watermarked copies',
-            u.watermarkedCount == 1 ? '1 copy' : '${u.watermarkedCount} copies',
+            'Original photos'.tr,
+            '@n photo'.trPluralParams('@n photos', u.photoCount, {
+              'n': '${u.photoCount}',
+            }),
+            size(u.photos),
+          ),
+          _row(
+            'Watermarked copies'.tr,
+            '@n copy'.trPluralParams('@n copies', u.watermarkedCount, {
+              'n': '${u.watermarkedCount}',
+            }),
             size(u.watermarked),
           ),
-          _row('Maps saved with photos', null, size(u.maps)),
-          _row('Reports', count(u.reportCount, 'PDF'), size(u.reports)),
+          _row('Maps saved with photos'.tr, null, size(u.maps)),
+          _row(
+            'Reports'.tr,
+            '@n PDF'.trPluralParams('@n PDFs', u.reportCount, {
+              'n': '${u.reportCount}',
+            }),
+            size(u.reports),
+          ),
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.map_outlined),
-            title: const Text('Map cache'),
+            title: Text('Map cache'.tr),
             subtitle: Text(
-              '${count(u.mapCacheCount, 'map')} kept so places you visit '
-              'again need no download. Clearing it never affects your '
-              'photos.',
+              ('@n map kept so places you visit again need no download. '
+                      'Clearing it never affects your photos.')
+                  .trPluralParams(
+                    '@n maps kept so places you visit again need no '
+                    'download. Clearing it never affects your photos.',
+                    u.mapCacheCount,
+                    {'n': '${u.mapCacheCount}'},
+                  ),
             ),
             trailing: TextButton(
               onPressed: u.mapCacheCount == 0
                   ? null
                   : () async {
                       await controller.clearMapCache();
-                      if (context.mounted) _snack(context, 'Map cache cleared');
+                      if (context.mounted) {
+                        _snack(context, 'Map cache cleared'.tr);
+                      }
                     },
-              child: Text('Clear ${size(u.mapCache)}'),
+              child: Text('Clear @size'.trParams({'size': size(u.mapCache)})),
             ),
           ),
         ],

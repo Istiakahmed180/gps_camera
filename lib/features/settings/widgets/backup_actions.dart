@@ -22,11 +22,12 @@ class BackupActions extends StatelessWidget {
         children: [
           ListTile(
             leading: const Icon(Icons.backup_outlined),
-            title: const Text('Create backup'),
-            subtitle: const Text(
-              'One ZIP file with all photos, watermarked copies, maps, '
-              'reports, projects and watermark settings. Save it to Files, '
-              'Google Drive or a computer.',
+            title: Text('Create backup'.tr),
+            subtitle: Text(
+              ('One ZIP file with all photos, watermarked copies, maps, '
+                      'reports, projects and watermark settings. Save it to '
+                      'Files, Google Drive or a computer.')
+                  .tr,
             ),
             enabled: !busy,
             onTap: () => _create(context),
@@ -34,10 +35,11 @@ class BackupActions extends StatelessWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.settings_backup_restore_rounded),
-            title: const Text('Restore from backup'),
-            subtitle: const Text(
-              'Adds what is missing from a backup. Nothing on this phone is '
-              'replaced or deleted.',
+            title: Text('Restore from backup'.tr),
+            subtitle: Text(
+              ('Adds what is missing from a backup. Nothing on this phone is '
+                      'replaced or deleted.')
+                  .tr,
             ),
             enabled: !busy,
             onTap: () => _restore(context),
@@ -49,13 +51,17 @@ class BackupActions extends StatelessWidget {
 
   Future<void> _create(BuildContext context) async {
     final navigator = Navigator.of(context);
-    _progressDialog(context, 'Creating backup', 'Adding file');
+    _progressDialog(
+      context,
+      'Creating backup'.tr,
+      'Adding file @done of @total',
+    );
     BackupFile backup;
     try {
       backup = await service.create();
     } on BackupException catch (e) {
       navigator.pop();
-      if (context.mounted) _snack(context, e.message, isError: true);
+      if (context.mounted) _snack(context, e.message.tr, isError: true);
       return;
     }
     navigator.pop();
@@ -67,22 +73,24 @@ class BackupActions extends StatelessWidget {
         case BackupSaveOutcome.saved:
           _snack(
             context,
-            'Backup saved: ${backup.photoCount} '
-            'photo${backup.photoCount == 1 ? '' : 's'}, '
-            '${backup.fileCount} files',
+            'Backup saved: @n photo, @files files'.trPluralParams(
+              'Backup saved: @n photos, @files files',
+              backup.photoCount,
+              {'n': '${backup.photoCount}', 'files': '${backup.fileCount}'},
+            ),
           );
         case BackupSaveOutcome.cancelled:
-          _snack(context, 'Backup not saved');
+          _snack(context, 'Backup not saved'.tr);
         case BackupSaveOutcome.noApp:
           _snack(
             context,
-            'No app can save files on this phone.',
+            'No app can save files on this phone.'.tr,
             isError: true,
           );
         case BackupSaveOutcome.failed:
           _snack(
             context,
-            'The backup could not be saved there. Try another location.',
+            'The backup could not be saved there. Try another location.'.tr,
             isError: true,
           );
       }
@@ -111,35 +119,38 @@ class BackupActions extends StatelessWidget {
         context: context,
         builder: (dialog) => AlertDialog(
           icon: const Icon(Icons.settings_backup_restore_rounded),
-          title: const Text('Restore this backup?'),
+          title: Text('Restore this backup?'.tr),
           content: Text(
-            '${afterRestart ? 'You chose this backup just before Android '
-                      'restarted the app. ' : ''}'
-            'Photos, watermarked copies, maps, reports and projects that are '
-            'not on this phone yet will be added. Files and projects already '
-            'here stay exactly as they are.',
+            '${afterRestart ? '${'You chose this backup just before Android restarted the app.'.tr} ' : ''}'
+            '${('Photos, watermarked copies, maps, reports and projects that '
+                'are not on this phone yet will be added. Files and '
+                'projects already here stay exactly as they are.').tr}',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialog).pop(false),
-              child: const Text('Cancel'),
+              child: Text('Cancel'.tr),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialog).pop(true),
-              child: const Text('Restore'),
+              child: Text('Restore'.tr),
             ),
           ],
         ),
       );
       if (confirmed != true || !context.mounted) return;
 
-      _progressDialog(context, 'Restoring backup', 'Checking file');
+      _progressDialog(
+        context,
+        'Restoring backup'.tr,
+        'Checking file @done of @total',
+      );
       RestoreSummary summary;
       try {
         summary = await service.restore(picked);
       } on BackupException catch (e) {
         navigator.pop();
-        if (context.mounted) _snack(context, e.message, isError: true);
+        if (context.mounted) _snack(context, e.message.tr, isError: true);
         return;
       }
       navigator.pop();
@@ -157,11 +168,12 @@ class BackupActions extends StatelessWidget {
     try {
       return await run();
     } on BackupException catch (e) {
-      if (context.mounted) _snack(context, e.message, isError: true);
+      if (context.mounted) _snack(context, e.message.tr, isError: true);
       return null;
     }
   }
 
+  /// [step] is an untranslated key with `@done` and `@total`.
   void _progressDialog(BuildContext context, String title, String step) {
     showDialog<void>(
       context: context,
@@ -182,13 +194,16 @@ class BackupActions extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   p == null || p.total == 0
-                      ? 'Preparing…'
-                      : '$step ${p.done} of ${p.total}',
+                      ? 'Preparing…'.tr
+                      : step.trParams({
+                          'done': '${p.done}',
+                          'total': '${p.total}',
+                        }),
                   style: dialog.text.bodyMedium,
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  'Keep the app open until this finishes.',
+                  'Keep the app open until this finishes.'.tr,
                   style: dialog.text.bodySmall,
                 ),
               ],
@@ -200,36 +215,49 @@ class BackupActions extends StatelessWidget {
   }
 
   Future<void> _showSummary(BuildContext context, RestoreSummary s) {
-    String plural(int n, String word) => '$n $word${n == 1 ? '' : 's'}';
+    String files(int n) => '@n file'.trPluralParams('@n files', n, {'n': '$n'});
     final nothing = s.addedFiles == 0 && s.addedProjects == 0;
     return showDialog<void>(
       context: context,
       builder: (dialog) => AlertDialog(
         icon: const Icon(Icons.check_circle_outline_rounded),
-        title: Text(nothing ? 'Already up to date' : 'Backup restored'),
+        title: Text((nothing ? 'Already up to date' : 'Backup restored').tr),
         content: Text(
           [
             if (nothing)
-              'Everything in this backup is already on this phone.'
+              'Everything in this backup is already on this phone.'.tr
             else ...[
-              'Added ${plural(s.addedPhotos, 'photo')} '
-                  '(${plural(s.addedFiles, 'file')} in total).',
+              'Added @n photo (@files in total).'.trPluralParams(
+                'Added @n photos (@files in total).',
+                s.addedPhotos,
+                {'n': '${s.addedPhotos}', 'files': files(s.addedFiles)},
+              ),
               if (s.addedProjects > 0)
-                'Added ${plural(s.addedProjects, 'project')}.',
+                'Added @n project.'.trPluralParams(
+                  'Added @n projects.',
+                  s.addedProjects,
+                  {'n': '${s.addedProjects}'},
+                ),
               if (s.addedAssignments > 0)
-                '${plural(s.addedAssignments, 'photo')} put back in '
-                    'their projects.',
-              if (s.restoredSettings) 'Watermark settings restored.',
+                '@n photo put back in their projects.'.trPluralParams(
+                  '@n photos put back in their projects.',
+                  s.addedAssignments,
+                  {'n': '${s.addedAssignments}'},
+                ),
+              if (s.restoredSettings) 'Watermark settings restored.'.tr,
             ],
             if (s.skippedFiles > 0)
-              '${plural(s.skippedFiles, 'file')} skipped because they '
-                  'already exist.',
+              '@n file skipped because they already exist.'.trPluralParams(
+                '@n files skipped because they already exist.',
+                s.skippedFiles,
+                {'n': '${s.skippedFiles}'},
+              ),
           ].join('\n\n'),
         ),
         actions: [
           FilledButton(
             onPressed: () => Navigator.of(dialog).pop(),
-            child: const Text('Done'),
+            child: Text('Done'.tr),
           ),
         ],
       ),

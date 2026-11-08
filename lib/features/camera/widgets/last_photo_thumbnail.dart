@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 
@@ -45,10 +46,10 @@ class LastPhotoThumbnail extends StatelessWidget {
     if (current == null || onTap == null) return frame;
 
     return Tooltip(
-      message: 'Add watermark',
+      message: 'Add watermark'.tr,
       child: Semantics(
         button: true,
-        label: 'Add watermark to last photo',
+        label: 'Add watermark to last photo'.tr,
         child: GestureDetector(
           onTap: onTap,
           child: Stack(

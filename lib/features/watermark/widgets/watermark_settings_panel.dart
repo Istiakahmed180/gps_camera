@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
@@ -30,37 +31,37 @@ class WatermarkSettingsPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionHeader('Details'),
+        SectionHeader('Details'.tr),
         Wrap(
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children: [
             _toggle(
-              'Date',
+              'Date'.tr,
               config.showDate,
               (v) => config.copyWith(showDate: v),
             ),
             _toggle(
-              'Time',
+              'Time'.tr,
               config.showTime,
               (v) => config.copyWith(showTime: v),
             ),
             _toggle(
-              'Coordinates',
+              'Coordinates'.tr,
               config.showCoordinates,
               (v) => config.copyWith(showCoordinates: v),
             ),
             _toggle(
-              'Accuracy',
+              'Accuracy'.tr,
               config.showAccuracy,
               (v) => config.copyWith(showAccuracy: v),
             ),
             Tooltip(
               message: hasAddress
                   ? ''
-                  : 'No address is recorded for this photo',
+                  : 'No address is recorded for this photo'.tr,
               child: _toggle(
-                'Address',
+                'Address'.tr,
                 config.showAddress && hasAddress,
                 (v) => config.copyWith(showAddress: v),
                 enabled: hasAddress,
@@ -69,18 +70,18 @@ class WatermarkSettingsPanel extends StatelessWidget {
             Tooltip(
               message: hasDirection
                   ? ''
-                  : 'No compass direction was recorded for this photo',
+                  : 'No compass direction was recorded for this photo'.tr,
               child: _toggle(
-                'Direction',
+                'Direction'.tr,
                 config.showDirection && hasDirection,
                 (v) => config.copyWith(showDirection: v),
                 enabled: hasDirection,
               ),
             ),
             Tooltip(
-              message: hasNote ? '' : 'This photo has no note',
+              message: hasNote ? '' : 'This photo has no note'.tr,
               child: _toggle(
-                'Note',
+                'Note'.tr,
                 config.showNote && hasNote,
                 (v) => config.copyWith(showNote: v),
                 enabled: hasNote,
@@ -89,24 +90,24 @@ class WatermarkSettingsPanel extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
-        const SectionHeader('Position'),
+        SectionHeader('Position'.tr),
         SegmentedButton<WatermarkPosition>(
           showSelectedIcon: false,
-          segments: const [
+          segments: [
             ButtonSegment(
               value: WatermarkPosition.bottomLeft,
-              label: Text('Left'),
-              icon: Icon(Icons.align_horizontal_left_rounded),
+              label: Text('Left'.tr),
+              icon: const Icon(Icons.align_horizontal_left_rounded),
             ),
             ButtonSegment(
               value: WatermarkPosition.bottomCenter,
-              label: Text('Center'),
-              icon: Icon(Icons.align_horizontal_center_rounded),
+              label: Text('Center'.tr),
+              icon: const Icon(Icons.align_horizontal_center_rounded),
             ),
             ButtonSegment(
               value: WatermarkPosition.bottomRight,
-              label: Text('Right'),
-              icon: Icon(Icons.align_horizontal_right_rounded),
+              label: Text('Right'.tr),
+              icon: const Icon(Icons.align_horizontal_right_rounded),
             ),
           ],
           selected: {config.position},
@@ -114,7 +115,7 @@ class WatermarkSettingsPanel extends StatelessWidget {
               onChanged(config.copyWith(position: s.first)),
         ),
         const SizedBox(height: AppSpacing.xl),
-        const SectionHeader('Text size'),
+        SectionHeader('Text size'.tr),
         SegmentedButton<WatermarkTextSize>(
           showSelectedIcon: false,
           segments: [
@@ -122,9 +123,9 @@ class WatermarkSettingsPanel extends StatelessWidget {
               ButtonSegment(
                 value: size,
                 label: Text(switch (size) {
-                  WatermarkTextSize.small => 'Small',
-                  WatermarkTextSize.medium => 'Medium',
-                  WatermarkTextSize.large => 'Large',
+                  WatermarkTextSize.small => 'Small'.tr,
+                  WatermarkTextSize.medium => 'Medium'.tr,
+                  WatermarkTextSize.large => 'Large'.tr,
                 }),
               ),
           ],
@@ -135,7 +136,7 @@ class WatermarkSettingsPanel extends StatelessWidget {
         const SizedBox(height: AppSpacing.xl),
         Row(
           children: [
-            const Expanded(child: SectionHeader('Opacity')),
+            Expanded(child: SectionHeader('Opacity'.tr)),
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
               child: Text(

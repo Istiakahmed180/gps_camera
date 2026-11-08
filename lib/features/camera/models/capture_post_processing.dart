@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:gps_camera/features/camera/models/capture_feedback.dart';
 import 'package:gps_camera/features/camera/services/capture_saver.dart';
 
 /// Work done after a photo is safely saved: map snapshot, address lookup
@@ -10,5 +11,5 @@ abstract interface class CapturePostProcessor {
 
   /// Adds place and map to the photo and, if enabled, saves a watermarked
   /// copy. Returns a short message for the user, or null.
-  Future<String?> process(SavedCapture saved, Uint8List? map);
+  Future<CaptureFeedback?> process(SavedCapture saved, Uint8List? map);
 }

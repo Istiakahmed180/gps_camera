@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 import 'package:gps_camera/features/watermark/models/watermark_content.dart';
@@ -40,7 +41,7 @@ class WatermarkPreview extends StatelessWidget {
                 image.bytes,
                 fit: BoxFit.fill,
                 gaplessPlayback: true,
-                semanticLabel: 'Photo preview',
+                semanticLabel: 'Photo preview'.tr,
               ),
               CustomPaint(
                 painter: WatermarkCanvasPainter(

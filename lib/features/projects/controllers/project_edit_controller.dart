@@ -82,7 +82,7 @@ class ProjectEditController extends GetxController {
   Future<void> save() async {
     if (isSaving.value) return;
     if (name.text.trim().isEmpty) {
-      nameError.value = 'Enter a project name.';
+      nameError.value = 'Enter a project name.'.tr;
       return;
     }
     isSaving.value = true;
@@ -98,13 +98,17 @@ class ProjectEditController extends GetxController {
             );
       Get.back(result: project);
     } on ProjectValidationException catch (e) {
-      if (e.message.contains('description')) {
+      if (e.message.contains('description') ||
+          e.message ==
+              'Keep the description under @n characters.'.trParams({
+                'n': '${ProjectRepository.maxDescriptionLength}',
+              })) {
         formError.value = e.message;
       } else {
         nameError.value = e.message;
       }
     } catch (_) {
-      formError.value = 'The project could not be saved. Try again.';
+      formError.value = 'The project could not be saved. Try again.'.tr;
     } finally {
       isSaving.value = false;
     }

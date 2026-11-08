@@ -57,28 +57,31 @@ class _PhotoMapViewState extends State<PhotoMapView> {
           final photos = spots.fold(0, (n, s) => n + s.photos.length);
           return Text(
             photos == 0
-                ? 'Map'
-                : 'Map · $photos photo${photos == 1 ? '' : 's'}',
+                ? 'Map'.tr
+                : 'Map · @n photo'.trPluralParams('Map · @n photos', photos, {
+                    'n': '$photos',
+                  }),
           );
         }),
       ),
       body: !_keyChecked
           ? const Center(child: CircularProgressIndicator())
           : _key == null
-          ? const EmptyStateView(
+          ? EmptyStateView(
               icon: Icons.map_outlined,
-              title: 'Map unavailable',
-              message: 'No map key is set up in this build of the app.',
+              title: 'Map unavailable'.tr,
+              message: 'No map key is set up in this build of the app.'.tr,
             )
           : Obx(() {
               final spots = PhotoSpots.from(_gallery.visible);
               if (spots.isEmpty) {
-                return const EmptyStateView(
+                return EmptyStateView(
                   icon: Icons.location_off_outlined,
-                  title: 'No photos with a location',
+                  title: 'No photos with a location'.tr,
                   message:
-                      'Photos taken with GPS appear here as pins. Check the '
-                      'gallery filter and search.',
+                      ('Photos taken with GPS appear here as pins. Check the '
+                              'gallery filter and search.')
+                          .tr,
                 );
               }
               return _Map(
@@ -110,7 +113,8 @@ class _PhotoMapViewState extends State<PhotoMapView> {
                 AppSpacing.sm,
               ),
               child: Text(
-                spot.title ?? '${spot.photos.length} photos here',
+                spot.title ??
+                    '@n photos here'.trParams({'n': '${spot.photos.length}'}),
                 style: sheet.text.titleMedium,
               ),
             ),
@@ -222,8 +226,12 @@ class _Pin extends StatelessWidget {
     final count = spot.photos.length;
     return Semantics(
       button: true,
-      label:
-          '$count photo${count == 1 ? '' : 's'}${spot.title == null ? '' : ' at ${spot.title}'}',
+      label: spot.title == null
+          ? '@n photo'.trPluralParams('@n photos', count, {'n': '$count'})
+          : '@n photo at @place'.trPluralParams('@n photos at @place', count, {
+              'n': '$count',
+              'place': spot.title!,
+            }),
       child: GestureDetector(
         onTap: onTap,
         child: Badge(

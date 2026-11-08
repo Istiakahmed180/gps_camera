@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/app/i18n/app_language.dart';
+import 'package:gps_camera/app/i18n/app_translations.dart';
 import 'package:gps_camera/app/routes/app_pages.dart';
 import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/core/services/storage_service.dart';
@@ -31,6 +34,11 @@ class GpsCameraApp extends StatelessWidget {
           : AppRoutes.onboarding,
       getPages: AppPages.pages,
       defaultTransition: Transition.native,
+      translations: AppTranslations(),
+      locale: Get.find<LanguageService>().locale,
+      fallbackLocale: AppLanguage.fallback,
+      supportedLocales: AppLanguage.supported,
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
     );
   }
 }

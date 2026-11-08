@@ -28,11 +28,11 @@ class PhotoDetailsView extends GetView<PhotoDetailsController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(photo.isOriginal ? 'Original' : 'Watermarked copy'),
+        title: Text(photo.isOriginal ? 'Original'.tr : 'Watermarked copy'.tr),
         actions: [
           Obx(
             () => IconButton(
-              tooltip: 'Delete',
+              tooltip: 'Delete'.tr,
               onPressed: controller.isBusy.value
                   ? null
                   : () => _delete(context),
@@ -111,8 +111,8 @@ class PhotoDetailsView extends GetView<PhotoDetailsController> {
     final outcome = await controller.share(origin: origin);
     if (!context.mounted) return;
     final message = switch (outcome) {
-      ShareOutcome.missingFile => 'This photo no longer exists.',
-      ShareOutcome.failed => 'The share sheet could not be opened.',
+      ShareOutcome.missingFile => 'This photo no longer exists.'.tr,
+      ShareOutcome.failed => 'The share sheet could not be opened.'.tr,
       ShareOutcome.shared ||
       ShareOutcome.dismissed ||
       ShareOutcome.opened => null,
@@ -138,8 +138,8 @@ class PhotoDetailsView extends GetView<PhotoDetailsController> {
       _snack(
         Get.context ?? context,
         result.deleted.where((n) => n.endsWith('.jpg')).length > 1
-            ? 'Photos deleted'
-            : 'Photo deleted',
+            ? 'Photos deleted'.tr
+            : 'Photo deleted'.tr,
       );
     } else {
       _showFailures(context, result);
@@ -151,22 +151,31 @@ class PhotoDetailsView extends GetView<PhotoDetailsController> {
       context: context,
       builder: (context) => AlertDialog(
         icon: Icon(Icons.error_outline_rounded, color: context.colors.error),
-        title: const Text('Some files were not deleted'),
+        title: Text('Some files were not deleted'.tr),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (result.deleted.isNotEmpty)
-              Text('Deleted: ${result.deleted.join(', ')}'),
+              Text(
+                'Deleted: @files'.trParams({
+                  'files': result.deleted.join(', '),
+                }),
+              ),
             const SizedBox(height: AppSpacing.sm),
             for (final failure in result.failures)
-              Text('Not deleted: ${failure.fileName} (${failure.message})'),
+              Text(
+                'Not deleted: @file (@reason)'.trParams({
+                  'file': failure.fileName,
+                  'reason': failure.message,
+                }),
+              ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text('OK'.tr),
           ),
         ],
       ),
@@ -208,8 +217,8 @@ class _Preview extends StatelessWidget {
                 fit: BoxFit.contain,
                 cacheHeight: (constraints.maxHeight * dpr * 2).round(),
                 semanticLabel: photo.isOriginal
-                    ? 'Original photo'
-                    : 'Watermarked photo',
+                    ? 'Original photo'.tr
+                    : 'Watermarked photo'.tr,
                 errorBuilder: (_, _, _) => const Icon(
                   Icons.broken_image_outlined,
                   color: AppColors.onViewfinderMuted,
@@ -243,7 +252,7 @@ class _ProjectSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SectionHeader('Project'),
+            SectionHeader('Project'.tr),
             Card(
               child: ListTile(
                 leading: Icon(
@@ -251,12 +260,12 @@ class _ProjectSection extends StatelessWidget {
                       ? Icons.folder_off_outlined
                       : Icons.folder_outlined,
                 ),
-                title: Text(project?.name ?? 'Not in a project'),
+                title: Text(project?.name ?? 'Not in a project'.tr),
                 subtitle: photo.isWatermarked
                     ? Text(
                         canChange
-                            ? 'Set through its original photo'
-                            : 'Original deleted; project can’t be changed',
+                            ? 'Set through its original photo'.tr
+                            : 'Original deleted; project can’t be changed'.tr,
                       )
                     : null,
                 trailing: canChange
@@ -265,7 +274,7 @@ class _ProjectSection extends StatelessWidget {
                             ? null
                             : () => _choose(context, project),
                         child: Text(
-                          project == null ? 'Add to project' : 'Change',
+                          project == null ? 'Add to project'.tr : 'Change'.tr,
                         ),
                       )
                     : null,
@@ -285,7 +294,7 @@ class _ProjectSection extends StatelessWidget {
       if (context.mounted) {
         PhotoDetailsView._snack(
           context,
-          'Projects could not be loaded.',
+          'Projects could not be loaded.'.tr,
           isError: true,
         );
       }
@@ -298,9 +307,9 @@ class _ProjectSection extends StatelessWidget {
       projects: projects,
       selectedId: current?.id,
       title: controller.photo.isWatermarked
-          ? 'Project for the original photo'
-          : 'Add to project',
-      noneLabel: current == null ? 'No project' : 'Remove from project',
+          ? 'Project for the original photo'.tr
+          : 'Add to project'.tr,
+      noneLabel: current == null ? 'No project'.tr : 'Remove from project'.tr,
     );
     if (choice == null || !context.mounted) return;
 
@@ -315,8 +324,8 @@ class _ProjectSection extends StatelessWidget {
       context,
       error ??
           (target == null
-              ? 'Removed from ${current!.name}'
-              : 'Added to ${target.name}'),
+              ? 'Removed from @name'.trParams({'name': current!.name})
+              : 'Added to @name'.trParams({'name': target.name})),
       isError: error != null,
     );
   }
@@ -340,7 +349,9 @@ class _Related extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionHeader(photo.isOriginal ? 'Watermarked versions' : 'Original'),
+        SectionHeader(
+          photo.isOriginal ? 'Watermarked versions'.tr : 'Original'.tr,
+        ),
         if (items.isEmpty)
           Card(
             child: ListTile(
@@ -351,8 +362,8 @@ class _Related extends StatelessWidget {
               ),
               title: Text(
                 photo.isOriginal
-                    ? 'No watermarked versions yet'
-                    : 'The original photo has been deleted',
+                    ? 'No watermarked versions yet'.tr
+                    : 'The original photo has been deleted'.tr,
               ),
             ),
           )
@@ -385,10 +396,10 @@ class _Related extends StatelessWidget {
                     ),
                     subtitle: Text(
                       item.isWatermarked && item.record != null
-                          ? '${item.record!.config.template.label} · '
+                          ? '${item.record!.config.template.label.tr} · '
                                 '${PhotoInfoFormatter.instant(item.record!.renderedAt)}'
                           : item.metadata == null
-                          ? 'Original'
+                          ? 'Original'.tr
                           : PhotoInfoFormatter.captureShort(item.metadata!),
                     ),
                     trailing: const Icon(Icons.chevron_right_rounded),
@@ -419,12 +430,12 @@ class _NoteSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionHeader('Note'),
+          SectionHeader('Note'.tr),
           Card(
             child: ListTile(
               leading: const Icon(Icons.sticky_note_2_outlined),
               title: Text(
-                note ?? 'Add a note',
+                note ?? 'Add a note'.tr,
                 style: note == null
                     ? context.text.bodyLarge?.copyWith(
                         color: context.colors.onSurfaceVariant,
@@ -433,7 +444,7 @@ class _NoteSection extends StatelessWidget {
               ),
               subtitle: controller.canEditNote
                   ? null
-                  : const Text('Saved with this copy'),
+                  : Text('Saved with this copy'.tr),
               trailing: controller.canEditNote
                   ? const Icon(Icons.edit_outlined)
                   : null,
@@ -449,17 +460,18 @@ class _NoteSection extends StatelessWidget {
     final result = await showNoteDialog(
       context,
       initial: controller.note.value,
-      title: 'Photo note',
+      title: 'Photo note'.tr,
       helper:
-          'Shown in reports and on new watermarked copies. Copies already '
-          'made keep their old note.',
+          ('Shown in reports and on new watermarked copies. Copies already '
+                  'made keep their old note.')
+              .tr,
     );
     if (result == null || !context.mounted) return;
     final error = await controller.saveNote(result.isEmpty ? null : result);
     if (!context.mounted) return;
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(
       SnackBar(
-        content: Text(error ?? 'Note saved'),
+        content: Text(error ?? 'Note saved'.tr),
         backgroundColor: error == null ? null : context.colors.error,
       ),
     );

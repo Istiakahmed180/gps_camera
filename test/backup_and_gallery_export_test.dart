@@ -214,10 +214,9 @@ void main() {
       gallery
         ..saved.clear()
         ..forced = PhoneGallerySave.failed;
-      expect(
-        await enricher().process(saved, null),
-        'Not saved to phone gallery',
-      );
+      final failed = await enricher().process(saved, null);
+      expect(failed!.message, 'Not saved to phone gallery');
+      expect(failed.isError, isTrue, reason: 'shown as an error');
     });
   });
 

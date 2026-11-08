@@ -82,14 +82,16 @@ class ReportService extends GetxService {
   /// name. Throws [ReportException]; on failure no partial file remains.
   Future<ReportResult> generate(ReportJob job) async {
     if (isGenerating.value) {
-      throw const ReportException('A report is already being generated.');
+      throw ReportException('A report is already being generated.'.tr);
     }
     if (job.entries.isEmpty) {
-      throw const ReportException('There are no photos to include.');
+      throw ReportException('There are no photos to include.'.tr);
     }
     if (job.entries.length > maxPhotos) {
-      throw const ReportException(
-        'Reports are limited to $maxPhotos photos. Select fewer photos.',
+      throw ReportException(
+        'Reports are limited to @max photos. Select fewer photos.'.trParams({
+          'max': '$maxPhotos',
+        }),
       );
     }
 
@@ -109,7 +111,7 @@ class ReportService extends GetxService {
         (p) => progress.value = p,
       );
       if (!await temp.exists() || await temp.length() == 0) {
-        throw const ReportException('The report file was not written.');
+        throw ReportException('The report file was not written.'.tr);
       }
       await temp.rename(target.path);
 
@@ -135,7 +137,9 @@ class ReportService extends GetxService {
         } catch (_) {}
       }
       if (e is ReportException) rethrow;
-      throw ReportException('The report could not be created: $e');
+      throw ReportException(
+        'The report could not be created: @error'.trParams({'error': '$e'}),
+      );
     } finally {
       isGenerating.value = false;
       progress.value = null;
@@ -199,7 +203,7 @@ class ReportService extends GetxService {
   Future<void> delete(ReportFile report) async {
     final directory = await _storage.reportsDirectory();
     if (report.file.parent.absolute.path != directory.absolute.path) {
-      throw const ReportException('Only reports can be deleted here.');
+      throw ReportException('Only reports can be deleted here.'.tr);
     }
     if (await report.file.exists()) await report.file.delete();
     final record = _storage.metadataFileFor(report.file);
@@ -295,7 +299,7 @@ class ReportService extends GetxService {
         case null:
           if (!done.isCompleted) {
             done.completeError(
-              const ReportException('Report generation stopped unexpectedly.'),
+              ReportException('Report generation stopped unexpectedly.'.tr),
             );
           }
           port.close();

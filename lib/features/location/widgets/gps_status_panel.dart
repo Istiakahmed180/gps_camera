@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/app/theme/app_text_styles.dart';
@@ -36,7 +37,10 @@ class GpsStatusPanel extends StatelessWidget {
     return Semantics(
       container: true,
       liveRegion: true,
-      label: 'GPS: ${view.title}. ${view.detail ?? ''}',
+      label: 'GPS: @title. @detail'.trParams({
+        'title': view.title.tr,
+        'detail': view.detail?.tr ?? '',
+      }),
       excludeSemantics: view.action == null,
       child: Container(
         constraints: const BoxConstraints(minHeight: 56),
@@ -193,7 +197,7 @@ class _Texts extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          view.title,
+          view.title.tr,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.text.labelLarge?.copyWith(
@@ -205,7 +209,7 @@ class _Texts extends StatelessWidget {
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
-              view.detail!,
+              view.detail!.tr,
               maxLines: 1,
               style: context.text.bodySmall
                   ?.merge(AppTextStyles.tabularFigures)
@@ -258,7 +262,7 @@ class _ActionButton extends StatelessWidget {
         minimumSize: const Size(48, 40),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       ),
-      child: Text(label),
+      child: Text(label.tr),
     );
   }
 }

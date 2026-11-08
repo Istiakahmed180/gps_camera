@@ -20,7 +20,7 @@ class WatermarkEditorView extends GetView<WatermarkController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Watermark')),
+      appBar: AppBar(title: Text('Watermark'.tr)),
       body: Obx(
         () => switch (controller.status.value) {
           WatermarkEditorStatus.loading => const Center(
@@ -28,10 +28,10 @@ class WatermarkEditorView extends GetView<WatermarkController> {
           ),
           WatermarkEditorStatus.error => EmptyStateView(
             icon: Icons.broken_image_outlined,
-            title: 'Photo unavailable',
-            message: controller.loadError.value ?? 'Something went wrong.',
+            title: 'Photo unavailable'.tr,
+            message: (controller.loadError.value ?? 'Something went wrong.').tr,
             action: AppButton(
-              label: 'Try again',
+              label: 'Try again'.tr,
               icon: Icons.refresh_rounded,
               variant: AppButtonVariant.secondary,
               onPressed: controller.load,
@@ -131,7 +131,7 @@ class _Controls extends GetView<WatermarkController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionHeader('Template'),
+          SectionHeader('Template'.tr),
           WatermarkStyleSelector(
             selected: config.template,
             content: content,
@@ -170,12 +170,19 @@ class _LocationNote extends GetView<WatermarkController> {
     final location = controller.metadata.value?.location;
     final message = switch (location?.status) {
       LocationRecordStatus.unavailable =>
-        'No location was recorded for this photo. The watermark will say '
-            '"Location unavailable" instead of coordinates.',
+        ('No location was recorded for this photo. The watermark will say '
+                '"Location unavailable" instead of coordinates.')
+            .tr,
       LocationRecordStatus.stale =>
-        'This photo only has a last known location'
-            '${location?.fixAge == null ? '' : ', from ${CaptureTimeFormatter.age(location!.fixAge!)} before capture'}. '
-            'The watermark labels it that way.',
+        location?.fixAge == null
+            ? ('This photo only has a last known location. The watermark '
+                      'labels it that way.')
+                  .tr
+            : ('This photo only has a last known location, from @age '
+                      'before capture. The watermark labels it that way.')
+                  .trParams({
+                    'age': CaptureTimeFormatter.age(location!.fixAge!),
+                  }),
       _ => null,
     };
     if (message == null) return const SizedBox.shrink();
@@ -243,19 +250,27 @@ class _SaveBar extends GetView<WatermarkController> {
                   _StatusLine(
                     isError: error != null || empty,
                     message:
-                        error ??
+                        error?.tr ??
                         (empty
-                            ? 'Choose at least one detail to show.'
-                            : 'Saved as ${result!.output.uri.pathSegments.last}. '
-                                  'The original is unchanged.'
-                                  '${controller.galleryFailed.value ? ' It could not be added to the phone gallery.' : ''}'),
+                            ? 'Choose at least one detail to show.'.tr
+                            : 'Saved as @file. The original is unchanged.'
+                                      .trParams({
+                                        'file': result!
+                                            .output
+                                            .uri
+                                            .pathSegments
+                                            .last,
+                                      }) +
+                                  (controller.galleryFailed.value
+                                      ? ' ${'It could not be added to the phone gallery.'.tr}'
+                                      : '')),
                   ),
                   const SizedBox(height: AppSpacing.md),
                 ],
                 AppButton(
                   label: controller.isSaving.value
-                      ? 'Saving…'
-                      : 'Save watermarked copy',
+                      ? 'Saving…'.tr
+                      : 'Save watermarked copy'.tr,
                   icon: Icons.save_alt_rounded,
                   isExpanded: true,
                   isLoading: controller.isSaving.value,

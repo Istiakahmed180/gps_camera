@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
 
 /// Asks for a note. Returns the text (empty means "remove"), or null when
@@ -49,7 +50,7 @@ class _NoteDialogState extends State<_NoteDialog> {
         maxLines: 4,
         textCapitalization: TextCapitalization.sentences,
         decoration: InputDecoration(
-          hintText: 'e.g. Crack on pillar 3, north side',
+          hintText: 'e.g. Crack on pillar 3, north side'.tr,
           helperText: widget.helper,
           helperMaxLines: 5,
           border: const OutlineInputBorder(),
@@ -59,15 +60,15 @@ class _NoteDialogState extends State<_NoteDialog> {
         if ((widget.initial ?? '').isNotEmpty)
           TextButton(
             onPressed: () => Navigator.of(context).pop(''),
-            child: const Text('Remove'),
+            child: Text('Remove'.tr),
           ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text('Cancel'.tr),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(_text.text.trim()),
-          child: const Text('Save'),
+          child: Text('Save'.tr),
         ),
       ],
     );

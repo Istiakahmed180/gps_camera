@@ -7,6 +7,7 @@ import 'package:gps_camera/core/services/permission_service.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/core/services/share_service.dart';
 import 'package:gps_camera/core/services/storage_service.dart';
+import 'package:gps_camera/app/i18n/app_language.dart';
 import 'package:gps_camera/core/services/theme_service.dart';
 import 'package:gps_camera/core/settings/app_preferences.dart';
 import 'package:gps_camera/features/backup/services/backup_service.dart';
@@ -27,6 +28,7 @@ class InitialBinding extends Bindings {
   void dependencies() {
     final storage = Get.put(StorageService(GetStorage()), permanent: true);
     Get.put(ThemeService(storage), permanent: true);
+    Get.put(LanguageService(storage), permanent: true);
     Get.put(AppPreferences(storage), permanent: true);
     Get.lazyPut(PermissionService.new, fenix: true);
     Get.lazyPut(PhotoStorageService.new, fenix: true);

@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/features/camera/models/camera_status.dart';
@@ -49,38 +50,39 @@ class CameraViewfinder extends StatelessWidget {
 
   Widget _buildMessage() {
     return switch (status) {
-      CameraStatus.initializing || CameraStatus.ready => const CameraMessage(
-        title: 'Starting camera…',
+      CameraStatus.initializing || CameraStatus.ready => CameraMessage(
+        title: 'Starting camera…'.tr,
         isLoading: true,
       ),
       CameraStatus.permissionDenied => CameraMessage(
         icon: Icons.no_photography_outlined,
-        title: 'Camera access needed',
-        message: 'Allow camera access to capture site photos.',
+        title: 'Camera access needed'.tr,
+        message: 'Allow camera access to capture site photos.'.tr,
         action: AppButton(
-          label: 'Allow camera',
+          label: 'Allow camera'.tr,
           icon: Icons.photo_camera_outlined,
           onPressed: onRequestPermission,
         ),
       ),
       CameraStatus.permissionBlocked => CameraMessage(
         icon: Icons.no_photography_outlined,
-        title: 'Camera access is turned off',
+        title: 'Camera access is turned off'.tr,
         message:
-            'Enable the camera permission for GPS Camera in system '
-            'settings, then return to the app.',
+            ('Enable the camera permission for GPS Camera in system '
+                    'settings, then return to the app.')
+                .tr,
         action: AppButton(
-          label: 'Open settings',
+          label: 'Open settings'.tr,
           icon: Icons.settings_outlined,
           onPressed: onOpenSettings,
         ),
       ),
       CameraStatus.error => CameraMessage(
         icon: Icons.videocam_off_outlined,
-        title: 'Camera unavailable',
+        title: 'Camera unavailable'.tr,
         message: errorMessage,
         action: AppButton(
-          label: 'Try again',
+          label: 'Try again'.tr,
           icon: Icons.refresh_rounded,
           onPressed: onRetry,
         ),

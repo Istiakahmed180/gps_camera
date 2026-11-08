@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
 import 'package:gps_camera/features/location/models/gps_accuracy_level.dart';
 import 'package:gps_camera/features/location/models/location_snapshot.dart';
@@ -162,7 +163,7 @@ class WatermarkContent {
   String? get accuracyValue {
     if (accuracy == null) return null;
     return accuracyLevel == GpsAccuracyLevel.poor
-        ? '$accuracy (poor)'
+        ? '@accuracy (poor)'.trParams({'accuracy': '$accuracy'})
         : accuracy;
   }
 
@@ -170,10 +171,11 @@ class WatermarkContent {
   String? get locationNotice => switch (locationState) {
     WatermarkLocationState.lastKnown =>
       fixAge == null
-          ? 'Last known location'
-          : 'Last known location · '
-                '${CaptureTimeFormatter.age(fixAge!)} before capture',
-    WatermarkLocationState.unavailable => 'Location unavailable',
+          ? 'Last known location'.tr
+          : 'Last known location · @age before capture'.trParams({
+              'age': CaptureTimeFormatter.age(fixAge!),
+            }),
+    WatermarkLocationState.unavailable => 'Location unavailable'.tr,
     WatermarkLocationState.current || null => null,
   };
 }

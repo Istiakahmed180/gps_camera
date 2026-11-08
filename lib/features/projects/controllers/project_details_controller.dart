@@ -170,7 +170,7 @@ class ProjectDetailsController extends GetxController implements PhotoLibrary {
     } on ProjectValidationException catch (e) {
       return e.message;
     } catch (_) {
-      return 'The project could not be updated. Try again.';
+      return 'The project could not be updated. Try again.'.tr;
     } finally {
       isBusy.value = false;
     }

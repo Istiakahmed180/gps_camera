@@ -20,8 +20,10 @@ class ActiveProjectChip extends StatelessWidget {
       return Semantics(
         button: true,
         label: project == null
-            ? 'No project selected. Choose a project for new photos'
-            : 'New photos go to ${project.name}. Change project',
+            ? 'No project selected. Choose a project for new photos'.tr
+            : 'New photos go to @name. Change project'.trParams({
+                'name': project.name,
+              }),
         excludeSemantics: true,
         child: Material(
           color: AppColors.viewfinderSurface,
@@ -49,7 +51,7 @@ class ActiveProjectChip extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   Flexible(
                     child: Text(
-                      project?.name ?? 'No project',
+                      project?.name ?? 'No project'.tr,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: context.text.labelLarge?.copyWith(
@@ -86,8 +88,8 @@ class ActiveProjectChip extends StatelessWidget {
       context,
       projects: projects,
       selectedId: current?.id,
-      title: 'Project for new photos',
-      noneLabel: 'No project',
+      title: 'Project for new photos'.tr,
+      noneLabel: 'No project'.tr,
     );
     if (choice == null) return;
     await controller.select(switch (choice) {

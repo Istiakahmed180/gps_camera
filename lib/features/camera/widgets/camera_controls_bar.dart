@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/features/camera/models/capture_timer.dart';
@@ -39,7 +40,7 @@ class CameraControlsBar extends StatelessWidget {
       children: [
         _Toggle(
           icon: showGrid ? Icons.grid_on_rounded : Icons.grid_off_rounded,
-          tooltip: showGrid ? 'Hide grid' : 'Show grid',
+          tooltip: showGrid ? 'Hide grid'.tr : 'Show grid'.tr,
           active: showGrid,
           onPressed: onToggleGrid,
         ),
@@ -48,7 +49,7 @@ class CameraControlsBar extends StatelessWidget {
           icon: timer == CaptureTimer.off
               ? Icons.timer_off_outlined
               : Icons.timer_outlined,
-          tooltip: 'Timer: ${timer.label}',
+          tooltip: 'Timer: @value'.trParams({'value': timer.label.tr}),
           active: timer != CaptureTimer.off,
           badge: timer == CaptureTimer.off ? null : '${timer.seconds}',
           onPressed: enabled ? onCycleTimer : null,
@@ -59,7 +60,7 @@ class CameraControlsBar extends StatelessWidget {
             icon: hasNote
                 ? Icons.sticky_note_2_rounded
                 : Icons.sticky_note_2_outlined,
-            tooltip: hasNote ? 'Edit note for new photos' : 'Add a note',
+            tooltip: hasNote ? 'Edit note for new photos'.tr : 'Add a note'.tr,
             active: hasNote,
             onPressed: onNote,
           ),
@@ -180,7 +181,7 @@ class _ZoomChip extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: 'Zoom $label',
+      label: 'Zoom @value'.trParams({'value': label}),
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,

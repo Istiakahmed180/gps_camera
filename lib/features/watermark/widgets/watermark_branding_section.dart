@@ -50,20 +50,22 @@ class _WatermarkBrandingSectionState extends State<WatermarkBrandingSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionHeader('Branding'),
+        SectionHeader('Branding'.tr),
         TextField(
           controller: _brand,
           maxLength: WatermarkConfig.maxBrandLength,
           textCapitalization: TextCapitalization.characters,
           decoration: InputDecoration(
-            labelText: 'Heading',
-            hintText: 'Company or app name',
-            helperText: 'Leave empty to hide it.',
+            labelText: 'Heading'.tr,
+            hintText: 'Company or app name'.tr,
+            helperText: 'Leave empty to hide it.'.tr,
             border: const OutlineInputBorder(),
             suffixIcon: config.brandText == WatermarkConfig.defaultBrand
                 ? null
                 : IconButton(
-                    tooltip: 'Use “${WatermarkConfig.defaultBrand}”',
+                    tooltip: 'Use “@brand”'.trParams({
+                      'brand': WatermarkConfig.defaultBrand,
+                    }),
                     icon: const Icon(Icons.restart_alt_rounded),
                     onPressed: () {
                       _brand.text = WatermarkConfig.defaultBrand;
@@ -82,11 +84,11 @@ class _WatermarkBrandingSectionState extends State<WatermarkBrandingSection> {
           controller: _custom,
           maxLength: WatermarkConfig.maxCustomTextLength,
           textCapitalization: TextCapitalization.sentences,
-          decoration: const InputDecoration(
-            labelText: 'Extra line',
-            hintText: 'e.g. Site: Block C · Inspector: Rahim',
-            helperText: 'Shown under the heading on every photo.',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: 'Extra line'.tr,
+            hintText: 'e.g. Site: Block C · Inspector: Rahim'.tr,
+            helperText: 'Shown under the heading on every photo.'.tr,
+            border: const OutlineInputBorder(),
           ),
           onChanged: (v) => widget.onChanged(config.copyWith(customText: v)),
         ),
@@ -113,11 +115,11 @@ class _WatermarkBrandingSectionState extends State<WatermarkBrandingSection> {
                     ? const Icon(Icons.image_outlined)
                     : RawImage(image: image, fit: BoxFit.contain),
               ),
-              title: const Text('Logo'),
+              title: Text('Logo'.tr),
               subtitle: Text(
                 image == null
-                    ? 'PNG or JPEG. A transparent PNG looks best.'
-                    : 'Shown beside the heading (not in Minimal).',
+                    ? 'PNG or JPEG. A transparent PNG looks best.'.tr
+                    : 'Shown beside the heading (not in Minimal).'.tr,
               ),
               trailing: _picking
                   ? const SizedBox.square(
@@ -127,21 +129,27 @@ class _WatermarkBrandingSectionState extends State<WatermarkBrandingSection> {
                   : image == null
                   ? TextButton(
                       onPressed: () => _pick(logo),
-                      child: const Text('Choose'),
+                      child: Text('Choose'.tr),
                     )
                   : PopupMenuButton<String>(
-                      tooltip: 'Logo options',
+                      tooltip: 'Logo options'.tr,
                       onSelected: (v) =>
                           v == 'change' ? _pick(logo) : _remove(logo),
-                      itemBuilder: (_) => const [
-                        PopupMenuItem(value: 'change', child: Text('Change')),
-                        PopupMenuItem(value: 'remove', child: Text('Remove')),
+                      itemBuilder: (_) => [
+                        PopupMenuItem(
+                          value: 'change',
+                          child: Text('Change'.tr),
+                        ),
+                        PopupMenuItem(
+                          value: 'remove',
+                          child: Text('Remove'.tr),
+                        ),
                       ],
                     ),
             ),
             if (image != null)
               SwitchListTile(
-                title: const Text('Show logo'),
+                title: Text('Show logo'.tr),
                 value: config.showLogo,
                 onChanged: (v) =>
                     widget.onChanged(config.copyWith(showLogo: v)),
@@ -160,9 +168,9 @@ class _WatermarkBrandingSectionState extends State<WatermarkBrandingSection> {
         widget.onChanged(widget.config.copyWith(showLogo: true));
       }
     } on LogoException catch (e) {
-      if (mounted) _snack(e.message);
+      if (mounted) _snack(e.message.tr);
     } catch (_) {
-      if (mounted) _snack('The logo could not be saved.');
+      if (mounted) _snack('The logo could not be saved.'.tr);
     } finally {
       if (mounted) setState(() => _picking = false);
     }
@@ -173,7 +181,7 @@ class _WatermarkBrandingSectionState extends State<WatermarkBrandingSection> {
       await logo.remove();
       if (mounted) widget.onChanged(widget.config.copyWith(showLogo: false));
     } catch (_) {
-      if (mounted) _snack('The logo could not be removed.');
+      if (mounted) _snack('The logo could not be removed.'.tr);
     }
   }
 

@@ -77,7 +77,7 @@ class _LiveWatermarkOverlayState extends State<LiveWatermarkOverlay> {
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: ActionChip(
             avatar: const Icon(Icons.branding_watermark_outlined, size: 18),
-            label: const Text('Auto watermark off'),
+            label: Text('Auto watermark off'.tr),
             onPressed: _openSheet,
           ),
         ),
@@ -133,8 +133,8 @@ class _LiveWatermarkOverlayState extends State<LiveWatermarkOverlay> {
                   height: mapRect.height * scale,
                   child: _MapPlaceholder(
                     text: widget.map.available.value
-                        ? 'Loading map…'
-                        : 'Map unavailable',
+                        ? 'Loading map…'.tr
+                        : 'Map unavailable'.tr,
                   ),
                 ),
               if (!bounds.isEmpty)
@@ -145,7 +145,7 @@ class _LiveWatermarkOverlayState extends State<LiveWatermarkOverlay> {
                   height: bounds.height * scale,
                   child: Semantics(
                     button: true,
-                    label: 'Watermark. Change template',
+                    label: 'Watermark. Change template'.tr,
                     child: GestureDetector(
                       behavior: HitTestBehavior.translucent,
                       onTap: _openSheet,
@@ -251,12 +251,12 @@ class _WatermarkSheetState extends State<_WatermarkSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Watermark', style: context.text.titleLarge),
+            Text('Watermark'.tr, style: context.text.titleLarge),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               value: _auto,
-              title: const Text('Save a watermarked copy on capture'),
-              subtitle: const Text('The original photo is always kept'),
+              title: Text('Save a watermarked copy on capture'.tr),
+              subtitle: Text('The original photo is always kept'.tr),
               onChanged: (value) async {
                 setState(() => _auto = value);
                 await widget.settings.saveAutoWatermark(value);
@@ -269,7 +269,7 @@ class _WatermarkSheetState extends State<_WatermarkSheet> {
               children: [
                 for (final template in WatermarkTemplate.values)
                   ChoiceChip(
-                    label: Text(template.label),
+                    label: Text(template.label.tr),
                     selected: _config.template == template,
                     onSelected: (_) async {
                       setState(
@@ -282,8 +282,9 @@ class _WatermarkSheetState extends State<_WatermarkSheet> {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'More options (details, size, position) are in the watermark '
-              'editor.',
+              ('More options (details, size, position) are in the watermark '
+                      'editor.')
+                  .tr,
               style: context.text.bodySmall,
             ),
           ],

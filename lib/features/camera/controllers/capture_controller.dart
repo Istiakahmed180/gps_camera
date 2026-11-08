@@ -236,7 +236,9 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
         flashMode.value = next;
       } on CameraException catch (e) {
         _showFeedback(
-          'Flash could not be changed: ${_describe(e)}',
+          'Flash could not be changed: @error'.trParams({
+            'error': _describe(e),
+          }),
           isError: true,
         );
       }
@@ -430,11 +432,17 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
       );
       _postProcess(saved, map);
     } on CameraException catch (e) {
-      _showFeedback('Capture failed: ${_describe(e)}', isError: true);
+      _showFeedback(
+        'Capture failed: @error'.trParams({'error': _describe(e)}),
+        isError: true,
+      );
     } on FileSystemException catch (e) {
-      _showFeedback('Photo could not be saved: ${e.message}', isError: true);
+      _showFeedback(
+        'Photo could not be saved: @error'.trParams({'error': e.message}),
+        isError: true,
+      );
     } catch (_) {
-      _showFeedback('Something went wrong while capturing.', isError: true);
+      _showFeedback('Something went wrong while capturing.'.tr, isError: true);
     } finally {
       isCapturing.value = false;
     }
@@ -446,9 +454,9 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
     if (processor == null) return;
     _postQueue = _postQueue.then((_) async {
       try {
-        final message = await processor.process(saved, await map);
-        if (message != null && !_isClosed) {
-          _showFeedback(message, isError: message.contains('not saved'));
+        final result = await processor.process(saved, await map);
+        if (result != null && !_isClosed) {
+          _showFeedback(result.message, isError: result.isError);
         }
       } catch (_) {
         // Post-processing is best effort; the photo is already saved.
@@ -484,7 +492,7 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
           status.value = CameraStatus.permissionDenied;
         }
       case null:
-        _setError('Camera permission could not be checked on this device.');
+        _setError('Camera permission could not be checked on this device.'.tr);
     }
   }
 
@@ -508,15 +516,17 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
         _cameraIndex = _defaultCameraIndex(_cameras);
       }
     } on CameraException catch (e) {
-      _setError('Cameras could not be listed: ${_describe(e)}');
+      _setError(
+        'Cameras could not be listed: @error'.trParams({'error': _describe(e)}),
+      );
       return;
     } catch (_) {
-      _setError('The camera is not available on this device.');
+      _setError('The camera is not available on this device.'.tr);
       return;
     }
 
     if (_cameras.isEmpty) {
-      _setError('No camera was found on this device.');
+      _setError('No camera was found on this device.'.tr);
       return;
     }
     canSwitchCamera.value =
@@ -580,7 +590,11 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
       case 'CameraAccessRestricted':
         status.value = CameraStatus.permissionBlocked;
       default:
-        _setError('The camera could not be started: ${_describe(e)}');
+        _setError(
+          'The camera could not be started: @error'.trParams({
+            'error': _describe(e),
+          }),
+        );
     }
   }
 
@@ -619,7 +633,7 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
           .assignCapture(photo)
           .timeout(const Duration(seconds: 3));
     } catch (_) {
-      return const AssignmentFailed('the project');
+      return AssignmentFailed('the project'.tr);
     }
   }
 
@@ -634,22 +648,25 @@ class CaptureController extends GetxController with WidgetsBindingObserver {
       NotAssigned() => base,
       AssignedToProject(:final projectName) => '$base · $projectName',
       AssignmentFailed(:final projectName) =>
-        '$base, but it could not be added to $projectName',
+        '@base, but it could not be added to @project'.trParams({
+          'base': base,
+          'project': projectName,
+        }),
     };
   }
 
   static String _locationMessage(SavedCapture saved) {
     if (!saved.hasMetadataFile) {
-      return 'Photo saved, but its location data could not be saved';
+      return 'Photo saved, but its location data could not be saved'.tr;
     }
     final location = saved.metadata.location;
     return switch (location.status) {
-      LocationRecordStatus.unavailable => 'Photo saved · no location',
-      LocationRecordStatus.stale => 'Photo saved · last known location',
+      LocationRecordStatus.unavailable => 'Photo saved · no location'.tr,
+      LocationRecordStatus.stale => 'Photo saved · last known location'.tr,
       LocationRecordStatus.current
           when location.accuracyLevel == GpsAccuracyLevel.poor =>
-        'Photo saved · poor GPS accuracy',
-      LocationRecordStatus.current => 'Photo saved with location',
+        'Photo saved · poor GPS accuracy'.tr,
+      LocationRecordStatus.current => 'Photo saved with location'.tr,
     };
   }
 

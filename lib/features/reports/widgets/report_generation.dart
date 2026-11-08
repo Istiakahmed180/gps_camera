@@ -17,7 +17,7 @@ Future<ReportResult?> generateReportWithProgress(
   ReportJob job,
 ) async {
   if (service.isGenerating.value) {
-    _snack(context, 'A report is already being generated.', isError: true);
+    _snack(context, 'A report is already being generated.'.tr, isError: true);
     return null;
   }
 
@@ -49,14 +49,17 @@ void _progressDialog(BuildContext context, ReportService service, int total) {
     builder: (context) => PopScope(
       canPop: false,
       child: AlertDialog(
-        title: const Text('Creating report'),
+        title: Text('Creating report'.tr),
         content: Obx(() {
           final p = service.progress.value;
           final text = p == null
-              ? 'Preparing…'
+              ? 'Preparing…'.tr
               : p.saving
-              ? 'Saving PDF…'
-              : 'Adding photo ${p.done} of ${p.total}';
+              ? 'Saving PDF…'.tr
+              : 'Adding photo @done of @total'.trParams({
+                  'done': '${p.done}',
+                  'total': '${p.total}',
+                });
           return Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -94,12 +97,12 @@ Future<void> _showReady(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Report ready', style: sheet.text.titleLarge),
+            Text('Report ready'.tr, style: sheet.text.titleLarge),
             const SizedBox(height: AppSpacing.xs),
             Text(
               '${record.fileName}\n'
-              '${record.photoCount} photo${record.photoCount == 1 ? '' : 's'}'
-              ' · ${record.pageCount} page${record.pageCount == 1 ? '' : 's'}',
+              '${'@n photo'.trPluralParams('@n photos', record.photoCount, {'n': '${record.photoCount}'})}'
+              ' · ${'@n page'.trPluralParams('@n pages', record.pageCount, {'n': '${record.pageCount}'})}',
               style: sheet.text.bodyMedium,
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -109,7 +112,7 @@ Future<void> _showReady(
                   child: OutlinedButton.icon(
                     onPressed: () => shareReport(sheet, service, result.file),
                     icon: const Icon(Icons.ios_share_rounded),
-                    label: const Text('Share'),
+                    label: Text('Share'.tr),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -117,7 +120,7 @@ Future<void> _showReady(
                   child: FilledButton.icon(
                     onPressed: () => openReport(sheet, service, result.file),
                     icon: const Icon(Icons.open_in_new_rounded),
-                    label: const Text('Open'),
+                    label: Text('Open'.tr),
                   ),
                 ),
               ],
@@ -127,7 +130,7 @@ Future<void> _showReady(
                 Navigator.of(sheet).pop();
                 Get.toNamed<void>(AppRoutes.reports);
               },
-              child: const Text('All reports'),
+              child: Text('All reports'.tr),
             ),
           ],
         ),
@@ -144,8 +147,8 @@ Future<void> shareReport(
   final outcome = await service.share(file);
   if (!context.mounted) return;
   final message = switch (outcome) {
-    ShareOutcome.missingFile => 'This report no longer exists.',
-    ShareOutcome.failed => 'The share sheet could not be opened.',
+    ShareOutcome.missingFile => 'This report no longer exists.'.tr,
+    ShareOutcome.failed => 'The share sheet could not be opened.'.tr,
     _ => null,
   };
   if (message != null) _snack(context, message, isError: true);
@@ -161,9 +164,9 @@ Future<void> openReport(
   final message = switch (outcome) {
     ReportOpenOutcome.opened => null,
     ReportOpenOutcome.noApp =>
-      'No PDF viewer is installed. Use Share to send the report instead.',
-    ReportOpenOutcome.missing => 'This report no longer exists.',
-    ReportOpenOutcome.failed => 'The report could not be opened.',
+      'No PDF viewer is installed. Use Share to send the report instead.'.tr,
+    ReportOpenOutcome.missing => 'This report no longer exists.'.tr,
+    ReportOpenOutcome.failed => 'The report could not be opened.'.tr,
   };
   if (message != null) _snack(context, message, isError: true);
 }

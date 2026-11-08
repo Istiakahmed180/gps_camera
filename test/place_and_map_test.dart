@@ -319,7 +319,8 @@ void main() {
 
         final message = await enricher(place: _place()).process(saved, png);
 
-        expect(message, 'Watermarked copy saved');
+        expect(message!.message, 'Watermarked copy saved');
+        expect(message.isError, isFalse);
         expect(
           File('${root.path}/GPSCamera/Maps/IMG_cap_map.png').readAsBytesSync(),
           png,
@@ -367,7 +368,7 @@ void main() {
 
       final message = await enricher().process(blind, png);
 
-      expect(message, 'Watermarked copy saved');
+      expect(message!.message, 'Watermarked copy saved');
       expect(sidecar()['place'], isNull);
       expect(sidecar()['mapImageFileName'], isNull);
       expect(

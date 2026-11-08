@@ -39,13 +39,13 @@ class PhotoDetailsController extends GetxController {
 
   /// Saves [value] as the note; returns an error message or null.
   Future<String?> saveNote(String? value) async {
-    if (!canEditNote) return 'This photo has no editable note.';
+    if (!canEditNote) return 'This photo has no editable note.'.tr;
     try {
       note.value = await _service.updateNote(photo, value);
       unawaited(_library.reload());
       return null;
     } catch (_) {
-      return 'The note could not be saved.';
+      return 'The note could not be saved.'.tr;
     }
   }
 
@@ -96,8 +96,9 @@ class PhotoDetailsController extends GetxController {
   Future<String?> setProject(Project? target) async {
     final key = PhotoRefs.assignmentKey(photo);
     if (key == null || !canChangeProject) {
-      return 'The original of this copy was deleted, so its project '
-          'cannot be changed.';
+      return ('The original of this copy was deleted, so its project '
+              'cannot be changed.')
+          .tr;
     }
     isBusy.value = true;
     try {
@@ -111,7 +112,7 @@ class PhotoDetailsController extends GetxController {
     } on ProjectValidationException catch (e) {
       return e.message;
     } catch (_) {
-      return 'The project could not be updated. Try again.';
+      return 'The project could not be updated. Try again.'.tr;
     } finally {
       isBusy.value = false;
     }

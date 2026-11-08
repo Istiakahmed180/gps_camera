@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:gps_camera/core/utils/script.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
@@ -30,14 +32,16 @@ class PhotoGridItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final metadata = photo.metadata;
     final (date, time) = metadata == null
-        ? ('No capture data', null)
+        ? ('No capture data'.tr, null)
         : PhotoInfoFormatter.captureParts(metadata);
     final caption = time == null ? date : '$date · $time';
-    final kind = photo.isOriginal ? 'Original' : 'Watermarked';
+    final label = photo.isOriginal
+        ? 'Original photo, @caption'.trParams({'caption': caption})
+        : 'Watermarked photo, @caption'.trParams({'caption': caption});
 
     return Semantics(
       button: true,
-      label: '$kind photo, $caption',
+      label: label,
       excludeSemantics: true,
       child: Material(
         color: context.colors.surfaceContainer,
@@ -129,6 +133,7 @@ class _KindBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final badge = isOriginal ? 'ORIGINAL'.tr : 'WATERMARKED'.tr;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: isOriginal ? const Color(0x99000000) : AppColors.accent,
@@ -140,10 +145,10 @@ class _KindBadge extends StatelessWidget {
           vertical: AppSpacing.xxs,
         ),
         child: Text(
-          isOriginal ? 'ORIGINAL' : 'WATERMARKED',
+          badge,
           style: context.text.labelSmall?.copyWith(
             fontSize: 9,
-            letterSpacing: 0.8,
+            letterSpacing: isLatinText(badge) ? 0.8 : 0,
             fontWeight: FontWeight.w700,
             color: isOriginal ? AppColors.onViewfinder : AppColors.onAccent,
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
@@ -47,14 +48,14 @@ class CaptureHeroCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Open camera',
+                      'Open camera'.tr,
                       style: context.text.titleLarge?.copyWith(
                         color: AppColors.onViewfinder,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      'Capture photos stamped with location, date and time.',
+                      'Capture photos stamped with location, date and time.'.tr,
                       style: context.text.bodyMedium?.copyWith(
                         color: AppColors.onViewfinderMuted,
                       ),

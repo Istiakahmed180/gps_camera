@@ -37,7 +37,7 @@ class ReportsController extends GetxController {
       return null;
     } catch (_) {
       await load();
-      return 'The report could not be deleted.';
+      return 'The report could not be deleted.'.tr;
     }
   }
 }

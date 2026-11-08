@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 
@@ -27,10 +28,10 @@ class ShutterButton extends StatelessWidget {
       button: true,
       enabled: enabled,
       label: isCapturing
-          ? 'Capturing photo'
+          ? 'Capturing photo'.tr
           : isCountingDown
-          ? 'Cancel timer'
-          : 'Capture photo',
+          ? 'Cancel timer'.tr
+          : 'Capture photo'.tr,
       child: GestureDetector(
         onTap: enabled ? onPressed : null,
         child: AnimatedOpacity(

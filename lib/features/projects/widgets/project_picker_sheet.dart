@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/features/projects/models/project.dart';
@@ -75,7 +76,7 @@ Future<ProjectChoice?> showProjectPicker(
                     Padding(
                       padding: const EdgeInsets.all(AppSpacing.xl),
                       child: Text(
-                        'No active projects yet. Create one in Projects.',
+                        'No active projects yet. Create one in Projects.'.tr,
                         style: context.text.bodyMedium?.copyWith(
                           color: context.colors.onSurfaceVariant,
                         ),

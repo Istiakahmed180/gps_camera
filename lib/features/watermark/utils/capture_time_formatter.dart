@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:gps_camera/core/settings/display_format.dart';
 
 /// Formats a capture time in the time zone it was taken in, not the
@@ -25,7 +26,7 @@ abstract final class CaptureTimeFormatter {
 
   /// `07 Nov 2026`
   static String date(DateTime wallClock) =>
-      '${_two(wallClock.day)} ${_months[wallClock.month - 1]} '
+      '${_two(wallClock.day)} ${_months[wallClock.month - 1].tr} '
       '${wallClock.year}';
 
   /// `10:02 AM`, or `10:02` / `22:02` when 24-hour time is chosen.
@@ -34,7 +35,7 @@ abstract final class CaptureTimeFormatter {
       return '${_two(wallClock.hour)}:${_two(wallClock.minute)}';
     }
     final hour = wallClock.hour % 12 == 0 ? 12 : wallClock.hour % 12;
-    final period = wallClock.hour < 12 ? 'AM' : 'PM';
+    final period = (wallClock.hour < 12 ? 'AM' : 'PM').tr;
     return '${_two(hour)}:${_two(wallClock.minute)} $period';
   }
 

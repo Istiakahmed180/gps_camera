@@ -1,0 +1,295 @@
+/// Gallery, photo details, photo map and projects.
+const Map<String, String> bnGalleryProjects = {
+  // Gallery
+  'Gallery': 'গ্যালারি',
+  'All': 'সব',
+  'Originals': 'অরিজিনাল',
+  'Watermarked': 'ওয়াটারমার্ক',
+  'Newest first': 'নতুনগুলো আগে',
+  'Oldest first': 'পুরনোগুলো আগে',
+  'Sort': 'সাজান',
+  'Search': 'খুঁজুন',
+  'Map': 'ম্যাপ',
+  'Open camera': 'ক্যামেরা খুলুন',
+  'Select photos for a report': 'রিপোর্টের জন্য ছবি বাছাই করুন',
+  'Cancel selection': 'বাছাই বাতিল',
+  'Select photos': 'ছবি বাছাই করুন',
+  '@n selected': '@nটি বাছাই করা হয়েছে',
+  'Select all shown': 'দেখানো সব বাছাই করুন',
+  'Create PDF report': 'PDF রিপোর্ট তৈরি করুন',
+  'Close search': 'খোঁজা বন্ধ করুন',
+  'Place, address, note or date': 'জায়গা, ঠিকানা, নোট বা তারিখ',
+  'These photos no longer exist.': 'এই ছবিগুলো আর নেই।',
+  'Delete @n photo?': '@nটি ছবি মুছবেন?',
+  'Delete @n photos?': '@nটি ছবি মুছবেন?',
+  'They are removed from the app with their location data. Copies already in the phone gallery are not touched. This cannot be undone.': 'ছবিগুলো লোকেশন তথ্যসহ অ্যাপ থেকে মুছে যাবে। ফোনের গ্যালারিতে আগে থেকে থাকা কপিতে হাত দেওয়া হবে না। এটি আর ফেরানো যাবে না।',
+  'Also delete watermarked copies of @n original':
+      '@nটি অরিজিনালের ওয়াটারমার্ক কপিও মুছুন',
+  'Also delete watermarked copies of @n originals':
+      '@nটি অরিজিনালের ওয়াটারমার্ক কপিও মুছুন',
+  'Deleted @n photo': '@nটি ছবি মুছে ফেলা হয়েছে',
+  'Deleted @n photos': '@nটি ছবি মুছে ফেলা হয়েছে',
+  'Deleted @removed, but @failed file could not be removed':
+      '@removedটি মুছে ফেলা হয়েছে, কিন্তু @failedটি ফাইল মোছা যায়নি',
+  'Deleted @removed, but @failed files could not be removed':
+      '@removedটি মুছে ফেলা হয়েছে, কিন্তু @failedটি ফাইল মোছা যায়নি',
+  'Photos could not be loaded': 'ছবি লোড করা যায়নি',
+  'Storage could not be read. Try again.':
+      'স্টোরেজ পড়া যায়নি। আবার চেষ্টা করুন।',
+  'No matching photos': 'মিলে যাওয়া কোনো ছবি নেই',
+  'Try a place, part of the address, a note or a date like "07 Nov".':
+      'কোনো জায়গা, ঠিকানার অংশ, নোট বা "07 Nov"-এর মতো তারিখ লিখে দেখুন।',
+  'No photos yet': 'এখনো কোনো ছবি নেই',
+  'Photos you capture will appear here with their location and timestamp.':
+      'আপনার তোলা ছবি লোকেশন ও সময়সহ এখানে দেখা যাবে।',
+  'No originals': 'কোনো অরিজিনাল নেই',
+  'Original captures will appear here.': 'তোলা অরিজিনাল ছবি এখানে দেখা যাবে।',
+  'No watermarked photos': 'কোনো ওয়াটারমার্ক ছবি নেই',
+  'Open an original and choose Add watermark to create a watermarked copy.': 'ওয়াটারমার্ক কপি বানাতে একটি অরিজিনাল খুলে "ওয়াটারমার্ক যোগ করুন" চাপুন।',
+  'All projects': 'সব প্রজেক্ট',
+  'No project': 'কোনো প্রজেক্ট নয়',
+  'Filter by project': 'প্রজেক্ট অনুযায়ী দেখুন',
+  'No capture data': 'ছবি তোলার তথ্য নেই',
+  'Original photo, @caption': 'অরিজিনাল ছবি, @caption',
+  'Watermarked photo, @caption': 'ওয়াটারমার্ক ছবি, @caption',
+  'ORIGINAL': 'অরিজিনাল',
+  'WATERMARKED': 'ওয়াটারমার্ক',
+
+  // Photo map
+  'Map · @n photo': 'ম্যাপ · @nটি ছবি',
+  'Map · @n photos': 'ম্যাপ · @nটি ছবি',
+  'No map key is set up in this build of the app.':
+      'অ্যাপের এই বিল্ডে কোনো ম্যাপ কী সেট করা নেই।',
+  'No photos with a location': 'লোকেশনসহ কোনো ছবি নেই',
+  'Photos taken with GPS appear here as pins. Check the gallery filter and search.': 'GPS দিয়ে তোলা ছবি এখানে পিন হিসেবে দেখা যাবে। গ্যালারির ফিল্টার ও খোঁজা দেখে নিন।',
+  '@n photos here': 'এখানে @nটি ছবি',
+  '@n photo': '@nটি ছবি',
+  '@n photos': '@nটি ছবি',
+  '@n photo at @place': '@place-এ @nটি ছবি',
+  '@n photos at @place': '@place-এ @nটি ছবি',
+
+  // Photo details
+  'Original': 'অরিজিনাল',
+  'Watermarked copy': 'ওয়াটারমার্ক কপি',
+  'This photo no longer exists.': 'এই ছবিটি আর নেই।',
+  'Photos deleted': 'ছবিগুলো মুছে ফেলা হয়েছে',
+  'Photo deleted': 'ছবি মুছে ফেলা হয়েছে',
+  'Some files were not deleted': 'কিছু ফাইল মোছা যায়নি',
+  'Deleted: @files': 'মুছে ফেলা হয়েছে: @files',
+  'Not deleted: @file (@reason)': 'মোছা যায়নি: @file (@reason)',
+  'OK': 'ঠিক আছে',
+  'Original photo': 'অরিজিনাল ছবি',
+  'Watermarked photo': 'ওয়াটারমার্ক ছবি',
+  'Project': 'প্রজেক্ট',
+  'Not in a project': 'কোনো প্রজেক্টে নেই',
+  'Set through its original photo': 'এর অরিজিনাল ছবি থেকে ঠিক করা হয়',
+  'Original deleted; project can’t be changed':
+      'অরিজিনাল মুছে ফেলা হয়েছে; প্রজেক্ট বদলানো যাবে না',
+  'Add to project': 'প্রজেক্টে যোগ করুন',
+  'Change': 'বদলান',
+  'Projects could not be loaded.': 'প্রজেক্ট লোড করা যায়নি।',
+  'Project for the original photo': 'অরিজিনাল ছবির প্রজেক্ট',
+  'Remove from project': 'প্রজেক্ট থেকে সরান',
+  'Removed from @name': '@name থেকে সরানো হয়েছে',
+  'Added to @name': '@name-এ যোগ করা হয়েছে',
+  'Watermarked versions': 'ওয়াটারমার্ক করা সংস্করণ',
+  'No watermarked versions yet': 'এখনো কোনো ওয়াটারমার্ক সংস্করণ নেই',
+  'The original photo has been deleted': 'অরিজিনাল ছবিটি মুছে ফেলা হয়েছে',
+  'Note': 'নোট',
+  'Add a note': 'নোট যোগ করুন',
+  'Saved with this copy': 'এই কপির সাথে সেভ করা',
+  'Photo note': 'ছবির নোট',
+  'Shown in reports and on new watermarked copies. Copies already made keep their old note.': 'রিপোর্টে ও নতুন ওয়াটারমার্ক কপিতে দেখানো হবে। আগে বানানো কপিতে পুরনো নোটই থাকবে।',
+  'Note saved': 'নোট সেভ হয়েছে',
+  'This photo has no editable note.': 'এই ছবির নোট এডিট করা যায় না।',
+  'The note could not be saved.': 'নোট সেভ করা যায়নি।',
+  'The original of this copy was deleted, so its project cannot be changed.':
+      'এই কপির অরিজিনাল মুছে ফেলা হয়েছে, তাই এর প্রজেক্ট বদলানো যাবে না।',
+  'The project could not be updated. Try again.':
+      'প্রজেক্ট আপডেট করা যায়নি। আবার চেষ্টা করুন।',
+  'Add watermark': 'ওয়াটারমার্ক যোগ করুন',
+  'Open original': 'অরিজিনাল খুলুন',
+  'Original deleted': 'অরিজিনাল মুছে ফেলা হয়েছে',
+  '@n watermarked copy': '@nটি ওয়াটারমার্ক কপি',
+  '@n watermarked copies': '@nটি ওয়াটারমার্ক কপি',
+  'This watermarked copy will be permanently deleted. The original photo is not affected.':
+      'এই ওয়াটারমার্ক কপিটি স্থায়ীভাবে মুছে যাবে। অরিজিনাল ছবির কিছু হবে না।',
+  'This photo and its location data will be permanently deleted.':
+      'এই ছবি ও এর লোকেশন তথ্য স্থায়ীভাবে মুছে যাবে।',
+  'This photo, its location data and @copies will be permanently deleted.':
+      'এই ছবি, এর লোকেশন তথ্য ও @copies স্থায়ীভাবে মুছে যাবে।',
+  'This photo and its location data will be permanently deleted. Its @copies will be kept and shown as having no original.': 'এই ছবি ও এর লোকেশন তথ্য স্থায়ীভাবে মুছে যাবে। এর @copies থেকে যাবে এবং অরিজিনাল ছাড়া দেখানো হবে।',
+  'Delete watermarked copy?': 'ওয়াটারমার্ক কপি মুছবেন?',
+  'Delete photo?': 'ছবি মুছবেন?',
+  'Also delete @copies': '@copiesও মুছুন',
+  "This can't be undone.": 'এটি আর ফেরানো যাবে না।',
+
+  // Photo details panel
+  'Capture': 'ছবি তোলা',
+  'Status': 'অবস্থা',
+  'Taken': 'তোলার সময়',
+  'Time zone': 'টাইম জোন',
+  'Camera direction': 'ক্যামেরার দিক',
+  'Facing': 'মুখ করা',
+  'Watermark': 'ওয়াটারমার্ক',
+  'Template': 'টেমপ্লেট',
+  'Rendered': 'তৈরির সময়',
+  'File': 'ফাইল',
+  'Name': 'নাম',
+  'Dimensions': 'মাপ',
+  'Size': 'সাইজ',
+  'Location': 'লোকেশন',
+  'Latitude': 'অক্ষাংশ',
+  'Longitude': 'দ্রাঘিমাংশ',
+  'Accuracy': 'নির্ভুলতা',
+  'Fix age': 'GPS ফিক্সের বয়স',
+  'Altitude': 'উচ্চতা',
+  'Direction of travel': 'চলার দিক',
+  'Place': 'জায়গা',
+  'Address': 'ঠিকানা',
+  'Address source': 'ঠিকানার উৎস',
+  'Source': 'উৎস',
+  'Metadata file is damaged': 'মেটাডেটা ফাইল নষ্ট হয়ে গেছে',
+  'Render record is damaged': 'ওয়াটারমার্কের রেকর্ড নষ্ট হয়ে গেছে',
+  'Render record is missing': 'ওয়াটারমার্কের রেকর্ড পাওয়া যাচ্ছে না',
+  'Capture data not available': 'ছবি তোলার তথ্য নেই',
+  'No metadata was saved for this photo': 'এই ছবির কোনো মেটাডেটা সেভ হয়নি',
+  'Current': 'বর্তমান',
+  'Stale (last known location)': 'পুরনো (সর্বশেষ জানা লোকেশন)',
+  'Unavailable · @reason': 'পাওয়া যায়নি · @reason',
+  '@age before capture': 'ছবি তোলার @age আগে',
+  'Mock location provider': 'নকল লোকেশন প্রোভাইডার',
+  'Unavailable (no address found)': 'পাওয়া যায়নি (কোনো ঠিকানা মেলেনি)',
+  'Device geocoder · @time': 'ফোনের জিওকোডার · @time',
+  'above WGS84 ellipsoid': 'WGS84 এলিপসয়েডের উপরে',
+  'above mean sea level': 'সমুদ্রপৃষ্ঠ থেকে উপরে',
+  'reference unknown': 'রেফারেন্স জানা নেই',
+  'Good': 'ভালো',
+  'Moderate': 'মাঝারি',
+  'Poor': 'দুর্বল',
+  'permission denied': 'অনুমতি দেওয়া হয়নি',
+  'location services off': 'লোকেশন সার্ভিস বন্ধ',
+  'no GPS fix yet': 'এখনো GPS ফিক্স পাওয়া যায়নি',
+  'GPS unavailable': 'GPS পাওয়া যাচ্ছে না',
+  'not recorded': 'রেকর্ড করা হয়নি',
+
+  // Projects list
+  'Projects': 'প্রজেক্ট',
+  'New project': 'নতুন প্রজেক্ট',
+  'Search projects': 'প্রজেক্ট খুঁজুন',
+  'Active': 'চালু',
+  'Archived': 'আর্কাইভ করা',
+  'Projects could not be loaded': 'প্রজেক্ট লোড করা যায়নি',
+  'The project database could not be opened. Try again.':
+      'প্রজেক্টের ডাটাবেস খোলা যায়নি। আবার চেষ্টা করুন।',
+  'No matching projects': 'মিলে যাওয়া কোনো প্রজেক্ট নেই',
+  'No archived projects': 'আর্কাইভ করা কোনো প্রজেক্ট নেই',
+  'No projects yet': 'এখনো কোনো প্রজেক্ট নেই',
+  'Try a different name or description.':
+      'অন্য নাম বা বিবরণ দিয়ে খুঁজে দেখুন।',
+  'Projects you archive appear here and can be restored.':
+      'আর্কাইভ করা প্রজেক্ট এখানে দেখা যাবে এবং আবার চালু করা যাবে।',
+  'Create a project to group photos by site, client or job.':
+      'সাইট, ক্লায়েন্ট বা কাজ অনুযায়ী ছবি সাজাতে একটি প্রজেক্ট তৈরি করুন।',
+  'Updated @date': 'আপডেট @date',
+
+  // Project edit
+  'Edit project': 'প্রজেক্ট এডিট করুন',
+  'Project name': 'প্রজেক্টের নাম',
+  'e.g. North Bridge inspection': 'যেমন: উত্তর ব্রিজ পরিদর্শন',
+  'Description (optional)': 'বিবরণ (ঐচ্ছিক)',
+  'Cover photo': 'কভার ছবি',
+  'Create project': 'প্রজেক্ট তৈরি করুন',
+  'Save changes': 'পরিবর্তন সেভ করুন',
+  'Add photos to this project to choose a cover. Until then, the latest photo is used.': 'কভার বাছাই করতে এই প্রজেক্টে ছবি যোগ করুন। ততক্ষণ সর্বশেষ ছবিটি ব্যবহার হবে।',
+  'Latest': 'সর্বশেষ',
+  'Enter a project name.': 'প্রজেক্টের নাম লিখুন।',
+  'Use @n characters or fewer.': '@nটি অক্ষর বা তার কম ব্যবহার করুন।',
+  'A project named "@name" already exists.':
+      '"@name" নামে একটি প্রজেক্ট আগে থেকেই আছে।',
+  'Keep the description under @n characters.':
+      'বিবরণ @nটি অক্ষরের মধ্যে রাখুন।',
+  'The project could not be saved. Try again.':
+      'প্রজেক্ট সেভ করা যায়নি। আবার চেষ্টা করুন।',
+  'This project no longer exists.': 'এই প্রজেক্টটি আর নেই।',
+  'Archived projects cannot receive photos. Restore it first.':
+      'আর্কাইভ করা প্রজেক্টে ছবি যোগ করা যায় না। আগে এটি আবার চালু করুন।',
+
+  // Project details
+  'More': 'আরও',
+  'Share photos as ZIP': 'ছবি ZIP হিসেবে শেয়ার করুন',
+  'Restore project': 'প্রজেক্ট আবার চালু করুন',
+  'Archive project': 'প্রজেক্ট আর্কাইভ করুন',
+  'Delete project': 'প্রজেক্ট মুছুন',
+  'Add photos': 'ছবি যোগ করুন',
+  'Project not found': 'প্রজেক্ট পাওয়া যায়নি',
+  'This project was deleted.': 'এই প্রজেক্টটি মুছে ফেলা হয়েছে।',
+  'Project could not be loaded': 'প্রজেক্ট লোড করা যায়নি',
+  'Try again.': 'আবার চেষ্টা করুন।',
+  'Archived · restore to add photos':
+      'আর্কাইভ করা · ছবি যোগ করতে আবার চালু করুন',
+  'Created @date': 'তৈরি @date',
+  '@n original': '@nটি অরিজিনাল',
+  '@n originals': '@nটি অরিজিনাল',
+  '@n watermarked': '@nটি ওয়াটারমার্ক',
+  '@n assigned photo files are missing':
+      'যোগ করা @nটি ছবির ফাইল পাওয়া যাচ্ছে না',
+  'No photos in this project': 'এই প্রজেক্টে কোনো ছবি নেই',
+  'Restore the project to add photos.':
+      'ছবি যোগ করতে প্রজেক্টটি আবার চালু করুন।',
+  'Add existing photos, or choose this project on the camera screen so new photos are added automatically.': 'আগের ছবি যোগ করুন, অথবা ক্যামেরা স্ক্রিনে এই প্রজেক্ট বাছাই করুন যাতে নতুন ছবি নিজে থেকেই যোগ হয়।',
+  'Add photos to this project to create a report.':
+      'রিপোর্ট তৈরি করতে এই প্রজেক্টে ছবি যোগ করুন।',
+  '@name archived': '@name আর্কাইভ করা হয়েছে',
+  '@name restored': '@name আবার চালু করা হয়েছে',
+  'Delete "@name"?': '"@name" মুছবেন?',
+  'The project and its photo assignments will be removed.':
+      'প্রজেক্ট ও এতে যোগ করা ছবির তালিকা সরিয়ে ফেলা হবে।',
+  'Its photo stays in the gallery.': 'এর ছবিটি গ্যালারিতে থেকে যাবে।',
+  'Its @n photos stay in the gallery.': 'এর @nটি ছবি গ্যালারিতে থেকে যাবে।',
+  'No photo files are deleted.': 'কোনো ছবির ফাইল মোছা হবে না।',
+  '@name deleted': '@name মুছে ফেলা হয়েছে',
+
+  // Add photos to a project
+  'Capture photos first, then add them to this project.':
+      'আগে ছবি তুলুন, তারপর এই প্রজেক্টে যোগ করুন।',
+  'Choose original photos. Their watermarked copies are included automatically.':
+      'অরিজিনাল ছবি বাছাই করুন। এদের ওয়াটারমার্ক কপি নিজে থেকেই যোগ হবে।',
+  '@n will move from another project.': '@nটি অন্য প্রজেক্ট থেকে সরে আসবে।',
+  'Add @n photo': '@nটি ছবি যোগ করুন',
+  'Add @n photos': '@nটি ছবি যোগ করুন',
+  'Added': 'যোগ করা হয়েছে',
+  'In @name': '@name-এ আছে',
+  'Photos could not be added. Try again.':
+      'ছবি যোগ করা যায়নি। আবার চেষ্টা করুন।',
+
+  // Active project chip and picker
+  'No project selected. Choose a project for new photos':
+      'কোনো প্রজেক্ট বাছাই করা নেই। নতুন ছবির জন্য একটি প্রজেক্ট বাছাই করুন',
+  'New photos go to @name. Change project':
+      'নতুন ছবি @name-এ যাবে। প্রজেক্ট বদলান',
+  'Project for new photos': 'নতুন ছবির প্রজেক্ট',
+  'No active projects yet. Create one in Projects.':
+      'এখনো কোনো চালু প্রজেক্ট নেই। প্রজেক্ট থেকে একটি তৈরি করুন।',
+
+  // Project ZIP
+  'Preparing ZIP': 'ZIP তৈরি হচ্ছে',
+  'Watermarked photos': 'ওয়াটারমার্ক ছবি',
+  'The watermarked copy of each photo, or the original if it has none.':
+      'প্রতিটি ছবির ওয়াটারমার্ক কপি, না থাকলে অরিজিনাল।',
+  'Original photos': 'অরিজিনাল ছবি',
+  'The untouched originals.': 'অপরিবর্তিত অরিজিনাল ছবি।',
+  'Both': 'দুটোই',
+  'Every original and every watermarked copy.':
+      'সব অরিজিনাল ও সব ওয়াটারমার্ক কপি।',
+  'Add a location spreadsheet': 'লোকেশনের স্প্রেডশিট যোগ করুন',
+  'A CSV file with time, coordinates, address and note for each photo. Opens in Excel or Google Sheets.': 'প্রতিটি ছবির সময়, কোঅর্ডিনেট, ঠিকানা ও নোটসহ একটি CSV ফাইল। Excel বা Google Sheets-এ খোলা যায়।',
+  '@n photo. Original photos get their capture time and GPS location written in, so other apps can read them.': '@nটি ছবি। অরিজিনাল ছবিতে তোলার সময় ও GPS লোকেশন লিখে দেওয়া হয়, যাতে অন্য অ্যাপও তা পড়তে পারে।',
+  '@n photos. Original photos get their capture time and GPS location written in, so other apps can read them.': '@nটি ছবি। অরিজিনাল ছবিতে তোলার সময় ও GPS লোকেশন লিখে দেওয়া হয়, যাতে অন্য অ্যাপও তা পড়তে পারে।',
+  'Create ZIP': 'ZIP তৈরি করুন',
+  'The ZIP could not be found.': 'ZIP ফাইলটি পাওয়া যায়নি।',
+  'An export is already running.': 'একটি এক্সপোর্ট আগে থেকেই চলছে।',
+  'This project has no photos.': 'এই প্রজেক্টে কোনো ছবি নেই।',
+  'The ZIP could not be created. Check that the phone has free space.':
+      'ZIP তৈরি করা যায়নি। ফোনে যথেষ্ট জায়গা আছে কিনা দেখুন।',
+};

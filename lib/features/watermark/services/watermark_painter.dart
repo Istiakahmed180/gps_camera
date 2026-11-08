@@ -2,7 +2,9 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
+import 'package:gps_camera/core/utils/script.dart';
 import 'package:gps_camera/features/location/models/gps_accuracy_level.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 import 'package:gps_camera/features/watermark/models/watermark_content.dart';
@@ -241,7 +243,11 @@ class WatermarkPainter {
     final labels = [
       for (final line in lines)
         if (line.label != null)
-          _text(line.label!, _labelStyle(), maxBlockWidth),
+          _text(
+            line.label!,
+            _spaced(_labelStyle(), line.label!),
+            maxBlockWidth,
+          ),
     ];
     _labelWidth = labels.fold(0, (w, p) => math.max(w, p.width));
     final labelColumn = _labelWidth == 0 ? 0 : _labelWidth + _labelGap;
@@ -260,7 +266,7 @@ class WatermarkPainter {
         _Row(
           _text(
             line.text,
-            _style(line.role),
+            _spaced(_style(line.role), line.text),
             math.max(1.0, maxValueWidth - logoSide - logoGap),
           ),
           label,
@@ -311,33 +317,40 @@ class WatermarkPainter {
         if (c.coordinatesLine != null)
           _Line(c.coordinatesLine!, _Role.secondary),
         if (c.accuracyValue != null)
-          _Line('GPS Accuracy: ${c.accuracyValue}', _accuracyRole),
+          _Line(
+            'GPS Accuracy: @value'.trParams({'value': '${c.accuracyValue}'}),
+            _accuracyRole,
+          ),
         if (c.direction != null)
-          _Line('Facing ${c.direction}', _Role.secondary),
+          _Line(
+            'Facing @direction'.trParams({'direction': '${c.direction}'}),
+            _Role.secondary,
+          ),
         if (c.address != null) _Line(c.address!, _Role.secondary),
-        if (c.note != null) _Line('Note: ${c.note}', _Role.note),
+        if (c.note != null)
+          _Line('Note: @note'.trParams({'note': '${c.note}'}), _Role.note),
       ],
       WatermarkTemplate.professional => [
         ..._header(),
-        if (c.date != null) _Line(c.date!, _Role.primary, label: 'DATE'),
+        if (c.date != null) _Line(c.date!, _Role.primary, label: 'DATE'.tr),
         if (c.time != null)
-          _Line('${c.time}  ${c.timeZone}', _Role.secondary, label: 'TIME'),
+          _Line('${c.time}  ${c.timeZone}', _Role.secondary, label: 'TIME'.tr),
         if (c.locationNotice != null) _Line(c.locationNotice!, _Role.notice),
         if (c.latitude != null)
-          _Line(c.latitude!, _Role.secondary, label: 'LAT'),
+          _Line(c.latitude!, _Role.secondary, label: 'LAT'.tr),
         if (c.longitude != null)
-          _Line(c.longitude!, _Role.secondary, label: 'LON'),
+          _Line(c.longitude!, _Role.secondary, label: 'LON'.tr),
         if (c.accuracy != null)
           _Line(
             '${c.accuracy}  ·  ${_levelLabel(c.accuracyLevel)}',
             _accuracyRole,
-            label: 'ACC',
+            label: 'ACC'.tr,
           ),
         if (c.direction != null)
-          _Line(c.direction!, _Role.secondary, label: 'DIR'),
+          _Line(c.direction!, _Role.secondary, label: 'DIR'.tr),
         if (c.address != null)
-          _Line(c.address!, _Role.secondary, label: 'ADDR'),
-        if (c.note != null) _Line(c.note!, _Role.note, label: 'NOTE'),
+          _Line(c.address!, _Role.secondary, label: 'ADDR'.tr),
+        if (c.note != null) _Line(c.note!, _Role.note, label: 'NOTE'.tr),
       ],
       WatermarkTemplate.map => [
         ..._header(),
@@ -353,12 +366,22 @@ class WatermarkPainter {
         if (c.dateTimeLine != null)
           _Line(c.dateTimeLine!.replaceAll('  |  ', '  ·  '), _Role.secondary),
         if (c.accuracyValue != null)
-          _Line('GPS Accuracy: ${c.accuracyValue}', _accuracyRole),
+          _Line(
+            'GPS Accuracy: @value'.trParams({'value': '${c.accuracyValue}'}),
+            _accuracyRole,
+          ),
         if (c.direction != null)
-          _Line('Facing ${c.direction}', _Role.secondary),
+          _Line(
+            'Facing @direction'.trParams({'direction': '${c.direction}'}),
+            _Role.secondary,
+          ),
         if (c.plusCode != null)
-          _Line('Plus Code ${c.plusCode}', _Role.secondary),
-        if (c.note != null) _Line('Note: ${c.note}', _Role.note),
+          _Line(
+            'Plus Code @code'.trParams({'code': '${c.plusCode}'}),
+            _Role.secondary,
+          ),
+        if (c.note != null)
+          _Line('Note: @note'.trParams({'note': '${c.note}'}), _Role.note),
       ],
       WatermarkTemplate.minimal => [
         if (c.customText != null) _Line(c.customText!, _Role.custom),
@@ -373,7 +396,10 @@ class WatermarkPainter {
                 : _Role.secondary,
           ),
         if (c.direction != null)
-          _Line('Facing ${c.direction}', _Role.secondary),
+          _Line(
+            'Facing @direction'.trParams({'direction': '${c.direction}'}),
+            _Role.secondary,
+          ),
         if (c.address != null) _Line(c.address!, _Role.secondary),
         if (c.note != null) _Line(c.note!, _Role.note),
       ],
@@ -395,9 +421,9 @@ class WatermarkPainter {
       : _Role.secondary;
 
   static String _levelLabel(GpsAccuracyLevel? level) => switch (level) {
-    GpsAccuracyLevel.good => 'Good',
-    GpsAccuracyLevel.moderate => 'Moderate',
-    GpsAccuracyLevel.poor || null => 'Poor',
+    GpsAccuracyLevel.good => 'Good'.tr,
+    GpsAccuracyLevel.moderate => 'Moderate'.tr,
+    GpsAccuracyLevel.poor || null => 'Poor'.tr,
   };
 
   TextStyle _style(_Role role) {
@@ -475,6 +501,10 @@ class WatermarkPainter {
     final side = math.min(width, height);
     return Rect.fromLTWH((width - side) / 2, (height - side) / 2, side, side);
   }
+
+  /// Drops letter spacing for non-Latin text, which it would break apart.
+  static TextStyle _spaced(TextStyle style, String text) =>
+      isLatinText(text) ? style : style.copyWith(letterSpacing: 0);
 
   TextStyle _labelStyle() => TextStyle(
     fontSize: 15 * _unit,

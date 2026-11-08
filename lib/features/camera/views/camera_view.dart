@@ -202,11 +202,12 @@ class CameraView extends GetView<CaptureController> {
   Future<void> _editNote(BuildContext context, AppPreferences prefs) async {
     final result = await showNoteDialog(
       context,
-      title: 'Note for new photos',
+      title: 'Note for new photos'.tr,
       initial: prefs.captureNote.value,
       helper:
-          'Added to every photo you take until you change or remove it. '
-          'Shown on the watermark and in reports.',
+          ('Added to every photo you take until you change or remove it. '
+                  'Shown on the watermark and in reports.')
+              .tr,
     );
     if (result == null) return;
     await prefs.setCaptureNote(result);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
@@ -55,7 +56,7 @@ class PhotoDetailsPanel extends StatelessWidget {
           _Section(
             title: 'Watermark',
             rows: [
-              _Row('Template', record.config.template.label),
+              _Row('Template', record.config.template.label.tr),
               _Row('Rendered', PhotoInfoFormatter.instant(record.renderedAt)),
             ],
           ),
@@ -78,11 +79,11 @@ class PhotoDetailsPanel extends StatelessWidget {
   }
 
   static String _missingMetadata(GalleryPhoto photo) => switch (photo.issue) {
-    GalleryIssue.metadataUnreadable => 'Metadata file is damaged',
-    GalleryIssue.recordUnreadable => 'Render record is damaged',
-    GalleryIssue.recordMissing => 'Render record is missing',
-    _ when photo.isWatermarked => 'Capture data not available',
-    _ => 'No metadata was saved for this photo',
+    GalleryIssue.metadataUnreadable => 'Metadata file is damaged'.tr,
+    GalleryIssue.recordUnreadable => 'Render record is damaged'.tr,
+    GalleryIssue.recordMissing => 'Render record is missing'.tr,
+    _ when photo.isWatermarked => 'Capture data not available'.tr,
+    _ => 'No metadata was saved for this photo'.tr,
   };
 }
 
@@ -96,10 +97,11 @@ class _LocationSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final fix = location.fix;
     final status = switch (location.status) {
-      LocationRecordStatus.current => 'Current',
-      LocationRecordStatus.stale => 'Stale (last known location)',
-      LocationRecordStatus.unavailable =>
-        'Unavailable · ${_reason(location.reason)}',
+      LocationRecordStatus.current => 'Current'.tr,
+      LocationRecordStatus.stale => 'Stale (last known location)'.tr,
+      LocationRecordStatus.unavailable => 'Unavailable · @reason'.trParams({
+        'reason': _reason(location.reason),
+      }),
     };
 
     return _Section(
@@ -117,7 +119,9 @@ class _LocationSection extends StatelessWidget {
           if (location.fixAge != null)
             _Row(
               'Fix age',
-              '${CaptureTimeFormatter.age(location.fixAge!)} before capture',
+              '@age before capture'.trParams({
+                'age': CaptureTimeFormatter.age(location.fixAge!),
+              }),
             ),
           if (fix.altitude != null) _Row('Altitude', _altitude(fix)),
           if (fix.heading != null)
@@ -126,7 +130,7 @@ class _LocationSection extends StatelessWidget {
               '${PhotoInfoFormatter.measured(fix.heading!, maxDecimals: 1)}°',
             ),
           ..._placeRows(place, fix),
-          if (fix.isMocked) const _Row('Source', 'Mock location provider'),
+          if (fix.isMocked) _Row('Source', 'Mock location provider'.tr),
         ],
       ],
     );
@@ -139,20 +143,22 @@ class _LocationSection extends StatelessWidget {
     }
     return [
       if (place.title != null) _Row('Place', place.title!),
-      _Row('Address', place.addressLine ?? 'Unavailable (no address found)'),
+      _Row('Address', place.addressLine ?? 'Unavailable (no address found)'.tr),
       _Row('Plus Code', place.plusCode),
       _Row(
         'Address source',
-        'Device geocoder · ${PhotoInfoFormatter.instant(place.resolvedAt)}',
+        'Device geocoder · @time'.trParams({
+          'time': PhotoInfoFormatter.instant(place.resolvedAt),
+        }),
       ),
     ];
   }
 
   static String _altitude(LocationFix fix) {
     final reference = switch (fix.altitudeReference) {
-      AltitudeReference.wgs84Ellipsoid => 'above WGS84 ellipsoid',
-      AltitudeReference.meanSeaLevel => 'above mean sea level',
-      null => 'reference unknown',
+      AltitudeReference.wgs84Ellipsoid => 'above WGS84 ellipsoid'.tr,
+      AltitudeReference.meanSeaLevel => 'above mean sea level'.tr,
+      null => 'reference unknown'.tr,
     };
     final accuracy = fix.altitudeAccuracy == null
         ? ''
@@ -162,18 +168,18 @@ class _LocationSection extends StatelessWidget {
   }
 
   static String _level(GpsAccuracyLevel level) => switch (level) {
-    GpsAccuracyLevel.good => 'Good',
-    GpsAccuracyLevel.moderate => 'Moderate',
-    GpsAccuracyLevel.poor => 'Poor',
+    GpsAccuracyLevel.good => 'Good'.tr,
+    GpsAccuracyLevel.moderate => 'Moderate'.tr,
+    GpsAccuracyLevel.poor => 'Poor'.tr,
   };
 
   static String _reason(LocationUnavailableReason? reason) => switch (reason) {
-    LocationUnavailableReason.permissionDenied => 'permission denied',
+    LocationUnavailableReason.permissionDenied => 'permission denied'.tr,
     LocationUnavailableReason.locationServicesDisabled =>
-      'location services off',
-    LocationUnavailableReason.noFixYet => 'no GPS fix yet',
-    LocationUnavailableReason.gpsUnavailable => 'GPS unavailable',
-    null => 'not recorded',
+      'location services off'.tr,
+    LocationUnavailableReason.noFixYet => 'no GPS fix yet'.tr,
+    LocationUnavailableReason.gpsUnavailable => 'GPS unavailable'.tr,
+    null => 'not recorded'.tr,
   };
 }
 
@@ -197,7 +203,7 @@ class _Section extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SectionHeader(title),
+          SectionHeader(title.tr),
           Card(
             child: Padding(
               padding: const EdgeInsets.symmetric(
@@ -218,7 +224,7 @@ class _Section extends StatelessWidget {
                           SizedBox(
                             width: 120,
                             child: Text(
-                              row.label,
+                              row.label.tr,
                               style: context.text.bodyMedium?.copyWith(
                                 color: context.colors.onSurfaceVariant,
                               ),

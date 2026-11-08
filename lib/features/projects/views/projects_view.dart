@@ -13,7 +13,7 @@ class ProjectsView extends GetView<ProjectsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Projects')),
+      appBar: AppBar(title: Text('Projects'.tr)),
       floatingActionButton: Obx(
         () =>
             controller.showArchived.value ||
@@ -23,7 +23,7 @@ class ProjectsView extends GetView<ProjectsController> {
             : FloatingActionButton.extended(
                 onPressed: controller.create,
                 icon: const Icon(Icons.add_rounded),
-                label: const Text('New project'),
+                label: Text('New project'.tr),
               ),
       ),
       body: ResponsiveCenter(
@@ -41,9 +41,9 @@ class ProjectsView extends GetView<ProjectsController> {
                   TextField(
                     onChanged: (v) => controller.query.value = v,
                     textInputAction: TextInputAction.search,
-                    decoration: const InputDecoration(
-                      hintText: 'Search projects',
-                      prefixIcon: Icon(Icons.search_rounded),
+                    decoration: InputDecoration(
+                      hintText: 'Search projects'.tr,
+                      prefixIcon: const Icon(Icons.search_rounded),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
@@ -52,9 +52,12 @@ class ProjectsView extends GetView<ProjectsController> {
                     child: Obx(
                       () => SegmentedButton<bool>(
                         showSelectedIcon: false,
-                        segments: const [
-                          ButtonSegment(value: false, label: Text('Active')),
-                          ButtonSegment(value: true, label: Text('Archived')),
+                        segments: [
+                          ButtonSegment(value: false, label: Text('Active'.tr)),
+                          ButtonSegment(
+                            value: true,
+                            label: Text('Archived'.tr),
+                          ),
                         ],
                         selected: {controller.showArchived.value},
                         onSelectionChanged: (s) =>
@@ -79,10 +82,10 @@ class ProjectsView extends GetView<ProjectsController> {
       case ProjectsStatus.error:
         return EmptyStateView(
           icon: Icons.error_outline_rounded,
-          title: 'Projects could not be loaded',
-          message: 'The project database could not be opened. Try again.',
+          title: 'Projects could not be loaded'.tr,
+          message: 'The project database could not be opened. Try again.'.tr,
           action: AppButton(
-            label: 'Try again',
+            label: 'Try again'.tr,
             variant: AppButtonVariant.secondary,
             onPressed: controller.load,
           ),
@@ -99,19 +102,19 @@ class ProjectsView extends GetView<ProjectsController> {
       return EmptyStateView(
         icon: archived ? Icons.inventory_2_outlined : Icons.folder_outlined,
         title: searching
-            ? 'No matching projects'
+            ? 'No matching projects'.tr
             : archived
-            ? 'No archived projects'
-            : 'No projects yet',
+            ? 'No archived projects'.tr
+            : 'No projects yet'.tr,
         message: searching
-            ? 'Try a different name or description.'
+            ? 'Try a different name or description.'.tr
             : archived
-            ? 'Projects you archive appear here and can be restored.'
-            : 'Create a project to group photos by site, client or job.',
+            ? 'Projects you archive appear here and can be restored.'.tr
+            : 'Create a project to group photos by site, client or job.'.tr,
         action: searching || archived
             ? null
             : AppButton(
-                label: 'New project',
+                label: 'New project'.tr,
                 icon: Icons.add_rounded,
                 onPressed: controller.create,
               ),

@@ -29,7 +29,7 @@ class OnboardingView extends GetView<OnboardingController> {
                         onPressed: controller.isLastPage
                             ? null
                             : () => controller.finish(),
-                        child: const Text('Skip'),
+                        child: Text('Skip'.tr),
                       ),
                     ),
                   ),
@@ -62,7 +62,7 @@ class OnboardingView extends GetView<OnboardingController> {
                         const SizedBox(height: AppSpacing.xl),
                         if (controller.isLastPage) ...[
                           AppButton(
-                            label: 'Open camera',
+                            label: 'Open camera'.tr,
                             icon: Icons.photo_camera_outlined,
                             isExpanded: true,
                             onPressed: () =>
@@ -70,14 +70,14 @@ class OnboardingView extends GetView<OnboardingController> {
                           ),
                           const SizedBox(height: AppSpacing.sm),
                           AppButton(
-                            label: 'Go to home',
+                            label: 'Go to home'.tr,
                             variant: AppButtonVariant.secondary,
                             isExpanded: true,
                             onPressed: () => controller.finish(),
                           ),
                         ] else
                           AppButton(
-                            label: 'Next',
+                            label: 'Next'.tr,
                             icon: Icons.arrow_forward_rounded,
                             isExpanded: true,
                             onPressed: controller.next,
@@ -127,7 +127,7 @@ class _Page extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xl),
         Text(
-          title,
+          title.tr,
           textAlign: TextAlign.center,
           style: context.text.headlineSmall?.copyWith(
             fontWeight: FontWeight.w700,
@@ -135,7 +135,7 @@ class _Page extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          message,
+          message.tr,
           textAlign: TextAlign.center,
           style: context.text.bodyLarge?.copyWith(
             color: context.colors.onSurfaceVariant,
@@ -168,9 +168,9 @@ class _Feature extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: context.text.titleSmall),
+                Text(title.tr, style: context.text.titleSmall),
                 const SizedBox(height: AppSpacing.xxs),
-                Text(text, style: context.text.bodyMedium),
+                Text(text.tr, style: context.text.bodyMedium),
               ],
             ),
           ),
@@ -257,9 +257,10 @@ class _PermissionsPage extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
-                'Your photos stay on this phone. To show an address and a '
-                'map, only the photo’s coordinates are sent to the address '
-                'and map services.',
+                ('Your photos stay on this phone. To show an address and a '
+                        'map, only the photo’s coordinates are sent to the '
+                        'address and map services.')
+                    .tr,
                 style: context.text.bodySmall,
               ),
             ),
@@ -301,12 +302,13 @@ class _PermissionCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: context.text.titleMedium),
+                  Text(title.tr, style: context.text.titleMedium),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
                     blocked
-                        ? '$reason Turned off — allow it in system settings.'
-                        : reason,
+                        ? '@reason Turned off — allow it in system settings.'
+                              .trParams({'reason': reason.tr})
+                        : reason.tr,
                     style: context.text.bodySmall,
                   ),
                 ],
@@ -315,7 +317,7 @@ class _PermissionCard extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             if (granted)
               Semantics(
-                label: '$title allowed',
+                label: '@title allowed'.trParams({'title': title.tr}),
                 child: const Icon(
                   Icons.check_circle_rounded,
                   color: AppColors.success,
@@ -324,7 +326,7 @@ class _PermissionCard extends StatelessWidget {
             else
               FilledButton.tonal(
                 onPressed: onAllow,
-                child: Text(blocked ? 'Settings' : 'Allow'),
+                child: Text(blocked ? 'Settings'.tr : 'Allow'.tr),
               ),
           ],
         ),
@@ -374,7 +376,10 @@ class _Dots extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Page ${index + 1} of $count',
+      label: 'Page @page of @count'.trParams({
+        'page': '${index + 1}',
+        'count': '$count',
+      }),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

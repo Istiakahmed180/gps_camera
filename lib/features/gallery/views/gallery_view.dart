@@ -48,29 +48,33 @@ class GalleryView extends GetView<GalleryController> {
     final count = controller.selectedIds.length;
     return AppBar(
       leading: IconButton(
-        tooltip: 'Cancel selection',
+        tooltip: 'Cancel selection'.tr,
         onPressed: controller.cancelSelection,
         icon: const Icon(Icons.close_rounded),
       ),
-      title: Text(count == 0 ? 'Select photos' : '$count selected'),
+      title: Text(
+        count == 0
+            ? 'Select photos'.tr
+            : '@n selected'.trParams({'n': '$count'}),
+      ),
       actions: [
         IconButton(
-          tooltip: 'Select all shown',
+          tooltip: 'Select all shown'.tr,
           onPressed: controller.selectAllVisible,
           icon: const Icon(Icons.select_all_rounded),
         ),
         IconButton(
-          tooltip: 'Share',
+          tooltip: 'Share'.tr,
           onPressed: count == 0 ? null : () => _shareSelected(context),
           icon: const Icon(Icons.ios_share_rounded),
         ),
         IconButton(
-          tooltip: 'Create PDF report',
+          tooltip: 'Create PDF report'.tr,
           onPressed: count == 0 ? null : () => _createReport(context),
           icon: const Icon(Icons.picture_as_pdf_outlined),
         ),
         IconButton(
-          tooltip: 'Delete',
+          tooltip: 'Delete'.tr,
           onPressed: count == 0 || controller.isBusy.value
               ? null
               : () => _deleteSelected(context),
@@ -83,15 +87,15 @@ class GalleryView extends GetView<GalleryController> {
   PreferredSizeWidget _searchBar() {
     return AppBar(
       leading: IconButton(
-        tooltip: 'Close search',
+        tooltip: 'Close search'.tr,
         onPressed: controller.stopSearch,
         icon: const Icon(Icons.arrow_back_rounded),
       ),
       title: TextField(
         autofocus: true,
         textInputAction: TextInputAction.search,
-        decoration: const InputDecoration(
-          hintText: 'Place, address, note or date',
+        decoration: InputDecoration(
+          hintText: 'Place, address, note or date'.tr,
           border: InputBorder.none,
         ),
         onChanged: controller.setQuery,
@@ -104,8 +108,8 @@ class GalleryView extends GetView<GalleryController> {
     final outcome = await Get.find<ShareService>().shareImages(files);
     if (!context.mounted) return;
     final message = switch (outcome) {
-      ShareOutcome.missingFile => 'These photos no longer exist.',
-      ShareOutcome.failed => 'The share sheet could not be opened.',
+      ShareOutcome.missingFile => 'These photos no longer exist.'.tr,
+      ShareOutcome.failed => 'The share sheet could not be opened.'.tr,
       _ => null,
     };
     if (message != null) _snack(context, message, isError: true);
@@ -120,15 +124,20 @@ class GalleryView extends GetView<GalleryController> {
       builder: (dialog) => StatefulBuilder(
         builder: (dialog, setState) => AlertDialog(
           icon: Icon(Icons.delete_outline_rounded, color: dialog.colors.error),
-          title: Text('Delete $count photo${count == 1 ? '' : 's'}?'),
+          title: Text(
+            'Delete @n photo?'.trPluralParams('Delete @n photos?', count, {
+              'n': '$count',
+            }),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'They are removed from the app with their location data. '
-                'Copies already in the phone gallery are not touched. This '
-                'cannot be undone.',
+              Text(
+                ('They are removed from the app with their location data. '
+                        'Copies already in the phone gallery are not touched. This '
+                        'cannot be undone.')
+                    .tr,
               ),
               if (withCopies > 0)
                 CheckboxListTile(
@@ -136,8 +145,12 @@ class GalleryView extends GetView<GalleryController> {
                   value: includeCopies,
                   onChanged: (v) => setState(() => includeCopies = v ?? true),
                   title: Text(
-                    'Also delete watermarked copies of $withCopies '
-                    'original${withCopies == 1 ? '' : 's'}',
+                    'Also delete watermarked copies of @n original'
+                        .trPluralParams(
+                          'Also delete watermarked copies of @n originals',
+                          withCopies,
+                          {'n': '$withCopies'},
+                        ),
                   ),
                 ),
             ],
@@ -145,7 +158,7 @@ class GalleryView extends GetView<GalleryController> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialog).pop(false),
-              child: const Text('Cancel'),
+              child: Text('Cancel'.tr),
             ),
             FilledButton(
               style: FilledButton.styleFrom(
@@ -153,7 +166,7 @@ class GalleryView extends GetView<GalleryController> {
                 foregroundColor: dialog.colors.onError,
               ),
               onPressed: () => Navigator.of(dialog).pop(true),
-              child: const Text('Delete'),
+              child: Text('Delete'.tr),
             ),
           ],
         ),
@@ -169,9 +182,15 @@ class GalleryView extends GetView<GalleryController> {
     _snack(
       context,
       failed == 0
-          ? 'Deleted $removed photo${removed == 1 ? '' : 's'}'
-          : 'Deleted $removed, but $failed file'
-                '${failed == 1 ? '' : 's'} could not be removed',
+          ? 'Deleted @n photo'.trPluralParams('Deleted @n photos', removed, {
+              'n': '$removed',
+            })
+          : 'Deleted @removed, but @failed file could not be removed'
+                .trPluralParams(
+                  'Deleted @removed, but @failed files could not be removed',
+                  failed,
+                  {'removed': '$removed', 'failed': '$failed'},
+                ),
       isError: failed > 0,
     );
   }
@@ -202,20 +221,20 @@ class GalleryView extends GetView<GalleryController> {
 
   PreferredSizeWidget _normalBar() {
     return AppBar(
-      title: const Text('Gallery'),
+      title: Text('Gallery'.tr),
       actions: [
         IconButton(
-          tooltip: 'Search',
+          tooltip: 'Search'.tr,
           onPressed: controller.startSearch,
           icon: const Icon(Icons.search_rounded),
         ),
         IconButton(
-          tooltip: 'Map',
+          tooltip: 'Map'.tr,
           onPressed: controller.openMap,
           icon: const Icon(Icons.map_outlined),
         ),
         IconButton(
-          tooltip: 'Select photos for a report',
+          tooltip: 'Select photos for a report'.tr,
           onPressed: () => controller.startSelection(),
           icon: const Icon(Icons.checklist_rounded),
         ),
@@ -226,7 +245,7 @@ class GalleryView extends GetView<GalleryController> {
           ),
         ),
         IconButton(
-          tooltip: 'Open camera',
+          tooltip: 'Open camera'.tr,
           onPressed: controller.openCamera,
           icon: const Icon(Icons.photo_camera_outlined),
         ),
@@ -250,10 +269,10 @@ class GalleryView extends GetView<GalleryController> {
         ),
         GalleryStatus.error => EmptyStateView(
           icon: Icons.error_outline_rounded,
-          title: 'Photos could not be loaded',
-          message: 'Storage could not be read. Try again.',
+          title: 'Photos could not be loaded'.tr,
+          message: 'Storage could not be read. Try again.'.tr,
           action: AppButton(
-            label: 'Try again',
+            label: 'Try again'.tr,
             icon: Icons.refresh_rounded,
             variant: AppButtonVariant.secondary,
             onPressed: controller.reload,
@@ -308,13 +327,14 @@ class _Content extends StatelessWidget {
                               child: SizedBox(
                                 height: constraints.maxHeight,
                                 child: controller.query.value.trim().isNotEmpty
-                                    ? const EmptyStateView(
+                                    ? EmptyStateView(
                                         icon: Icons.search_off_rounded,
-                                        title: 'No matching photos',
+                                        title: 'No matching photos'.tr,
                                         message:
-                                            'Try a place, part of the '
-                                            'address, a note or a date '
-                                            'like "07 Nov".',
+                                            ('Try a place, part of the '
+                                                    'address, a note or a date '
+                                                    'like "07 Nov".')
+                                                .tr,
                                       )
                                     : GalleryEmptyState(
                                         filter: controller.filter.value,
