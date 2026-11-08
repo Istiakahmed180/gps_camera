@@ -3,6 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
+import 'package:gps_camera/features/video/services/video_stamp_service.dart';
+import 'package:gps_camera/features/video/services/video_service.dart';
+import 'package:gps_camera/features/video/services/video_recovery.dart';
+import 'package:gps_camera/features/camera/services/capture_saver.dart';
+import 'package:gps_camera/core/services/storage_service.dart';
 import 'package:gps_camera/app/app.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/features/backup/services/backup_service.dart';
@@ -55,6 +62,39 @@ abstract final class BackgroundServices {
     }
   }
 
+  /// Saves a recording and makes stamped copies that Android interrupted
+  /// by closing the app, then says so once there is a screen.
+  static Future<void> _recoverVideos() async {
+    try {
+      final storage = Get.find<PhotoStorageService>();
+      final settings = WatermarkSettingsStore(Get.find<StorageService>());
+      final video = Get.find<VideoService>();
+      final recovered = await VideoRecovery(
+        storage: storage,
+        saver: CaptureSaver(storage, video: video),
+        stamper: Get.find<VideoStampService>(),
+        gallery: Get.find<GalleryService>(),
+        autoStamp: settings.loadAutoWatermark,
+        config: settings.load,
+        temporaryDirectory: getTemporaryDirectory,
+        export: Get.find<GalleryExportService>(),
+      ).run();
+      if (recovered) {
+        appMessenger.currentState?.showSnackBar(
+          SnackBar(
+            content: Text(
+              'A video that was interrupted when the app closed has been '
+                      'saved.'
+                  .tr,
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      // Tried again the next time the app starts.
+    }
+  }
+
   static Future<void> start() async {
     String? key;
     try {
@@ -70,6 +110,7 @@ abstract final class BackgroundServices {
     // Loads the logo and applies one picked just before a restart.
     Get.find<LogoService>();
     unawaited(_recoverBackupWork());
+    unawaited(_recoverVideos());
 
     final storage = Get.find<PhotoStorageService>();
     final places = PlaceService();
