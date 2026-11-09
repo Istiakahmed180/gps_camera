@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
+import 'package:gps_camera/shared/widgets/soft_surface.dart';
 
 class EmptyStateView extends StatelessWidget {
   const EmptyStateView({
@@ -28,20 +29,7 @@ class EmptyStateView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: colors.surfaceContainer,
-                  borderRadius: AppRadius.xlAll,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  child: Icon(
-                    icon,
-                    size: AppSizes.iconLg,
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ),
+              SoftIconTile(icon: icon),
               const SizedBox(height: AppSpacing.xl),
               Text(
                 title,

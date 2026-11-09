@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/app/theme/app_text_styles.dart';
+import 'package:gps_camera/app/theme/soft_theme.dart';
 
 abstract final class AppTheme {
   static ThemeData get light => _build(_lightScheme, AppColors.lightBackground);
@@ -53,19 +54,28 @@ abstract final class AppTheme {
       primary: scheme.onSurface,
       secondary: scheme.onSurfaceVariant,
     );
-    const buttonShape = RoundedRectangleBorder(borderRadius: AppRadius.mdAll);
+    final soft = isDark ? SoftTheme.dark : SoftTheme.light;
+    const buttonShape = RoundedRectangleBorder(borderRadius: AppRadius.lgAll);
+    const pill = StadiumBorder();
     const buttonPadding = EdgeInsets.symmetric(horizontal: AppSpacing.xl);
     const buttonMinSize = Size(64, AppSizes.buttonHeight);
 
     OutlineInputBorder inputBorder(Color color, [double width = 1]) {
       return OutlineInputBorder(
-        borderRadius: AppRadius.mdAll,
+        borderRadius: AppRadius.lgAll,
         borderSide: BorderSide(color: color, width: width),
       );
     }
 
+    // Text fields look pressed into the page: no outline until focused.
+    const noBorder = OutlineInputBorder(
+      borderRadius: AppRadius.lgAll,
+      borderSide: BorderSide.none,
+    );
+
     return ThemeData(
       colorScheme: scheme,
+      extensions: [soft],
       scaffoldBackgroundColor: background,
       canvasColor: background,
       textTheme: textTheme,
@@ -80,14 +90,19 @@ abstract final class AppTheme {
             (isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
                 .copyWith(statusBarColor: Colors.transparent),
       ),
+      // Cards float softly above the page instead of being outlined.
       cardTheme: CardThemeData(
-        color: scheme.surface,
-        elevation: 0,
+        color: soft.surface,
+        elevation: 3,
+        shadowColor: soft.shadow.withValues(alpha: isDark ? 0.9 : 0.45),
+        surfaceTintColor: Colors.transparent,
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.lgAll,
-          side: BorderSide(color: scheme.outlineVariant),
+          borderRadius: BorderRadius.circular(20),
+          side: isDark
+              ? BorderSide(color: soft.highlight.withValues(alpha: 0.6))
+              : BorderSide.none,
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -95,7 +110,11 @@ abstract final class AppTheme {
           minimumSize: buttonMinSize,
           padding: buttonPadding,
           shape: buttonShape,
-          textStyle: textTheme.labelLarge,
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+          elevation: 3,
+          shadowColor: scheme.primary.withValues(alpha: 0.5),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -104,7 +123,10 @@ abstract final class AppTheme {
           padding: buttonPadding,
           shape: buttonShape,
           textStyle: textTheme.labelLarge,
-          side: BorderSide(color: scheme.outline),
+          backgroundColor: soft.surface,
+          side: BorderSide(color: scheme.outlineVariant),
+          elevation: 2,
+          shadowColor: soft.shadow.withValues(alpha: 0.5),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -117,13 +139,13 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationThemeData(
         filled: true,
-        fillColor: scheme.surfaceContainer,
+        fillColor: soft.inset,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.md + AppSpacing.xxs,
         ),
-        border: inputBorder(scheme.outlineVariant),
-        enabledBorder: inputBorder(scheme.outlineVariant),
+        border: noBorder,
+        enabledBorder: noBorder,
         focusedBorder: inputBorder(scheme.primary, 1.5),
         errorBorder: inputBorder(scheme.error),
         focusedErrorBorder: inputBorder(scheme.error, 1.5),
@@ -136,6 +158,50 @@ abstract final class AppTheme {
         iconColor: scheme.onSurfaceVariant,
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: soft.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 8,
+        shadowColor: soft.shadow,
+        height: 70,
+        indicatorColor: scheme.primary.withValues(alpha: isDark ? 0.24 : 0.14),
+        indicatorShape: pill,
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => textTheme.labelMedium?.copyWith(
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w700
+                : FontWeight.w500,
+            color: states.contains(WidgetState.selected)
+                ? scheme.primary
+                : scheme.onSurfaceVariant,
+          ),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? scheme.primary
+                : scheme.onSurfaceVariant,
+          ),
+        ),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: SegmentedButton.styleFrom(
+          shape: pill,
+          backgroundColor: soft.inset,
+          selectedBackgroundColor: scheme.primary,
+          selectedForegroundColor: scheme.onPrimary,
+          side: BorderSide.none,
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        shape: pill,
+        backgroundColor: soft.surface,
+        selectedColor: scheme.primary.withValues(alpha: isDark ? 0.3 : 0.16),
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
+      switchTheme: SwitchThemeData(
+        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+      ),
       dividerTheme: DividerThemeData(
         color: scheme.outlineVariant,
         thickness: 1,
@@ -146,11 +212,11 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: scheme.surface,
+        backgroundColor: soft.surface,
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.xlAll),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: scheme.surface,
+        backgroundColor: background,
         showDragHandle: true,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gps_camera/app/theme/soft_theme.dart';
+import 'package:gps_camera/shared/widgets/soft_surface.dart';
 import 'package:get/get.dart';
 import 'package:gps_camera/app/i18n/app_language.dart';
 import 'package:gps_camera/app/routes/app_routes.dart';
@@ -15,96 +17,103 @@ class OnboardingView extends GetView<OnboardingController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    // Choose a language before reading the rest.
-                    Obx(
-                      () => TextButton.icon(
-                        onPressed: () => Get.toNamed<void>(AppRoutes.language),
-                        icon: const Icon(Icons.translate_rounded, size: 20),
-                        label: Text(
-                          (Get.find<LanguageService>().language.value ==
-                                      AppLanguage.system
-                                  ? Get.find<LanguageService>().phoneLanguage
-                                  : Get.find<LanguageService>().language.value)
-                              .label,
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    Obx(
-                      () => AnimatedOpacity(
-                        duration: const Duration(milliseconds: 200),
-                        opacity: controller.isLastPage ? 0 : 1,
-                        child: TextButton(
-                          onPressed: controller.isLastPage
-                              ? null
-                              : () => controller.finish(),
-                          child: Text('Skip'.tr),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: PageView(
-                    controller: controller.pages,
-                    onPageChanged: controller.onPageChanged,
+      body: SoftBackdrop(
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Column(
+                children: [
+                  Row(
                     children: [
-                      const _WelcomePage(),
-                      _PermissionsPage(controller: controller),
-                      const _ReadyPage(),
+                      // Choose a language before reading the rest.
+                      Obx(
+                        () => TextButton.icon(
+                          onPressed: () =>
+                              Get.toNamed<void>(AppRoutes.language),
+                          icon: const Icon(Icons.translate_rounded, size: 20),
+                          label: Text(
+                            (Get.find<LanguageService>().language.value ==
+                                        AppLanguage.system
+                                    ? Get.find<LanguageService>().phoneLanguage
+                                    : Get.find<LanguageService>()
+                                          .language
+                                          .value)
+                                .label,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      Obx(
+                        () => AnimatedOpacity(
+                          duration: const Duration(milliseconds: 200),
+                          opacity: controller.isLastPage ? 0 : 1,
+                          child: TextButton(
+                            onPressed: controller.isLastPage
+                                ? null
+                                : () => controller.finish(),
+                            child: Text('Skip'.tr),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.xl,
-                    AppSpacing.md,
-                    AppSpacing.xl,
-                    AppSpacing.xl,
-                  ),
-                  child: Obx(
-                    () => Column(
+                  Expanded(
+                    child: PageView(
+                      controller: controller.pages,
+                      onPageChanged: controller.onPageChanged,
                       children: [
-                        _Dots(
-                          count: OnboardingController.pageCount,
-                          index: controller.page.value,
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-                        if (controller.isLastPage) ...[
-                          AppButton(
-                            label: 'Open camera'.tr,
-                            icon: Icons.photo_camera_outlined,
-                            isExpanded: true,
-                            onPressed: () =>
-                                controller.finish(openCamera: true),
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          AppButton(
-                            label: 'Go to home'.tr,
-                            variant: AppButtonVariant.secondary,
-                            isExpanded: true,
-                            onPressed: () => controller.finish(),
-                          ),
-                        ] else
-                          AppButton(
-                            label: 'Next'.tr,
-                            icon: Icons.arrow_forward_rounded,
-                            isExpanded: true,
-                            onPressed: controller.next,
-                          ),
+                        const _WelcomePage(),
+                        _PermissionsPage(controller: controller),
+                        const _ReadyPage(),
                       ],
                     ),
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.xl,
+                      AppSpacing.md,
+                      AppSpacing.xl,
+                      AppSpacing.xl,
+                    ),
+                    child: Obx(
+                      () => Column(
+                        children: [
+                          _Dots(
+                            count: OnboardingController.pageCount,
+                            index: controller.page.value,
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+                          if (controller.isLastPage) ...[
+                            AppButton(
+                              label: 'Open camera'.tr,
+                              icon: Icons.photo_camera_outlined,
+                              isExpanded: true,
+                              onPressed: () =>
+                                  controller.finish(openCamera: true),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            AppButton(
+                              label: 'Go to home'.tr,
+                              variant: AppButtonVariant.secondary,
+                              isExpanded: true,
+                              onPressed: () => controller.finish(),
+                            ),
+                          ] else
+                            SizedBox(
+                              width: double.infinity,
+                              child: GlossyButton(
+                                label: 'Next'.tr,
+                                trailingArrow: true,
+                                onPressed: controller.next,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -119,7 +128,11 @@ class _Page extends StatelessWidget {
     required this.title,
     required this.message,
     required this.children,
+    this.logo = false,
   });
+
+  /// Shows the app logo in the tile instead of [icon].
+  final bool logo;
 
   final IconData icon;
   final String title;
@@ -133,15 +146,21 @@ class _Page extends StatelessWidget {
       children: [
         const SizedBox(height: AppSpacing.lg),
         Center(
-          child: Container(
-            width: 88,
-            height: 88,
-            decoration: BoxDecoration(
-              color: AppColors.accent.withValues(alpha: 0.16),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 44, color: AppColors.accent),
-          ),
+          child: logo
+              ? DecoratedBox(
+                  decoration: context.soft.card(radius: 40, depth: 9),
+                  child: Padding(
+                    padding: const EdgeInsets.all(26),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 76,
+                      height: 76,
+                      errorBuilder: (_, _, _) =>
+                          Icon(icon, size: 56, color: AppColors.glossBottom),
+                    ),
+                  ),
+                )
+              : SoftIconTile(icon: icon, size: 104, iconSize: 48),
         ),
         const SizedBox(height: AppSpacing.xl),
         Text(
@@ -176,23 +195,41 @@ class _Feature extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: context.colors.primary),
-          const SizedBox(width: AppSpacing.lg),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title.tr, style: context.text.titleSmall),
-                const SizedBox(height: AppSpacing.xxs),
-                Text(text.tr, style: context.text.bodyMedium),
-              ],
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: SoftSurface(
+        radius: 18,
+        depth: 4,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: context.colors.primary.withValues(alpha: 0.12),
+                borderRadius: AppRadius.mdAll,
+              ),
+              child: Icon(icon, color: context.colors.primary, size: 22),
             ),
-          ),
-        ],
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title.tr, style: context.text.titleSmall),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    text.tr,
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -204,6 +241,7 @@ class _WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const _Page(
+      logo: true,
       icon: Icons.photo_camera_outlined,
       title: 'Welcome to Locaproof',
       message: 'Photos that prove where and when they were taken.',
@@ -308,8 +346,9 @@ class _PermissionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final granted = access == PermissionAccess.granted;
     final blocked = access == PermissionAccess.blocked;
-    return Card(
-      margin: EdgeInsets.zero,
+    return SoftSurface(
+      radius: 18,
+      depth: 4,
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(

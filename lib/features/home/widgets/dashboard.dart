@@ -9,13 +9,8 @@ import 'package:gps_camera/features/projects/models/project.dart';
 import 'package:gps_camera/features/projects/widgets/project_cover.dart';
 import 'package:gps_camera/features/watermark/utils/capture_time_formatter.dart';
 import 'package:gps_camera/shared/widgets/media_thumbnail.dart';
-
-/// Brand gradient shared by the dashboard's camera card.
-const LinearGradient _brandGradient = LinearGradient(
-  begin: Alignment.topLeft,
-  end: Alignment.bottomRight,
-  colors: [Color(0xFF1488BA), Color(0xFF07506F)],
-);
+import 'package:gps_camera/shared/widgets/soft_surface.dart';
+import 'package:gps_camera/app/theme/soft_theme.dart';
 
 /// The big camera card: what the app is for, one tap away, with where the
 /// last capture was taken.
@@ -31,132 +26,146 @@ class CaptureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final last = _last();
 
-    return Material(
-      borderRadius: AppRadius.xlAll,
-      clipBehavior: Clip.antiAlias,
-      child: Ink(
-        decoration: const BoxDecoration(gradient: _brandGradient),
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Capture proof'.tr,
-                            style: context.text.headlineSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: AppRadius.xlAll,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.glossTop.withValues(alpha: 0.4),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Material(
+        borderRadius: AppRadius.xlAll,
+        clipBehavior: Clip.antiAlias,
+        child: Ink(
+          decoration: const BoxDecoration(gradient: SoftTheme.gloss),
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Capture proof'.tr,
+                              style: context.text.headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: AppSpacing.xs),
-                          Text(
-                            'Photos and videos stamped with location, date '
-                                    'and time.'
-                                .tr,
-                            style: context.text.bodyMedium?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.8),
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              'Photos and videos stamped with location, date '
+                                      'and time.'
+                                  .tr,
+                              style: context.text.bodyMedium?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.lg),
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: AppColors.accent,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.25),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.photo_camera_rounded,
-                        color: AppColors.onAccent,
-                        size: 30,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.14),
-                    borderRadius: AppRadius.mdAll,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          last == null
-                              ? Icons.my_location_rounded
-                              : Icons.place_rounded,
-                          size: AppSizes.iconSm,
-                          color: Colors.white,
+                          ],
                         ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: last == null
-                              ? Text(
-                                  'Tap to open the camera'.tr,
-                                  style: context.text.labelLarge?.copyWith(
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Last capture · @date'.trParams({
-                                        'date': last.$2,
-                                      }),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: context.text.labelSmall?.copyWith(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.75,
-                                        ),
-                                      ),
+                      ),
+                      const SizedBox(width: AppSpacing.lg),
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: AppColors.accent,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.photo_camera_rounded,
+                          color: AppColors.onAccent,
+                          size: 30,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.14),
+                      borderRadius: AppRadius.mdAll,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            last == null
+                                ? Icons.my_location_rounded
+                                : Icons.place_rounded,
+                            size: AppSizes.iconSm,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: last == null
+                                ? Text(
+                                    'Tap to open the camera'.tr,
+                                    style: context.text.labelLarge?.copyWith(
+                                      color: Colors.white,
                                     ),
-                                    if (last.$1 != null)
+                                  )
+                                : Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
                                       Text(
-                                        last.$1!,
+                                        'Last capture · @date'.trParams({
+                                          'date': last.$2,
+                                        }),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: context.text.labelLarge
-                                            ?.copyWith(color: Colors.white),
+                                        style: context.text.labelSmall
+                                            ?.copyWith(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.75,
+                                              ),
+                                            ),
                                       ),
-                                  ],
-                                ),
-                        ),
-                        const Icon(
-                          Icons.arrow_forward_rounded,
-                          size: AppSizes.iconSm,
-                          color: Colors.white,
-                        ),
-                      ],
+                                      if (last.$1 != null)
+                                        Text(
+                                          last.$1!,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: context.text.labelLarge
+                                              ?.copyWith(color: Colors.white),
+                                        ),
+                                    ],
+                                  ),
+                          ),
+                          const Icon(
+                            Icons.arrow_forward_rounded,
+                            size: AppSizes.iconSm,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -206,48 +215,40 @@ class StatTile extends StatelessWidget {
       button: true,
       label: '$value $label',
       excludeSemantics: true,
-      child: Material(
-        color: colors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.lgAll,
-          side: BorderSide(color: colors.outlineVariant),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.14),
-                    borderRadius: AppRadius.smAll,
-                  ),
-                  child: Icon(icon, size: 20, color: color),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  '$value',
-                  style: context.text.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.text.bodySmall?.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ],
+      child: SoftSurface(
+        radius: 18,
+        depth: 4,
+        onTap: onTap,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.14),
+                borderRadius: AppRadius.smAll,
+              ),
+              child: Icon(icon, size: 20, color: color),
             ),
-          ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              '$value',
+              style: context.text.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.text.bodySmall?.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -380,14 +381,7 @@ class RecentProjects extends StatelessWidget {
         onAction: onCreate,
       );
     }
-    final colors = context.colors;
-    return Material(
-      color: colors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: AppRadius.lgAll,
-        side: BorderSide(color: colors.outlineVariant),
-      ),
-      clipBehavior: Clip.antiAlias,
+    return SoftSurface(
       child: Column(
         children: [
           for (final (index, summary) in projects.indexed) ...[
@@ -443,12 +437,7 @@ class _EmptyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(color: colors.outlineVariant),
-      ),
+    return SoftSurface(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(

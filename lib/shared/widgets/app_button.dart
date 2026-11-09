@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
+import 'package:gps_camera/shared/widgets/soft_surface.dart';
 
 enum AppButtonVariant { primary, secondary, tertiary }
 
@@ -33,10 +34,19 @@ class AppButton extends StatelessWidget {
     final child = Text(label);
 
     final Widget button = switch (variant) {
-      AppButtonVariant.primary => FilledButton.icon(
+      AppButtonVariant.primary => GlossyButton(
+        label: label,
         onPressed: callback,
-        icon: leading,
-        label: child,
+        leading: isLoading
+            ? const SizedBox.square(
+                dimension: AppSizes.iconSm,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : null,
+        icon: icon,
       ),
       AppButtonVariant.secondary => OutlinedButton.icon(
         onPressed: callback,
