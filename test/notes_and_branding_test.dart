@@ -99,7 +99,7 @@ void main() {
   group('branding config', () {
     test('defaults keep old saved settings looking the same', () {
       final old = WatermarkConfig.fromJson({'template': 'map'});
-      expect(old.brandText, 'GPS CAMERA');
+      expect(old.brandText, 'LOCAPROOF');
       expect(old.customText, '');
       expect(old.showLogo, isFalse);
       expect(old.showNote, isTrue);

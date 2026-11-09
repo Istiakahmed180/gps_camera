@@ -108,7 +108,7 @@ void main() {
       final out = PhotoExif.apply(camera, spec, upright: false)!;
       final exif = img.decodeJpgExif(out)!;
 
-      expect(_ascii(exif.imageIfd[0x0131]), 'GPS Camera');
+      expect(_ascii(exif.imageIfd[0x0131]), 'Locaproof');
       expect(exif.imageIfd.make, 'OnePlus');
       expect(exif.imageIfd.orientation, 6, reason: 'pixels not rotated');
       expect(_ascii(exif.exifIfd[0x9003]), '2026:11:07 10:02:09');

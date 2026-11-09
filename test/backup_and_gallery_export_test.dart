@@ -277,7 +277,7 @@ void main() {
 
       final s = service(db);
       final backup = await s.create();
-      expect(backup.name, 'GPSCamera_Backup_20261107_150405.zip');
+      expect(backup.name, 'Locaproof_Backup_20261107_150405.zip');
       expect(backup.photoCount, 2);
       expect(s.isBusy.value, isFalse);
 

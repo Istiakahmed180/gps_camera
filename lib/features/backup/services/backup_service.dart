@@ -409,7 +409,7 @@ class BackupService {
 
   static String _fileName(DateTime t) {
     String two(int v) => v.toString().padLeft(2, '0');
-    return 'GPSCamera_Backup_${t.year}${two(t.month)}${two(t.day)}_'
+    return 'Locaproof_Backup_${t.year}${two(t.month)}${two(t.day)}_'
         '${two(t.hour)}${two(t.minute)}${two(t.second)}.zip';
   }
 
@@ -496,7 +496,7 @@ _Extracted _extract(String zipPath, String root, SendPort port) {
     }
     if (manifest is! Map<String, dynamic> ||
         manifest['format'] != BackupService.format) {
-      throw const BackupException('This file is not a GPS Camera backup.');
+      throw const BackupException('This file is not a Locaproof backup.');
     }
     final version = manifest['version'];
     if (version is! int || version > BackupService.version) {

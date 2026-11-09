@@ -9,11 +9,11 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>To record sound with your videos.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>GPS Camera uses the camera to capture photos for your site documentation.</string>
+	<string>Locaproof uses the camera to capture photos for your site documentation.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>GPS Camera records your location with each photo while the camera is open.</string>
+	<string>Locaproof records your location with each photo while the camera is open.</string>
 	<key>CFBundleDisplayName</key>
-	<string>GPS Camera</string>
+	<string>Locaproof</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

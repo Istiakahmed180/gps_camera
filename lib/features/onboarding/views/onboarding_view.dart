@@ -205,7 +205,7 @@ class _WelcomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const _Page(
       icon: Icons.photo_camera_outlined,
-      title: 'Welcome to GPS Camera',
+      title: 'Welcome to Locaproof',
       message: 'Photos that prove where and when they were taken.',
       children: [
         _Feature(
@@ -366,7 +366,7 @@ class _ReadyPage extends StatelessWidget {
         _Feature(
           Icons.photo_library_outlined,
           'Phone gallery',
-          'Watermarked photos are also saved to Pictures/GPS Camera. '
+          'Watermarked photos are also saved to Pictures/Locaproof. '
               'Change this in Settings.',
         ),
         _Feature(

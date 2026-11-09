@@ -114,8 +114,8 @@ Future<ReportRenderStats> renderReportPdf(
   final doc = pw.Document(
     theme: theme,
     title: job.title,
-    author: 'GPS Camera',
-    creator: 'GPS Camera',
+    author: 'Locaproof',
+    creator: 'Locaproof',
   );
   doc.addPage(
     pw.MultiPage(
@@ -311,7 +311,7 @@ pw.Widget _runningHeader(ReportJob job, _Styles s, _Tx tx) {
     ),
     child: pw.Row(
       children: [
-        pw.Text('GPS CAMERA', style: s.brand),
+        pw.Text('LOCAPROOF', style: s.brand),
         pw.SizedBox(width: 8),
         pw.Expanded(
           child: tx(job.title, s.small, width: _contentWidth - 80, maxLines: 1),
@@ -379,7 +379,7 @@ pw.Widget _summary(ReportJob job, _Styles s, int missingImages, _Tx tx) {
     child: pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text('GPS CAMERA', style: s.brand),
+        pw.Text('LOCAPROOF', style: s.brand),
         pw.SizedBox(height: 6),
         tx(
           job.projectName ?? job.title,

@@ -40,7 +40,7 @@ class WatermarkConfig {
     this.showDirection = true,
   });
 
-  static const String defaultBrand = 'GPS CAMERA';
+  static const String defaultBrand = 'LOCAPROOF';
   static const int maxBrandLength = 40;
   static const int maxCustomTextLength = 120;
 

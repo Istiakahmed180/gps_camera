@@ -92,7 +92,7 @@ class ExifSpec {
 /// thumbnail (which would show the photo without its watermark) and
 /// interoperability data are dropped.
 abstract final class PhotoExif {
-  static const String software = 'GPS Camera';
+  static const String software = 'Locaproof';
 
   /// Camera tags copied from the original's EXIF IFD.
   static const List<int> _cameraTags = [

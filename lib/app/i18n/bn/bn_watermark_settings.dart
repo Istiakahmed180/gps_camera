@@ -157,9 +157,9 @@ const Map<String, String> bnWatermarkSettings = {
           'Backup to keep copies outside the app.':
       'ফোনের গ্যালারিতে সেভ করতে Android 10 বা তার পরের ভার্সন লাগে। অ্যাপের '
       'বাইরে কপি রাখতে শেয়ার বা ব্যাকআপ ব্যবহার করুন।',
-  'New photos are also saved to Pictures/GPS Camera, so they appear in the '
+  'New photos are also saved to Pictures/Locaproof, so they appear in the '
           'phone’s gallery and stay there if the app is removed.':
-      'নতুন ছবি Pictures/GPS Camera-তেও সেভ হয়, তাই ফোনের গ্যালারিতে দেখা যায় '
+      'নতুন ছবি Pictures/Locaproof-তেও সেভ হয়, তাই ফোনের গ্যালারিতে দেখা যায় '
       'এবং অ্যাপ মুছে ফেললেও থেকে যায়।',
   'Don’t save': 'সেভ করবেন না',
   'Photos stay inside the app only.': 'ছবি শুধু অ্যাপের ভেতরেই থাকবে।',
@@ -179,12 +179,12 @@ const Map<String, String> bnWatermarkSettings = {
       'ছবিগুলো পড়া যায়নি। আবার চেষ্টা করুন।',
   'There are no photos to copy.': 'কপি করার মতো কোনো ছবি নেই।',
   'Copy to phone gallery?': 'ফোনের গ্যালারিতে কপি করবেন?',
-  '@n photo will be copied to Pictures/GPS Camera. The photos in the app '
+  '@n photo will be copied to Pictures/Locaproof. The photos in the app '
           'are not changed.':
-      '@nটি ছবি Pictures/GPS Camera-তে কপি হবে। অ্যাপের ছবিগুলো বদলাবে না।',
-  '@n photos will be copied to Pictures/GPS Camera. The photos in the app '
+      '@nটি ছবি Pictures/Locaproof-তে কপি হবে। অ্যাপের ছবিগুলো বদলাবে না।',
+  '@n photos will be copied to Pictures/Locaproof. The photos in the app '
           'are not changed.':
-      '@nটি ছবি Pictures/GPS Camera-তে কপি হবে। অ্যাপের ছবিগুলো বদলাবে না।',
+      '@nটি ছবি Pictures/Locaproof-তে কপি হবে। অ্যাপের ছবিগুলো বদলাবে না।',
   'Copy': 'কপি করুন',
   'Photos could not be copied. Try again.':
       'ছবিগুলো কপি করা যায়নি। আবার চেষ্টা করুন।',
@@ -325,8 +325,7 @@ const Map<String, String> bnWatermarkSettings = {
   'The backup could not be read. It may be damaged or incomplete.':
       'ব্যাকআপ পড়া যায়নি। ফাইলটি নষ্ট বা অসম্পূর্ণ হতে পারে।',
   'A backup is already in progress.': 'একটি ব্যাকআপ এখন চলছে।',
-  'This file is not a GPS Camera backup.':
-      'এই ফাইলটি GPS Camera-এর ব্যাকআপ নয়।',
+  'This file is not a Locaproof backup.': 'এই ফাইলটি Locaproof-এর ব্যাকআপ নয়।',
   'This backup was made by a newer version of the app. Update the app and '
           'try again.':
       'এই ব্যাকআপ অ্যাপের নতুন ভার্সনে বানানো। অ্যাপ আপডেট করে আবার চেষ্টা করুন।',

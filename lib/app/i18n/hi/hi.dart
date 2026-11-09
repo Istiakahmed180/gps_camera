@@ -39,7 +39,7 @@ const Map<String, String> hi = {
   '@n photo put back in their projects.':
       '@n फ़ोटो वापस अपने प्रोजेक्ट में रख दी गई।',
   '@n photo still need details. Check the internet connection and try again.': '@n फ़ोटो की जानकारी अभी बाकी है। इंटरनेट कनेक्शन जाँचें और फिर से कोशिश करें।',
-  '@n photo will be copied to Pictures/GPS Camera. The photos in the app are not changed.': '@n फ़ोटो Pictures/GPS Camera में कॉपी की जाएगी। ऐप में मौजूद फ़ोटो नहीं बदलेंगी।',
+  '@n photo will be copied to Pictures/Locaproof. The photos in the app are not changed.': '@n फ़ोटो Pictures/Locaproof में कॉपी की जाएगी। ऐप में मौजूद फ़ोटो नहीं बदलेंगी।',
   '@n photo. Original photos get their capture time and GPS location written in, so other apps can read them.': '@n फ़ोटो। ओरिजिनल फ़ोटो में उनके लेने का समय और GPS लोकेशन लिख दी जाती है, ताकि दूसरे ऐप उसे पढ़ सकें।',
   '@n photos': '@n फ़ोटो',
   '@n photos at @place': '@place पर @n फ़ोटो',
@@ -47,7 +47,7 @@ const Map<String, String> hi = {
   '@n photos put back in their projects.':
       '@n फ़ोटो वापस अपने प्रोजेक्ट में रख दी गईं।',
   '@n photos still need details. Check the internet connection and try again.': '@n फ़ोटो की जानकारी अभी बाकी है। इंटरनेट कनेक्शन जाँचें और फिर से कोशिश करें।',
-  '@n photos will be copied to Pictures/GPS Camera. The photos in the app are not changed.': '@n फ़ोटो Pictures/GPS Camera में कॉपी की जाएँगी। ऐप में मौजूद फ़ोटो नहीं बदलेंगी।',
+  '@n photos will be copied to Pictures/Locaproof. The photos in the app are not changed.': '@n फ़ोटो Pictures/Locaproof में कॉपी की जाएँगी। ऐप में मौजूद फ़ोटो नहीं बदलेंगी।',
   '@n photos. Original photos get their capture time and GPS location written in, so other apps can read them.': '@n फ़ोटो। ओरिजिनल फ़ोटो में उनके लेने का समय और GPS लोकेशन लिख दी जाती है, ताकि दूसरे ऐप उसे पढ़ सकें।',
   '@n selected': '@n चुनी गईं',
   '@n still waiting': '@n अभी बाकी',
@@ -233,7 +233,7 @@ const Map<String, String> hi = {
   'Edit project': 'प्रोजेक्ट बदलें',
   'Enable it in app settings to tag photos':
       'फ़ोटो में लोकेशन जोड़ने के लिए ऐप सेटिंग में इसे चालू करें',
-  'Enable the camera permission for GPS Camera in system settings, then return to the app.': 'सिस्टम सेटिंग में GPS Camera के लिए कैमरा की अनुमति चालू करें, फिर ऐप पर लौटें।',
+  'Enable the camera permission for Locaproof in system settings, then return to the app.': 'सिस्टम सेटिंग में Locaproof के लिए कैमरा की अनुमति चालू करें, फिर ऐप पर लौटें।',
   'Enter a project name.': 'प्रोजेक्ट का नाम डालें।',
   'Every original and every watermarked copy.':
       'हर ओरिजिनल और हर वॉटरमार्क वाली कॉपी।',
@@ -325,7 +325,7 @@ const Map<String, String> hi = {
       'और विकल्प (जानकारी, साइज़, जगह) वॉटरमार्क एडिटर में हैं।',
   'NOTE': 'नोट',
   'Name': 'नाम',
-  'New photos are also saved to Pictures/GPS Camera, so they appear in the phone’s gallery and stay there if the app is removed.': 'नई फ़ोटो Pictures/GPS Camera में भी सेव होती हैं, ताकि वे फ़ोन की गैलरी में दिखें और ऐप हटाने के बाद भी वहीं रहें।',
+  'New photos are also saved to Pictures/Locaproof, so they appear in the phone’s gallery and stay there if the app is removed.': 'नई फ़ोटो Pictures/Locaproof में भी सेव होती हैं, ताकि वे फ़ोन की गैलरी में दिखें और ऐप हटाने के बाद भी वहीं रहें।',
   'New photos go to @name. Change project':
       'नई फ़ोटो @name में जाएँगी। प्रोजेक्ट बदलें',
   'New project': 'नया प्रोजेक्ट',
@@ -591,7 +591,7 @@ const Map<String, String> hi = {
   'This backup was made by a newer version of the app. Update the app and try again.':
       'यह बैकअप ऐप के नए वर्शन से बना है। ऐप अपडेट करें और फिर से कोशिश करें।',
   'This can\'t be undone.': 'इसे वापस नहीं किया जा सकता।',
-  'This file is not a GPS Camera backup.': 'यह फ़ाइल GPS Camera बैकअप नहीं है।',
+  'This file is not a Locaproof backup.': 'यह फ़ाइल Locaproof बैकअप नहीं है।',
   'This is a watermarked copy. Open its original to create a new watermark.': 'यह वॉटरमार्क वाली कॉपी है। नया वॉटरमार्क बनाने के लिए इसकी ओरिजिनल खोलें।',
   'This is already a watermarked copy. Open its original instead.':
       'यह पहले से वॉटरमार्क वाली कॉपी है। इसके बजाय इसकी ओरिजिनल खोलें।',
@@ -666,9 +666,9 @@ const Map<String, String> hi = {
   'Watermarked photo': 'वॉटरमार्क वाली फ़ोटो',
   'Watermarked photo, @caption': 'वॉटरमार्क वाली फ़ोटो, @caption',
   'Watermarked photos': 'वॉटरमार्क वाली फ़ोटो',
-  'Watermarked photos are also saved to Pictures/GPS Camera. Change this in Settings.': 'वॉटरमार्क वाली फ़ोटो Pictures/GPS Camera में भी सेव होती हैं। इसे सेटिंग में बदलें।',
+  'Watermarked photos are also saved to Pictures/Locaproof. Change this in Settings.': 'वॉटरमार्क वाली फ़ोटो Pictures/Locaproof में भी सेव होती हैं। इसे सेटिंग में बदलें।',
   'Watermarked versions': 'वॉटरमार्क वाले वर्शन',
-  'Welcome to GPS Camera': 'GPS Camera में आपका स्वागत है',
+  'Welcome to Locaproof': 'Locaproof में आपका स्वागत है',
   'While the camera is open. Volume works normally everywhere else.':
       'सिर्फ़ कैमरा खुला होने पर। बाकी जगह वॉल्यूम सामान्य रूप से काम करता है।',
   'Works offline': 'बिना इंटरनेट काम करता है',

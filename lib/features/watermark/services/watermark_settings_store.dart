@@ -11,10 +11,17 @@ class WatermarkSettingsStore {
     final saved = _storage.read<Map<String, dynamic>>(
       StorageKeys.watermarkConfig,
     );
-    return saved == null
-        ? const WatermarkConfig()
-        : WatermarkConfig.fromJson(saved);
+    if (saved == null) return const WatermarkConfig();
+    final config = WatermarkConfig.fromJson(saved);
+    // The app's old name was the default heading; it follows the new one.
+    // A heading the user typed is kept as it is.
+    return config.brandText == oldDefaultBrand
+        ? config.copyWith(brandText: WatermarkConfig.defaultBrand)
+        : config;
   }
+
+  /// The default heading before the app was renamed to Locaproof.
+  static const String oldDefaultBrand = 'GPS CAMERA';
 
   Future<void> save(WatermarkConfig config) =>
       _storage.write(StorageKeys.watermarkConfig, config.toJson());

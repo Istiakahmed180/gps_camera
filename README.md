@@ -1,6 +1,6 @@
-# GPS Camera
+# Locaproof
 
-Android-first GPS camera for geo-tagged photos, project albums and PDF reports.
+Locaproof is an Android-first GPS camera for geo-tagged photos, project albums and PDF reports.
 
 ## Stack
 

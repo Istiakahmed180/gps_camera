@@ -52,7 +52,7 @@ void main() {
   testWidgets('first launch shows the introduction, then home', (tester) async {
     await tester.pumpWidget(const GpsCameraApp());
     await tester.pumpAndSettle();
-    expect(find.text('Welcome to GPS Camera'), findsOneWidget);
+    expect(find.text('Welcome to Locaproof'), findsOneWidget);
 
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();

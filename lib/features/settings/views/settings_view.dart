@@ -140,7 +140,7 @@ class _GallerySettings extends StatelessWidget {
               AppSpacing.xs,
             ),
             child: Text(
-              ('New photos are also saved to Pictures/GPS Camera, so they '
+              ('New photos are also saved to Pictures/Locaproof, so they '
                       'appear in the phone’s gallery and stay there if the app '
                       'is removed.')
                   .tr,
@@ -208,10 +208,10 @@ class _GallerySettings extends StatelessWidget {
       builder: (dialog) => AlertDialog(
         title: Text('Copy to phone gallery?'.tr),
         content: Text(
-          ('@n photo will be copied to Pictures/GPS Camera. The photos in '
+          ('@n photo will be copied to Pictures/Locaproof. The photos in '
                   'the app are not changed.')
               .trCount(
-                '@n photos will be copied to Pictures/GPS Camera. The '
+                '@n photos will be copied to Pictures/Locaproof. The '
                 'photos in the app are not changed.',
                 count,
                 {'n': '$count'},

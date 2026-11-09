@@ -1,4 +1,4 @@
-/// Which files are copied to the phone's gallery (Pictures/GPS Camera).
+/// Which files are copied to the phone's gallery (Pictures/Locaproof).
 enum GallerySaveMode {
   /// Nothing leaves app storage.
   off('Don’t save', 'Photos stay inside the app only.'),

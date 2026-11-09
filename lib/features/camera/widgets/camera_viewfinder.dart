@@ -68,7 +68,7 @@ class CameraViewfinder extends StatelessWidget {
         icon: Icons.no_photography_outlined,
         title: 'Camera access is turned off'.tr,
         message:
-            ('Enable the camera permission for GPS Camera in system '
+            ('Enable the camera permission for Locaproof in system '
                     'settings, then return to the app.')
                 .tr,
         action: AppButton(

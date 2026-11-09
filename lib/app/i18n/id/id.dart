@@ -38,14 +38,14 @@ const Map<String, String> id = {
   '@n photo at @place': '@n foto di @place',
   '@n photo put back in their projects.': '@n foto dikembalikan ke proyeknya.',
   '@n photo still need details. Check the internet connection and try again.': '@n foto masih memerlukan detail. Periksa koneksi internet, lalu coba lagi.',
-  '@n photo will be copied to Pictures/GPS Camera. The photos in the app are not changed.': '@n foto akan disalin ke Pictures/GPS Camera. Foto di aplikasi tidak diubah.',
+  '@n photo will be copied to Pictures/Locaproof. The photos in the app are not changed.': '@n foto akan disalin ke Pictures/Locaproof. Foto di aplikasi tidak diubah.',
   '@n photo. Original photos get their capture time and GPS location written in, so other apps can read them.': '@n foto. Foto asli akan diberi waktu pengambilan dan lokasi GPS agar dapat dibaca aplikasi lain.',
   '@n photos': '@n foto',
   '@n photos at @place': '@n foto di @place',
   '@n photos here': '@n foto di sini',
   '@n photos put back in their projects.': '@n foto dikembalikan ke proyeknya.',
   '@n photos still need details. Check the internet connection and try again.': '@n foto masih memerlukan detail. Periksa koneksi internet, lalu coba lagi.',
-  '@n photos will be copied to Pictures/GPS Camera. The photos in the app are not changed.': '@n foto akan disalin ke Pictures/GPS Camera. Foto di aplikasi tidak diubah.',
+  '@n photos will be copied to Pictures/Locaproof. The photos in the app are not changed.': '@n foto akan disalin ke Pictures/Locaproof. Foto di aplikasi tidak diubah.',
   '@n photos. Original photos get their capture time and GPS location written in, so other apps can read them.': '@n foto. Foto asli akan diberi waktu pengambilan dan lokasi GPS agar dapat dibaca aplikasi lain.',
   '@n selected': '@n dipilih',
   '@n still waiting': '@n masih menunggu',
@@ -231,7 +231,7 @@ const Map<String, String> id = {
   'Edit project': 'Edit proyek',
   'Enable it in app settings to tag photos':
       'Aktifkan di setelan aplikasi untuk menandai lokasi foto',
-  'Enable the camera permission for GPS Camera in system settings, then return to the app.': 'Aktifkan izin kamera untuk GPS Camera di setelan sistem, lalu kembali ke aplikasi.',
+  'Enable the camera permission for Locaproof in system settings, then return to the app.': 'Aktifkan izin kamera untuk Locaproof di setelan sistem, lalu kembali ke aplikasi.',
   'Enter a project name.': 'Masukkan nama proyek.',
   'Every original and every watermarked copy.':
       'Setiap foto asli dan setiap salinan bertanda air.',
@@ -325,7 +325,7 @@ const Map<String, String> id = {
       'Opsi lainnya (detail, ukuran, posisi) ada di editor tanda air.',
   'NOTE': 'CTT',
   'Name': 'Nama',
-  'New photos are also saved to Pictures/GPS Camera, so they appear in the phone’s gallery and stay there if the app is removed.': 'Foto baru juga disimpan ke Pictures/GPS Camera, sehingga muncul di galeri ponsel dan tetap ada meskipun aplikasi dihapus.',
+  'New photos are also saved to Pictures/Locaproof, so they appear in the phone’s gallery and stay there if the app is removed.': 'Foto baru juga disimpan ke Pictures/Locaproof, sehingga muncul di galeri ponsel dan tetap ada meskipun aplikasi dihapus.',
   'New photos go to @name. Change project':
       'Foto baru masuk ke @name. Ubah proyek',
   'New project': 'Proyek baru',
@@ -595,8 +595,7 @@ const Map<String, String> id = {
   'They are removed from the app with their location data. Copies already in the phone gallery are not touched. This cannot be undone.': 'Foto akan dihapus dari aplikasi beserta data lokasinya. Salinan yang sudah ada di galeri ponsel tidak tersentuh. Tindakan ini tidak dapat diurungkan.',
   'This backup was made by a newer version of the app. Update the app and try again.': 'Cadangan ini dibuat oleh versi aplikasi yang lebih baru. Perbarui aplikasi, lalu coba lagi.',
   'This can\'t be undone.': 'Tindakan ini tidak dapat diurungkan.',
-  'This file is not a GPS Camera backup.':
-      'File ini bukan cadangan GPS Camera.',
+  'This file is not a Locaproof backup.': 'File ini bukan cadangan Locaproof.',
   'This is a watermarked copy. Open its original to create a new watermark.': 'Ini adalah salinan bertanda air. Buka foto aslinya untuk membuat tanda air baru.',
   'This is already a watermarked copy. Open its original instead.':
       'Ini sudah merupakan salinan bertanda air. Buka foto aslinya.',
@@ -670,9 +669,9 @@ const Map<String, String> id = {
   'Watermarked photo': 'Foto bertanda air',
   'Watermarked photo, @caption': 'Foto bertanda air, @caption',
   'Watermarked photos': 'Foto bertanda air',
-  'Watermarked photos are also saved to Pictures/GPS Camera. Change this in Settings.': 'Foto bertanda air juga disimpan ke Pictures/GPS Camera. Ubah ini di Setelan.',
+  'Watermarked photos are also saved to Pictures/Locaproof. Change this in Settings.': 'Foto bertanda air juga disimpan ke Pictures/Locaproof. Ubah ini di Setelan.',
   'Watermarked versions': 'Versi bertanda air',
-  'Welcome to GPS Camera': 'Selamat datang di GPS Camera',
+  'Welcome to Locaproof': 'Selamat datang di Locaproof',
   'While the camera is open. Volume works normally everywhere else.':
       'Saat kamera terbuka. Tombol volume berfungsi normal di tempat lain.',
   'Works offline': 'Berfungsi offline',

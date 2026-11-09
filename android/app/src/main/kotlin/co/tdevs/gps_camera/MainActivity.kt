@@ -164,7 +164,7 @@ class MainActivity : FlutterActivity() {
 
     /**
      * Copies a JPEG (or MP4) from GPSCamera/Photos or GPSCamera/Watermarked
-     * into Pictures/GPS Camera (videos: Movies/GPS Camera). The app's own file is only read. A gallery photo
+     * into Pictures/Locaproof (videos: Movies/Locaproof). The app's own file is only read. A gallery photo
      * with the same name that this app added earlier is left as it is.
      */
     private fun saveToGallery(path: String?, name: String?, takenAt: Long?): String {
@@ -396,8 +396,8 @@ class MainActivity : FlutterActivity() {
         private const val CHANNEL = "co.tdevs.gps_camera/native"
         private const val VOLUME_CHANNEL = "co.tdevs.gps_camera/volume"
         private const val COMPASS_CHANNEL = "co.tdevs.gps_camera/compass"
-        private const val GALLERY_DIR = "Pictures/GPS Camera"
-        private const val VIDEO_DIR = "Movies/GPS Camera"
+        private const val GALLERY_DIR = "Pictures/Locaproof"
+        private const val VIDEO_DIR = "Movies/Locaproof"
         private val GALLERY_SOURCES = setOf("Photos", "Watermarked")
         private val SAFE_NAME = Regex("[A-Za-z0-9_.-]{1,120}\\.(jpg|mp4)")
         private const val REQUEST_SAVE = 4101

@@ -13,7 +13,7 @@ enum PhoneGallerySave {
   failed,
 }
 
-/// Copies app photos into the phone's shared Pictures/GPS Camera folder.
+/// Copies app photos into the phone's shared Pictures/Locaproof folder.
 /// No storage permission is used: Android 10+ lets apps add their own media.
 class PhoneGallery {
   PhoneGallery([MethodChannel? channel])

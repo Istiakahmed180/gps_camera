@@ -58,9 +58,9 @@ const Map<String, String> bnCamera = {
       'সাইটের ছবি তুলতে ক্যামেরার অনুমতি দিন।',
   'Allow camera': 'ক্যামেরার অনুমতি দিন',
   'Camera access is turned off': 'ক্যামেরার অনুমতি বন্ধ আছে',
-  'Enable the camera permission for GPS Camera in system '
+  'Enable the camera permission for Locaproof in system '
           'settings, then return to the app.':
-      'ফোনের সেটিংসে GPS Camera-র জন্য ক্যামেরার অনুমতি চালু করুন, '
+      'ফোনের সেটিংসে Locaproof-র জন্য ক্যামেরার অনুমতি চালু করুন, '
       'তারপর অ্যাপে ফিরে আসুন।',
   'Open settings': 'সেটিংস খুলুন',
   'Camera unavailable': 'ক্যামেরা পাওয়া যাচ্ছে না',
@@ -138,7 +138,7 @@ const Map<String, String> bnCamera = {
 
   // Onboarding
   'Go to home': 'হোমে যান',
-  'Welcome to GPS Camera': 'GPS Camera-তে স্বাগতম',
+  'Welcome to Locaproof': 'Locaproof-তে স্বাগতম',
   'Photos that prove where and when they were taken.':
       'ছবি কোথায় ও কখন তোলা হয়েছে, তার প্রমাণসহ ছবি।',
   'Location stamp': 'লোকেশন স্ট্যাম্প',
@@ -174,9 +174,9 @@ const Map<String, String> bnCamera = {
   'You’re ready': 'আপনি প্রস্তুত',
   'A few things worth knowing:': 'কয়েকটি জরুরি কথা:',
   'Phone gallery': 'ফোনের গ্যালারি',
-  'Watermarked photos are also saved to Pictures/GPS Camera. '
+  'Watermarked photos are also saved to Pictures/Locaproof. '
           'Change this in Settings.':
-      'ওয়াটারমার্ক করা ছবি Pictures/GPS Camera-তেও সেভ হয়। '
+      'ওয়াটারমার্ক করা ছবি Pictures/Locaproof-তেও সেভ হয়। '
       'সেটিংস থেকে এটি বদলাতে পারবেন।',
   'Notes and branding': 'নোট ও ব্র্যান্ডিং',
   'Add a note in the camera, and your own name or logo in the '

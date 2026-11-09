@@ -36,16 +36,16 @@ const Map<String, String> ar = {
   '@n photo at @place': '@n صورة في @place',
   '@n photo put back in their projects.': 'أُعيدت @n صورة إلى مشروعها.',
   '@n photo still need details. Check the internet connection and try again.': 'لا تزال @n صورة بحاجة إلى تفاصيل. تحقق من الاتصال بالإنترنت وحاول مجددًا.',
-  '@n photo will be copied to Pictures/GPS Camera. The photos in the app are not changed.':
-      'سيتم نسخ @n صورة إلى Pictures/GPS Camera. لن تتغير الصور داخل التطبيق.',
+  '@n photo will be copied to Pictures/Locaproof. The photos in the app are not changed.':
+      'سيتم نسخ @n صورة إلى Pictures/Locaproof. لن تتغير الصور داخل التطبيق.',
   '@n photo. Original photos get their capture time and GPS location written in, so other apps can read them.': '@n صورة. تُكتب في الصور الأصلية وقت الالتقاط وموقع GPS، لتتمكن التطبيقات الأخرى من قراءتها.',
   '@n photos': '@n صور',
   '@n photos at @place': '@n صور في @place',
   '@n photos here': '@n صور هنا',
   '@n photos put back in their projects.': 'أُعيدت @n صور إلى مشاريعها.',
   '@n photos still need details. Check the internet connection and try again.': 'لا تزال @n صور بحاجة إلى تفاصيل. تحقق من الاتصال بالإنترنت وحاول مجددًا.',
-  '@n photos will be copied to Pictures/GPS Camera. The photos in the app are not changed.':
-      'سيتم نسخ @n صور إلى Pictures/GPS Camera. لن تتغير الصور داخل التطبيق.',
+  '@n photos will be copied to Pictures/Locaproof. The photos in the app are not changed.':
+      'سيتم نسخ @n صور إلى Pictures/Locaproof. لن تتغير الصور داخل التطبيق.',
   '@n photos. Original photos get their capture time and GPS location written in, so other apps can read them.': '@n صور. تُكتب في الصور الأصلية وقت الالتقاط وموقع GPS، لتتمكن التطبيقات الأخرى من قراءتها.',
   '@n selected': 'تم تحديد @n',
   '@n still waiting': '@n قيد الانتظار',
@@ -232,7 +232,7 @@ const Map<String, String> ar = {
   'Edit project': 'تعديل المشروع',
   'Enable it in app settings to tag photos':
       'فعّله في إعدادات التطبيق لإضافة الموقع إلى الصور',
-  'Enable the camera permission for GPS Camera in system settings, then return to the app.': 'فعّل إذن الكاميرا لتطبيق GPS Camera من إعدادات النظام، ثم عُد إلى التطبيق.',
+  'Enable the camera permission for Locaproof in system settings, then return to the app.': 'فعّل إذن الكاميرا لتطبيق Locaproof من إعدادات النظام، ثم عُد إلى التطبيق.',
   'Enter a project name.': 'أدخل اسم المشروع.',
   'Every original and every watermarked copy.':
       'كل صورة أصلية وكل نسخة بعلامة مائية.',
@@ -325,7 +325,7 @@ const Map<String, String> ar = {
       'تتوفر خيارات إضافية (التفاصيل، الحجم، الموضع) في محرر العلامة المائية.',
   'NOTE': 'ملاحظة',
   'Name': 'الاسم',
-  'New photos are also saved to Pictures/GPS Camera, so they appear in the phone’s gallery and stay there if the app is removed.': 'تُحفظ الصور الجديدة أيضًا في Pictures/GPS Camera، فتظهر في معرض الهاتف وتبقى فيه حتى لو أُزيل التطبيق.',
+  'New photos are also saved to Pictures/Locaproof, so they appear in the phone’s gallery and stay there if the app is removed.': 'تُحفظ الصور الجديدة أيضًا في Pictures/Locaproof، فتظهر في معرض الهاتف وتبقى فيه حتى لو أُزيل التطبيق.',
   'New photos go to @name. Change project':
       'تُضاف الصور الجديدة إلى @name. تغيير المشروع',
   'New project': 'مشروع جديد',
@@ -587,8 +587,8 @@ const Map<String, String> ar = {
   'They are removed from the app with their location data. Copies already in the phone gallery are not touched. This cannot be undone.': 'ستُزال من التطبيق مع بيانات موقعها. لن تتأثر النسخ الموجودة في معرض الهاتف. لا يمكن التراجع عن ذلك.',
   'This backup was made by a newer version of the app. Update the app and try again.': 'أُنشئت هذه النسخة الاحتياطية بإصدار أحدث من التطبيق. حدّث التطبيق وحاول مجددًا.',
   'This can\'t be undone.': 'لا يمكن التراجع عن ذلك.',
-  'This file is not a GPS Camera backup.':
-      'هذا الملف ليس نسخة احتياطية من GPS Camera.',
+  'This file is not a Locaproof backup.':
+      'هذا الملف ليس نسخة احتياطية من Locaproof.',
   'This is a watermarked copy. Open its original to create a new watermark.':
       'هذه نسخة بعلامة مائية. افتح صورتها الأصلية لإنشاء علامة مائية جديدة.',
   'This is already a watermarked copy. Open its original instead.':
@@ -665,9 +665,9 @@ const Map<String, String> ar = {
   'Watermarked photo': 'صورة بعلامة مائية',
   'Watermarked photo, @caption': 'صورة بعلامة مائية، @caption',
   'Watermarked photos': 'الصور بعلامة مائية',
-  'Watermarked photos are also saved to Pictures/GPS Camera. Change this in Settings.': 'تُحفظ الصور بعلامة مائية أيضًا في Pictures/GPS Camera. يمكنك تغيير ذلك من الإعدادات.',
+  'Watermarked photos are also saved to Pictures/Locaproof. Change this in Settings.': 'تُحفظ الصور بعلامة مائية أيضًا في Pictures/Locaproof. يمكنك تغيير ذلك من الإعدادات.',
   'Watermarked versions': 'النسخ بعلامة مائية',
-  'Welcome to GPS Camera': 'مرحبًا بك في GPS Camera',
+  'Welcome to Locaproof': 'مرحبًا بك في Locaproof',
   'While the camera is open. Volume works normally everywhere else.':
       'أثناء فتح الكاميرا. يعمل الصوت بشكل طبيعي في كل مكان آخر.',
   'Works offline': 'يعمل دون اتصال',
