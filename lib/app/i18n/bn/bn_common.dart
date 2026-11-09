@@ -151,4 +151,5 @@ const Map<String, String> bnCommon = {
   'Video saved with location': 'লোকেশনসহ ভিডিও সেভ হয়েছে',
   'A video that was interrupted when the app closed has been saved.':
       'অ্যাপ বন্ধ হয়ে যাওয়ায় থেমে যাওয়া একটি ভিডিও সেভ করা হয়েছে।',
+  'Video thumbnails': 'ভিডিওর থাম্বনেইল',
 };

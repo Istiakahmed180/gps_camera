@@ -809,4 +809,5 @@ const Map<String, String> ar = {
   'Video saved with location': 'تم حفظ الفيديو مع الموقع',
   'A video that was interrupted when the app closed has been saved.':
       'تم حفظ فيديو توقف عند إغلاق التطبيق.',
+  'Video thumbnails': 'الصور المصغّرة للفيديو',
 };

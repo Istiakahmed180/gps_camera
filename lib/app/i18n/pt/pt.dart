@@ -821,4 +821,5 @@ const Map<String, String> pt = {
   'Video saved with location': 'Vídeo salvo com localização',
   'A video that was interrupted when the app closed has been saved.':
       'Um vídeo interrompido quando o app fechou foi salvo.',
+  'Video thumbnails': 'Miniaturas de vídeo',
 };

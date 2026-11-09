@@ -253,6 +253,8 @@ class StorageSettings extends StatelessWidget {
             size(u.watermarked),
           ),
           _row('Maps saved with photos'.tr, null, size(u.maps)),
+          if (u.thumbnails > 0)
+            _row('Video thumbnails'.tr, null, size(u.thumbnails)),
           _row(
             'Reports'.tr,
             '@n PDF'.trCount('@n PDFs', u.reportCount, {

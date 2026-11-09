@@ -15,6 +15,7 @@ class StorageUsageReport {
     required this.reportCount,
     required this.mapCache,
     required this.mapCacheCount,
+    this.thumbnails = 0,
   });
 
   /// Originals with their metadata.
@@ -32,7 +33,11 @@ class StorageUsageReport {
   final int mapCache;
   final int mapCacheCount;
 
-  int get total => photos + watermarked + maps + reports + mapCache;
+  /// Video thumbnails; made again when needed.
+  final int thumbnails;
+
+  int get total =>
+      photos + watermarked + maps + reports + mapCache + thumbnails;
 }
 
 class StorageUsage {
@@ -54,6 +59,11 @@ class StorageUsage {
     final reports = await _folder(await _storage.reportsDirectory(), const [
       '.pdf',
     ]);
+    // Not created just to be measured; missing counts as empty.
+    final thumbnails = await _folder(
+      Directory('${(await _storage.rootDirectory()).path}/Thumbnails'),
+      const [],
+    );
     final (cacheBytes, cacheCount) = await _mapCache.usage();
     return StorageUsageReport(
       photos: photos.$1,
@@ -65,6 +75,7 @@ class StorageUsage {
       reportCount: reports.$2,
       mapCache: cacheBytes,
       mapCacheCount: cacheCount,
+      thumbnails: thumbnails.$1,
     );
   }
 

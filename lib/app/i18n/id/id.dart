@@ -816,4 +816,5 @@ const Map<String, String> id = {
   'Video saved with location': 'Video disimpan dengan lokasi',
   'A video that was interrupted when the app closed has been saved.':
       'Video yang terhenti saat aplikasi ditutup telah disimpan.',
+  'Video thumbnails': 'Thumbnail video',
 };

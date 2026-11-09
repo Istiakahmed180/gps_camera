@@ -815,4 +815,5 @@ const Map<String, String> es = {
   'Video saved with location': 'Video guardado con ubicación',
   'A video that was interrupted when the app closed has been saved.':
       'Se guardó un video que se interrumpió al cerrarse la app.',
+  'Video thumbnails': 'Miniaturas de video',
 };

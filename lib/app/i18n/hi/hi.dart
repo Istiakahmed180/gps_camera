@@ -812,4 +812,5 @@ const Map<String, String> hi = {
   'Video saved with location': 'लोकेशन के साथ वीडियो सेव हुआ',
   'A video that was interrupted when the app closed has been saved.':
       'ऐप बंद होने से रुका हुआ एक वीडियो सेव कर दिया गया है।',
+  'Video thumbnails': 'वीडियो थंबनेल',
 };
