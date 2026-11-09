@@ -123,7 +123,6 @@ const Map<String, String> ar = {
   'Altitude': 'الارتفاع',
   'An export is already running.': 'هناك عملية تصدير قيد التشغيل بالفعل.',
   'Appearance': 'المظهر',
-  'Appearance and preferences': 'المظهر والتفضيلات',
   'Apr': 'أبريل',
   'Archive project': 'أرشفة المشروع',
   'Archived': 'مؤرشف',
@@ -143,7 +142,6 @@ const Map<String, String> ar = {
       'تم حفظ النسخة الاحتياطية: @n صور، @files ملف',
   'Both': 'كلاهما',
   'Branding': 'العلامة التجارية',
-  'Browse geo-tagged photos': 'تصفح الصور المحددة جغرافيًا',
   'Camera': 'الكاميرا',
   'Camera access is turned off': 'الوصول إلى الكاميرا متوقف',
   'Camera access needed': 'يلزم الوصول إلى الكاميرا',
@@ -161,8 +159,6 @@ const Map<String, String> ar = {
   'Capture photo': 'التقاط صورة',
   'Capture photos first, then add them to this project.':
       'التقط الصور أولًا، ثم أضفها إلى هذا المشروع.',
-  'Capture photos stamped with location, date and time.':
-      'التقط صورًا مختومة بالموقع والتاريخ والوقت.',
   'Capturing photo': 'جارٍ التقاط الصورة',
   'Center': 'الوسط',
   'Change': 'تغيير',
@@ -224,8 +220,6 @@ const Map<String, String> ar = {
   'Dimensions': 'الأبعاد',
   'Direction': 'الاتجاه',
   'Direction of travel': 'اتجاه الحركة',
-  'Document every site with verifiable location data.':
-      'وثّق كل موقع ببيانات موقع قابلة للتحقق.',
   'Done': 'تم',
   'Don’t save': 'عدم الحفظ',
   'Edit note for new photos': 'تعديل ملاحظة الصور الجديدة',
@@ -387,9 +381,19 @@ const Map<String, String> ar = {
   'Open an original and choose Add watermark to create a watermarked copy.':
       'افتح صورة أصلية واختر إضافة علامة مائية لإنشاء نسخة بعلامة مائية.',
   'Open camera': 'فتح الكاميرا',
+  'Home': 'الرئيسية',
+  'Capture proof': 'التقط بإثبات',
+  'Photos and videos stamped with location, date and time.':
+      'صور وفيديوهات مختومة بالموقع والتاريخ والوقت.',
+  'Tap to open the camera': 'انقر لفتح الكاميرا',
+  'Last capture · @date': 'آخر لقطة · @date',
+  'Recent captures': 'اللقطات الأخيرة',
+  'See all': 'عرض الكل',
+  'Active projects': 'المشاريع النشطة',
+  'No captures yet': 'لا توجد لقطات بعد',
+  'Your photos and videos will appear here.': 'ستظهر صورك وفيديوهاتك هنا.',
   'Open original': 'فتح الأصلية',
   'Open settings': 'فتح الإعدادات',
-  'Organise photos by site or client': 'نظّم الصور حسب الموقع أو العميل',
   'Original': 'الأصلية',
   'Original captures will appear here.': 'ستظهر الصور الأصلية الملتقطة هنا.',
   'Original deleted': 'تم حذف الصورة الأصلية',
@@ -400,7 +404,6 @@ const Map<String, String> ar = {
   'Original photos': 'الصور الأصلية',
   'Originals': 'الأصلية',
   'PDF report': 'تقرير PDF',
-  'PDF reports you have created': 'تقارير PDF التي أنشأتها',
   'PM': 'م',
   'PNG or JPEG. A transparent PNG looks best.':
       'PNG أو JPEG. يبدو PNG الشفاف أفضل.',
@@ -688,7 +691,6 @@ const Map<String, String> ar = {
   'While the camera is open. Volume works normally everywhere else.':
       'أثناء فتح الكاميرا. يعمل الصوت بشكل طبيعي في كل مكان آخر.',
   'Works offline': 'يعمل دون اتصال',
-  'Workspace': 'مساحة العمل',
   'You chose this backup just before Android restarted the app.':
       'اخترت هذه النسخة الاحتياطية قبل أن يعيد Android تشغيل التطبيق مباشرةً.',
   'Your backup was saved.': 'تم حفظ نسختك الاحتياطية.',

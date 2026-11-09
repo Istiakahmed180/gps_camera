@@ -49,36 +49,56 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('every initial route opens from home', (tester) async {
+  Future<void> openSettings(WidgetTester tester) async {
+    await tester.tap(find.byTooltip('Settings'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('every screen opens from home', (tester) async {
     await tester.pumpWidget(const GpsCameraApp());
     await tester.pumpAndSettle();
-    expect(find.text('Open camera'), findsOneWidget);
+    expect(find.text('Capture proof'), findsOneWidget);
+    expect(find.text('No captures yet'), findsOneWidget);
 
-    await openFromHome(tester, 'Open camera');
+    await openFromHome(tester, 'Capture proof');
     expect(find.text('Camera access needed'), findsOneWidget);
     expect(find.text('Location permission needed'), findsOneWidget);
     await goBack(tester);
 
+    // Tabs along the bottom.
     await openFromHome(tester, 'Gallery');
     expect(find.text('No photos yet'), findsOneWidget);
-    await goBack(tester);
 
     await openFromHome(tester, 'Projects');
     expect(find.text('No projects yet'), findsOneWidget);
-    await goBack(tester);
-
-    await openFromHome(tester, 'Settings');
-    expect(find.text('Camera'.toUpperCase()), findsOneWidget);
-    await goBack(tester);
 
     await openFromHome(tester, 'Reports');
     expect(find.text('No reports yet'), findsOneWidget);
+
+    await openFromHome(tester, 'Home');
+    expect(find.text('Capture proof'), findsOneWidget);
+
+    await openSettings(tester);
+    expect(find.text('Camera'.toUpperCase()), findsOneWidget);
+    await goBack(tester);
+    expect(find.text('Recent captures'), findsOneWidget);
+  });
+
+  testWidgets('back on a tab returns to the dashboard first', (tester) async {
+    await tester.pumpWidget(const GpsCameraApp());
+    await tester.pumpAndSettle();
+    await openFromHome(tester, 'Reports');
+    expect(find.text('No reports yet'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Capture proof'), findsOneWidget);
   });
 
   testWidgets('theme selector switches light and dark', (tester) async {
     await tester.pumpWidget(const GpsCameraApp());
     await tester.pumpAndSettle();
-    await openFromHome(tester, 'Settings');
+    await openSettings(tester);
     // Theme sits below the camera, gallery and backup sections.
     await tester.scrollUntilVisible(
       find.text('Dark'),

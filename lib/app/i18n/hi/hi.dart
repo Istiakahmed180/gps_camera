@@ -125,7 +125,6 @@ const Map<String, String> hi = {
   'Altitude': 'ऊँचाई',
   'An export is already running.': 'एक एक्सपोर्ट पहले से चल रहा है।',
   'Appearance': 'दिखावट',
-  'Appearance and preferences': 'दिखावट और पसंद',
   'Apr': 'अप्रैल',
   'Archive project': 'प्रोजेक्ट आर्काइव करें',
   'Archived': 'आर्काइव',
@@ -145,7 +144,6 @@ const Map<String, String> hi = {
       'बैकअप सेव हुआ: @n फ़ोटो, @files फ़ाइलें',
   'Both': 'दोनों',
   'Branding': 'ब्रांडिंग',
-  'Browse geo-tagged photos': 'लोकेशन वाली फ़ोटो देखें',
   'Camera': 'कैमरा',
   'Camera access is turned off': 'कैमरा की अनुमति बंद है',
   'Camera access needed': 'कैमरा की अनुमति चाहिए',
@@ -163,8 +161,6 @@ const Map<String, String> hi = {
   'Capture photo': 'फ़ोटो लें',
   'Capture photos first, then add them to this project.':
       'पहले फ़ोटो लें, फिर उन्हें इस प्रोजेक्ट में जोड़ें।',
-  'Capture photos stamped with location, date and time.':
-      'लोकेशन, तारीख और समय के साथ फ़ोटो लें।',
   'Capturing photo': 'फ़ोटो ली जा रही है',
   'Center': 'बीच में',
   'Change': 'बदलें',
@@ -225,8 +221,6 @@ const Map<String, String> hi = {
   'Dimensions': 'साइज़',
   'Direction': 'दिशा',
   'Direction of travel': 'चलने की दिशा',
-  'Document every site with verifiable location data.':
-      'हर साइट को पक्के लोकेशन डेटा के साथ दर्ज करें।',
   'Done': 'हो गया',
   'Don’t save': 'सेव न करें',
   'Edit note for new photos': 'नई फ़ोटो के लिए नोट बदलें',
@@ -385,10 +379,20 @@ const Map<String, String> hi = {
   'Open': 'खोलें',
   'Open an original and choose Add watermark to create a watermarked copy.': 'वॉटरमार्क वाली कॉपी बनाने के लिए कोई ओरिजिनल खोलें और "वॉटरमार्क जोड़ें" चुनें।',
   'Open camera': 'कैमरा खोलें',
+  'Home': 'होम',
+  'Capture proof': 'सबूत के साथ फ़ोटो लें',
+  'Photos and videos stamped with location, date and time.':
+      'लोकेशन, तारीख़ और समय की मुहर वाली फ़ोटो और वीडियो।',
+  'Tap to open the camera': 'कैमरा खोलने के लिए टैप करें',
+  'Last capture · @date': 'पिछली फ़ोटो · @date',
+  'Recent captures': 'हाल की फ़ोटो',
+  'See all': 'सभी देखें',
+  'Active projects': 'चालू प्रोजेक्ट',
+  'No captures yet': 'अभी कोई फ़ोटो नहीं',
+  'Your photos and videos will appear here.':
+      'आपकी फ़ोटो और वीडियो यहाँ दिखेंगे।',
   'Open original': 'ओरिजिनल खोलें',
   'Open settings': 'सेटिंग खोलें',
-  'Organise photos by site or client':
-      'साइट या क्लाइंट के हिसाब से फ़ोटो व्यवस्थित करें',
   'Original': 'ओरिजिनल',
   'Original captures will appear here.': 'ओरिजिनल फ़ोटो यहाँ दिखेंगी।',
   'Original deleted': 'ओरिजिनल मिटा दी गई',
@@ -399,7 +403,6 @@ const Map<String, String> hi = {
   'Original photos': 'ओरिजिनल फ़ोटो',
   'Originals': 'ओरिजिनल',
   'PDF report': 'PDF रिपोर्ट',
-  'PDF reports you have created': 'आपकी बनाई PDF रिपोर्ट',
   'PM': 'PM',
   'PNG or JPEG. A transparent PNG looks best.':
       'PNG या JPEG। पारदर्शी PNG सबसे अच्छा दिखता है।',
@@ -689,7 +692,6 @@ const Map<String, String> hi = {
   'While the camera is open. Volume works normally everywhere else.':
       'सिर्फ़ कैमरा खुला होने पर। बाकी जगह वॉल्यूम सामान्य रूप से काम करता है।',
   'Works offline': 'बिना इंटरनेट काम करता है',
-  'Workspace': 'वर्कस्पेस',
   'You chose this backup just before Android restarted the app.':
       'Android के ऐप को रीस्टार्ट करने से ठीक पहले आपने यह बैकअप चुना था।',
   'Your backup was saved.': 'आपका बैकअप सेव हो गया।',

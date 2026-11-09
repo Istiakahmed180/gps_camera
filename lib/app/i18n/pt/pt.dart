@@ -124,7 +124,6 @@ const Map<String, String> pt = {
   'Altitude': 'Altitude',
   'An export is already running.': 'Uma exportação já está em andamento.',
   'Appearance': 'Aparência',
-  'Appearance and preferences': 'Aparência e preferências',
   'Apr': 'abr',
   'Archive project': 'Arquivar projeto',
   'Archived': 'Arquivados',
@@ -145,7 +144,6 @@ const Map<String, String> pt = {
       'Backup salvo: @n fotos, @files arquivos',
   'Both': 'Ambos',
   'Branding': 'Marca',
-  'Browse geo-tagged photos': 'Ver fotos com localização',
   'Camera': 'Câmera',
   'Camera access is turned off': 'O acesso à câmera está desativado',
   'Camera access needed': 'Acesso à câmera necessário',
@@ -164,8 +162,6 @@ const Map<String, String> pt = {
   'Capture photo': 'Tirar foto',
   'Capture photos first, then add them to this project.':
       'Tire fotos primeiro e depois adicione-as a este projeto.',
-  'Capture photos stamped with location, date and time.':
-      'Tire fotos com localização, data e hora.',
   'Capturing photo': 'Tirando foto',
   'Center': 'Centro',
   'Change': 'Alterar',
@@ -227,8 +223,6 @@ const Map<String, String> pt = {
   'Dimensions': 'Dimensões',
   'Direction': 'Direção',
   'Direction of travel': 'Direção do movimento',
-  'Document every site with verifiable location data.':
-      'Documente cada local com dados de localização verificáveis.',
   'Done': 'Concluído',
   'Don’t save': 'Não salvar',
   'Edit note for new photos': 'Editar nota para novas fotos',
@@ -394,9 +388,20 @@ const Map<String, String> pt = {
   'Open': 'Abrir',
   'Open an original and choose Add watermark to create a watermarked copy.': 'Abra um original e escolha Adicionar marca d\'água para criar uma cópia com marca d\'água.',
   'Open camera': 'Abrir câmera',
+  'Home': 'Início',
+  'Capture proof': 'Registre com prova',
+  'Photos and videos stamped with location, date and time.':
+      'Fotos e vídeos com carimbo de local, data e hora.',
+  'Tap to open the camera': 'Toque para abrir a câmera',
+  'Last capture · @date': 'Última captura · @date',
+  'Recent captures': 'Capturas recentes',
+  'See all': 'Ver tudo',
+  'Active projects': 'Projetos ativos',
+  'No captures yet': 'Nenhuma captura ainda',
+  'Your photos and videos will appear here.':
+      'Suas fotos e vídeos aparecerão aqui.',
   'Open original': 'Abrir original',
   'Open settings': 'Abrir configurações',
-  'Organise photos by site or client': 'Organize fotos por local ou cliente',
   'Original': 'Original',
   'Original captures will appear here.': 'As fotos originais aparecerão aqui.',
   'Original deleted': 'Original excluído',
@@ -407,7 +412,6 @@ const Map<String, String> pt = {
   'Original photos': 'Fotos originais',
   'Originals': 'Originais',
   'PDF report': 'Relatório PDF',
-  'PDF reports you have created': 'Relatórios PDF que você criou',
   'PM': 'PM',
   'PNG or JPEG. A transparent PNG looks best.':
       'PNG ou JPEG. Um PNG transparente fica melhor.',
@@ -698,7 +702,6 @@ const Map<String, String> pt = {
   'Welcome to Locaproof': 'Boas-vindas ao Locaproof',
   'While the camera is open. Volume works normally everywhere else.': 'Enquanto a câmera está aberta. O volume funciona normalmente em qualquer outro lugar.',
   'Works offline': 'Funciona off-line',
-  'Workspace': 'Espaço de trabalho',
   'You chose this backup just before Android restarted the app.':
       'Você escolheu este backup pouco antes de o Android reiniciar o app.',
   'Your backup was saved.': 'Seu backup foi salvo.',

@@ -15,6 +15,11 @@ import 'package:gps_camera/core/services/theme_service.dart';
 final GlobalKey<ScaffoldMessengerState> appMessenger =
     GlobalKey<ScaffoldMessengerState>();
 
+/// Tells screens when one opened on top of them closes, so they can show
+/// what it changed.
+final RouteObserver<ModalRoute<void>> appRouteObserver =
+    RouteObserver<ModalRoute<void>>();
+
 class GpsCameraApp extends StatelessWidget {
   const GpsCameraApp({super.key});
 
@@ -33,6 +38,7 @@ class GpsCameraApp extends StatelessWidget {
           ? AppPages.initial
           : AppRoutes.onboarding,
       getPages: AppPages.pages,
+      navigatorObservers: [appRouteObserver],
       defaultTransition: Transition.native,
       translations: AppTranslations(),
       locale: Get.find<LanguageService>().locale,

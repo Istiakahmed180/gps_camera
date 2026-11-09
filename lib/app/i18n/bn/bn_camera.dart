@@ -123,18 +123,21 @@ const Map<String, String> bnCamera = {
 
   // Home
   'Gallery': 'গ্যালারি',
-  'Browse geo-tagged photos': 'লোকেশনসহ ছবিগুলো দেখুন',
   'Projects': 'প্রজেক্ট',
-  'Organise photos by site or client': 'সাইট বা ক্লায়েন্ট অনুযায়ী ছবি সাজান',
   'Reports': 'রিপোর্ট',
-  'PDF reports you have created': 'আপনার তৈরি PDF রিপোর্ট',
-  'Appearance and preferences': 'চেহারা ও পছন্দ',
-  'Document every site with verifiable location data.':
-      'যাচাইযোগ্য লোকেশনের তথ্যসহ প্রতিটি সাইটের ছবি রাখুন।',
-  'Workspace': 'ওয়ার্কস্পেস',
   'Open camera': 'ক্যামেরা খুলুন',
-  'Capture photos stamped with location, date and time.':
-      'লোকেশন, তারিখ ও সময়সহ ছবি তুলুন।',
+  'Home': 'হোম',
+  'Capture proof': 'প্রমাণসহ ছবি তুলুন',
+  'Photos and videos stamped with location, date and time.':
+      'লোকেশন, তারিখ আর সময়ের স্ট্যাম্পসহ ছবি ও ভিডিও।',
+  'Tap to open the camera': 'ক্যামেরা খুলতে ট্যাপ করুন',
+  'Last capture · @date': 'শেষ ছবি · @date',
+  'Recent captures': 'সাম্প্রতিক ছবি',
+  'See all': 'সব দেখুন',
+  'Active projects': 'চলমান প্রজেক্ট',
+  'No captures yet': 'এখনো কোনো ছবি নেই',
+  'Your photos and videos will appear here.':
+      'আপনার তোলা ছবি আর ভিডিও এখানে দেখাবে।',
 
   // Onboarding
   'Go to home': 'হোমে যান',

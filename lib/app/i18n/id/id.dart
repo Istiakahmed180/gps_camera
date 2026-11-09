@@ -122,7 +122,6 @@ const Map<String, String> id = {
   'Altitude': 'Ketinggian',
   'An export is already running.': 'Ekspor sedang berjalan.',
   'Appearance': 'Tampilan',
-  'Appearance and preferences': 'Tampilan dan preferensi',
   'Apr': 'Apr',
   'Archive project': 'Arsipkan proyek',
   'Archived': 'Diarsipkan',
@@ -142,7 +141,6 @@ const Map<String, String> id = {
       'Cadangan disimpan: @n foto, @files file',
   'Both': 'Keduanya',
   'Branding': 'Branding',
-  'Browse geo-tagged photos': 'Jelajahi foto bertag lokasi',
   'Camera': 'Kamera',
   'Camera access is turned off': 'Akses kamera dinonaktifkan',
   'Camera access needed': 'Akses kamera diperlukan',
@@ -161,8 +159,6 @@ const Map<String, String> id = {
   'Capture photo': 'Ambil foto',
   'Capture photos first, then add them to this project.':
       'Ambil foto terlebih dahulu, lalu tambahkan ke proyek ini.',
-  'Capture photos stamped with location, date and time.':
-      'Ambil foto yang dicap lokasi, tanggal, dan waktu.',
   'Capturing photo': 'Mengambil foto',
   'Center': 'Tengah',
   'Change': 'Ubah',
@@ -224,7 +220,6 @@ const Map<String, String> id = {
   'Dimensions': 'Dimensi',
   'Direction': 'Arah',
   'Direction of travel': 'Arah perjalanan',
-  'Document every site with verifiable location data.': 'Dokumentasikan setiap lokasi kerja dengan data lokasi yang dapat diverifikasi.',
   'Done': 'Selesai',
   'Don’t save': 'Jangan simpan',
   'Edit note for new photos': 'Edit catatan untuk foto baru',
@@ -387,10 +382,20 @@ const Map<String, String> id = {
   'Open': 'Buka',
   'Open an original and choose Add watermark to create a watermarked copy.': 'Buka foto asli lalu pilih Tambahkan tanda air untuk membuat salinan bertanda air.',
   'Open camera': 'Buka kamera',
+  'Home': 'Beranda',
+  'Capture proof': 'Ambil bukti',
+  'Photos and videos stamped with location, date and time.':
+      'Foto dan video dengan cap lokasi, tanggal, dan waktu.',
+  'Tap to open the camera': 'Ketuk untuk membuka kamera',
+  'Last capture · @date': 'Terakhir diambil · @date',
+  'Recent captures': 'Tangkapan terbaru',
+  'See all': 'Lihat semua',
+  'Active projects': 'Proyek aktif',
+  'No captures yet': 'Belum ada tangkapan',
+  'Your photos and videos will appear here.':
+      'Foto dan video Anda akan muncul di sini.',
   'Open original': 'Buka foto asli',
   'Open settings': 'Buka setelan',
-  'Organise photos by site or client':
-      'Atur foto berdasarkan lokasi kerja atau klien',
   'Original': 'Asli',
   'Original captures will appear here.':
       'Foto asli yang Anda ambil akan muncul di sini.',
@@ -402,7 +407,6 @@ const Map<String, String> id = {
   'Original photos': 'Foto asli',
   'Originals': 'Asli',
   'PDF report': 'Laporan PDF',
-  'PDF reports you have created': 'Laporan PDF yang telah Anda buat',
   'PM': 'PM',
   'PNG or JPEG. A transparent PNG looks best.':
       'PNG atau JPEG. PNG transparan terlihat paling bagus.',
@@ -692,7 +696,6 @@ const Map<String, String> id = {
   'While the camera is open. Volume works normally everywhere else.':
       'Saat kamera terbuka. Tombol volume berfungsi normal di tempat lain.',
   'Works offline': 'Berfungsi offline',
-  'Workspace': 'Ruang kerja',
   'You chose this backup just before Android restarted the app.':
       'Anda memilih cadangan ini tepat sebelum Android memulai ulang aplikasi.',
   'Your backup was saved.': 'Cadangan Anda telah disimpan.',

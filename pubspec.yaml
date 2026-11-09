@@ -61,3 +61,5 @@ flutter:
     - assets/fonts/Roboto-Regular.ttf
     - assets/fonts/Roboto-Medium.ttf
     - assets/fonts/Roboto-Bold.ttf
+    # The Locaproof pin beside the app name on the home screen.
+    - assets/images/logo.png
