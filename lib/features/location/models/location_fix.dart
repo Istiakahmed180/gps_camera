@@ -68,6 +68,21 @@ class LocationFix {
   /// Human-readable address. Not populated until reverse geocoding exists.
   final String? address;
 
+  /// The same fix with [altitude] measured from [reference].
+  LocationFix withAltitude(double altitude, AltitudeReference reference) =>
+      LocationFix(
+        latitude: latitude,
+        longitude: longitude,
+        accuracy: accuracy,
+        timestamp: timestamp,
+        altitude: altitude,
+        altitudeReference: reference,
+        altitudeAccuracy: altitudeAccuracy,
+        heading: heading,
+        isMocked: isMocked,
+        address: address,
+      );
+
   Duration ageAt(DateTime time) {
     final age = time.difference(timestamp);
     return age.isNegative ? Duration.zero : age;

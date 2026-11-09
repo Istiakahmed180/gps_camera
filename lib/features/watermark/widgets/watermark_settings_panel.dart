@@ -14,7 +14,11 @@ class WatermarkSettingsPanel extends StatelessWidget {
     required this.onChanged,
     this.hasNote = false,
     this.hasDirection = false,
+    this.hasAltitude = false,
   });
+
+  /// Whether this photo recorded a height above sea level.
+  final bool hasAltitude;
 
   /// Whether this photo recorded a compass direction.
   final bool hasDirection;
@@ -68,6 +72,18 @@ class WatermarkSettingsPanel extends StatelessWidget {
               ),
             ),
             Tooltip(
+              message: hasAltitude
+                  ? ''
+                  : 'No altitude above sea level was recorded for this photo'
+                        .tr,
+              child: _toggle(
+                'Altitude'.tr,
+                config.showAltitude && hasAltitude,
+                (v) => config.copyWith(showAltitude: v),
+                enabled: hasAltitude,
+              ),
+            ),
+            Tooltip(
               message: hasDirection
                   ? ''
                   : 'No compass direction was recorded for this photo'.tr,
@@ -91,6 +107,14 @@ class WatermarkSettingsPanel extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xl),
         SectionHeader('Position'.tr),
+        if (config.template.isCard)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Text(
+              'This template spans the full width of the photo.'.tr,
+              style: context.text.bodySmall,
+            ),
+          ),
         SegmentedButton<WatermarkPosition>(
           showSelectedIcon: false,
           segments: [
@@ -111,8 +135,9 @@ class WatermarkSettingsPanel extends StatelessWidget {
             ),
           ],
           selected: {config.position},
-          onSelectionChanged: (s) =>
-              onChanged(config.copyWith(position: s.first)),
+          onSelectionChanged: config.template.isCard
+              ? null
+              : (s) => onChanged(config.copyWith(position: s.first)),
         ),
         const SizedBox(height: AppSpacing.xl),
         SectionHeader('Text size'.tr),

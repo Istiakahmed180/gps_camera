@@ -514,6 +514,23 @@ const Map<String, String> hi = {
   'Skip': 'छोड़ें',
   'Small': 'छोटा',
   'Small, unobtrusive text': 'छोटा, हल्का टेक्स्ट',
+  'Map card': 'मैप कार्ड',
+  'Full-width card with a map, place name and details':
+      'मैप, जगह के नाम और विवरण के साथ पूरी चौड़ाई वाला कार्ड',
+  'Round map': 'गोल मैप',
+  'Full-width card with a round map': 'गोल मैप के साथ पूरी चौड़ाई वाला कार्ड',
+  'Map right': 'दाईं ओर मैप',
+  'Full-width card with the map on the right':
+      'दाईं ओर मैप के साथ पूरी चौड़ाई वाला कार्ड',
+  'Banner': 'बैनर',
+  'Full-width card without a map': 'बिना मैप के पूरी चौड़ाई वाला कार्ड',
+  'Alt @value': 'ऊँचाई @value',
+  'ALT': 'ऊँचाई',
+  'No altitude above sea level was recorded for this photo':
+      'इस फ़ोटो के लिए समुद्र तल से ऊँचाई दर्ज नहीं हुई',
+  'This template spans the full width of the photo.':
+      'यह टेम्पलेट फ़ोटो की पूरी चौड़ाई में फैला है।',
+  'Templates': 'टेम्पलेट',
   'Some files were not deleted': 'कुछ फ़ाइलें नहीं मिटाई गईं',
   'Something went wrong while capturing.': 'फ़ोटो लेते समय कुछ गड़बड़ हो गई।',
   'Something went wrong.': 'कुछ गड़बड़ हो गई।',

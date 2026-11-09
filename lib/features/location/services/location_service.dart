@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
@@ -22,12 +23,65 @@ class LocationException implements Exception {
 ///
 /// Stateless: callers own subscriptions and cancel them to stop updates.
 class LocationService extends GetxService {
-  LocationService(this._permissions);
+  LocationService(
+    this._permissions, {
+    Future<double?> Function(
+      double latitude,
+      double longitude,
+      double altitude,
+    )?
+    seaLevel,
+  }) : _seaLevel = seaLevel ?? _platformSeaLevel;
 
   /// Android delivers a fix about this often while the stream is open.
   static const Duration updateInterval = Duration(seconds: 2);
 
   final PermissionService _permissions;
+
+  /// Height above mean sea level for an ellipsoid height at a place, or
+  /// null when the phone cannot work it out.
+  final Future<double?> Function(
+    double latitude,
+    double longitude,
+    double altitude,
+  )
+  _seaLevel;
+
+  /// Android 14+ converts with its built-in geoid model; older phones
+  /// answer null.
+  static Future<double?> _platformSeaLevel(
+    double latitude,
+    double longitude,
+    double altitude,
+  ) async {
+    if (defaultTargetPlatform != TargetPlatform.android) return null;
+    final value = await const MethodChannel('co.tdevs.gps_camera/native')
+        .invokeMethod<Object?>('seaLevelAltitude', {
+          'latitude': latitude,
+          'longitude': longitude,
+          'altitude': altitude,
+        });
+    return value is num ? value.toDouble() : null;
+  }
+
+  /// [fix] with its altitude given above mean sea level when it can be.
+  /// An ellipsoid height (Android) can be tens of meters off, so it is
+  /// converted; if that fails the fix is kept as it is.
+  @visibleForTesting
+  Future<LocationFix> withSeaLevel(LocationFix fix) async {
+    final altitude = fix.altitude;
+    if (altitude == null ||
+        fix.altitudeReference != AltitudeReference.wgs84Ellipsoid) {
+      return fix;
+    }
+    try {
+      final seaLevel = await _seaLevel(fix.latitude, fix.longitude, altitude);
+      if (seaLevel == null || !seaLevel.isFinite) return fix;
+      return fix.withAltitude(seaLevel, AltitudeReference.meanSeaLevel);
+    } catch (_) {
+      return fix;
+    }
+  }
 
   Future<bool> isServiceEnabled() => Geolocator.isLocationServiceEnabled();
 
@@ -59,7 +113,7 @@ class LocationService extends GetxService {
           'The fix did not include valid coordinates and accuracy.',
         );
       }
-      return fix;
+      return await withSeaLevel(fix);
     } on TimeoutException {
       throw const LocationException(
         LocationErrorKind.unavailable,
@@ -77,6 +131,7 @@ class LocationService extends GetxService {
         .map(toFix)
         .where((fix) => fix != null)
         .cast<LocationFix>()
+        .asyncMap(withSeaLevel)
         .handleError(
           (Object error) => throw mapError(error),
           test: (error) => error is! LocationException,

@@ -30,7 +30,7 @@ void main() {
       'opacity': 9,
       'position': null,
     });
-    expect(restored.template, WatermarkTemplate.classic);
+    expect(restored.template, WatermarkTemplate.mapCard);
     expect(restored.showDate, isTrue);
     expect(restored.opacity, 1);
     expect(restored.position, WatermarkPosition.bottomLeft);

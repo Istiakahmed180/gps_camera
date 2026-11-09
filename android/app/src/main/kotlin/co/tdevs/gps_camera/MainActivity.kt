@@ -24,6 +24,9 @@ class MainActivity : FlutterActivity() {
     private val io = Executors.newSingleThreadExecutor()
     private val main = Handler(Looper.getMainLooper())
 
+    /** Its own thread, so location fixes never wait behind a gallery save. */
+    private val altitudeIo = Executors.newSingleThreadExecutor()
+
     /** The Dart call waiting for a document picker, if any. */
     private var pending: MethodChannel.Result? = null
     private var pendingBackup: File? = null
@@ -63,6 +66,14 @@ class MainActivity : FlutterActivity() {
                             call.argument<Double>("altitude") ?: 0.0,
                         ),
                     )
+                    "seaLevelAltitude" -> altitudeIo.execute {
+                        val value = seaLevelAltitude(
+                            call.argument<Double>("latitude") ?: 0.0,
+                            call.argument<Double>("longitude") ?: 0.0,
+                            call.argument<Double>("altitude") ?: 0.0,
+                        )
+                        main.post { result.success(value) }
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -102,6 +113,30 @@ class MainActivity : FlutterActivity() {
     override fun onDestroy() {
         io.shutdown()
         super.onDestroy()
+    }
+
+    /** Reused: it keeps the geoid tiles it has read. */
+    private var altitudeConverter: Any? = null
+
+    /**
+     * Height above mean sea level for a GPS (ellipsoid) height, using
+     * Android's own geoid model (Android 14+). Null when not possible.
+     */
+    private fun seaLevelAltitude(latitude: Double, longitude: Double, altitude: Double): Double? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return null
+        return try {
+            val converter = (altitudeConverter as? android.location.altitude.AltitudeConverter)
+                ?: android.location.altitude.AltitudeConverter().also { altitudeConverter = it }
+            val location = android.location.Location("gps").apply {
+                this.latitude = latitude
+                this.longitude = longitude
+                this.altitude = altitude
+            }
+            converter.addMslAltitudeToLocation(applicationContext, location)
+            if (location.hasMslAltitude()) location.mslAltitudeMeters else null
+        } catch (e: Throwable) {
+            null
+        }
     }
 
     private fun background(result: MethodChannel.Result, work: () -> Any?) {

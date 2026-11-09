@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
+import 'package:gps_camera/features/location/models/location_fix.dart';
 import 'package:gps_camera/features/location/models/location_snapshot.dart';
 import 'package:gps_camera/features/watermark/controllers/watermark_controller.dart';
 import 'package:gps_camera/features/watermark/utils/capture_time_formatter.dart';
@@ -145,6 +146,10 @@ class _Controls extends GetView<WatermarkController> {
             hasAddress: controller.hasAddress,
             hasNote: controller.metadata.value?.note != null,
             hasDirection: controller.metadata.value?.direction != null,
+            hasAltitude:
+                controller.metadata.value?.location.fix?.altitudeReference ==
+                    AltitudeReference.meanSeaLevel &&
+                controller.metadata.value?.location.fix?.altitude != null,
             onChanged: controller.updateConfig,
           ),
           const SizedBox(height: AppSpacing.xl),

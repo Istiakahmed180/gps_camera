@@ -24,7 +24,7 @@ enum WatermarkTextSize {
 /// User-selected watermark settings. Persisted as JSON.
 class WatermarkConfig {
   const WatermarkConfig({
-    this.template = WatermarkTemplate.classic,
+    this.template = WatermarkTemplate.mapCard,
     this.showDate = true,
     this.showTime = true,
     this.showCoordinates = true,
@@ -38,6 +38,7 @@ class WatermarkConfig {
     this.showLogo = false,
     this.showNote = true,
     this.showDirection = true,
+    this.showAltitude = true,
   });
 
   static const String defaultBrand = 'LOCAPROOF';
@@ -95,6 +96,7 @@ class WatermarkConfig {
       showLogo: flag('showLogo', fallback.showLogo),
       showNote: flag('showNote', fallback.showNote),
       showDirection: flag('showDirection', fallback.showDirection),
+      showAltitude: flag('showAltitude', fallback.showAltitude),
     );
   }
 
@@ -130,6 +132,9 @@ class WatermarkConfig {
   /// Shows which way the camera faced, from the compass.
   final bool showDirection;
 
+  /// Shows height above sea level, when the photo recorded one.
+  final bool showAltitude;
+
   WatermarkConfig copyWith({
     WatermarkTemplate? template,
     bool? showDate,
@@ -145,6 +150,7 @@ class WatermarkConfig {
     bool? showLogo,
     bool? showNote,
     bool? showDirection,
+    bool? showAltitude,
   }) {
     return WatermarkConfig(
       template: template ?? this.template,
@@ -165,6 +171,7 @@ class WatermarkConfig {
       showLogo: showLogo ?? this.showLogo,
       showNote: showNote ?? this.showNote,
       showDirection: showDirection ?? this.showDirection,
+      showAltitude: showAltitude ?? this.showAltitude,
     );
   }
 
@@ -183,6 +190,7 @@ class WatermarkConfig {
     'showLogo': showLogo,
     'showNote': showNote,
     'showDirection': showDirection,
+    'showAltitude': showAltitude,
   };
 
   @override
@@ -201,7 +209,8 @@ class WatermarkConfig {
       other.customText == customText &&
       other.showLogo == showLogo &&
       other.showNote == showNote &&
-      other.showDirection == showDirection;
+      other.showDirection == showDirection &&
+      other.showAltitude == showAltitude;
 
   @override
   int get hashCode => Object.hash(
@@ -219,5 +228,6 @@ class WatermarkConfig {
     showLogo,
     showNote,
     showDirection,
+    showAltitude,
   );
 }

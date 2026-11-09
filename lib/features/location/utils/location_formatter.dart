@@ -19,6 +19,12 @@ abstract final class LocationFormatter {
     return '±$text ${f.units.symbol}';
   }
 
+  /// `34 m` or `112 ft`, whole units.
+  static String length(double meters, {DisplayFormat? format}) {
+    final f = format ?? DisplayFormat.current;
+    return '${f.convert(meters).round()} ${f.units.symbol}';
+  }
+
   static String altitude(
     double meters,
     AltitudeReference? reference, {

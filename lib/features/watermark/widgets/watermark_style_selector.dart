@@ -27,11 +27,17 @@ class WatermarkStyleSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (final (index, template) in WatermarkTemplate.values.indexed) ...[
-          if (index > 0) const SizedBox(width: AppSpacing.sm),
-          Expanded(
+    // Scrolls sideways: there are more templates than fit across.
+    return SizedBox(
+      height: 158,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: WatermarkTemplate.values.length,
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+        itemBuilder: (context, index) {
+          final template = WatermarkTemplate.values[index];
+          return SizedBox(
+            width: 150,
             child: _TemplateCard(
               template: template,
               isSelected: template == selected,
@@ -44,9 +50,9 @@ class WatermarkStyleSelector extends StatelessWidget {
               ),
               onTap: () => onSelected(template),
             ),
-          ),
-        ],
-      ],
+          );
+        },
+      ),
     );
   }
 }

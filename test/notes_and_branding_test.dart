@@ -200,7 +200,9 @@ void main() {
 
     test('the logo widens the heading only when enabled', () async {
       final logo = await _image(300, 100);
+      // Not a card template: those are always full width.
       const config = WatermarkConfig(
+        template: WatermarkTemplate.classic,
         showDate: false,
         showTime: false,
         showCoordinates: false,

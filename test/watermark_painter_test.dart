@@ -53,12 +53,14 @@ void main() {
   });
 
   test('positions follow the setting along the bottom edge', () {
-    final left = painterFor(const WatermarkConfig());
+    // Card templates are full width, so a sized one is used.
+    const base = WatermarkConfig(template: WatermarkTemplate.classic);
+    final left = painterFor(base);
     final center = painterFor(
-      const WatermarkConfig(position: WatermarkPosition.bottomCenter),
+      base.copyWith(position: WatermarkPosition.bottomCenter),
     );
     final right = painterFor(
-      const WatermarkConfig(position: WatermarkPosition.bottomRight),
+      base.copyWith(position: WatermarkPosition.bottomRight),
     );
 
     expect(left.bounds.left, closeTo(image.width - right.bounds.right, 0.01));
@@ -81,7 +83,15 @@ void main() {
       for (final t in WatermarkTemplate.values)
         t: painterFor(WatermarkConfig(template: t)).bounds.size,
     };
-    expect(sizes.values.toSet(), hasLength(WatermarkTemplate.values.length));
+    // Without a map, every card template is the same full-width banner.
+    final cards = WatermarkTemplate.values.where((t) => t.isCard).toList();
+    for (final card in cards) {
+      expect(sizes[card], sizes[WatermarkTemplate.banner], reason: card.name);
+    }
+    expect(
+      sizes.values.toSet(),
+      hasLength(WatermarkTemplate.values.length - cards.length + 1),
+    );
     expect(
       sizes[WatermarkTemplate.minimal]!.height,
       lessThan(sizes[WatermarkTemplate.professional]!.height),

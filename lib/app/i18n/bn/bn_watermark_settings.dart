@@ -33,6 +33,23 @@ const Map<String, String> bnWatermarkSettings = {
       'পরিদর্শন ও সাইট রেকর্ডের জন্য সাজানো তথ্য',
   'Minimal': 'মিনিমাল',
   'Small, unobtrusive text': 'ছোট, চোখে না লাগা লেখা',
+  'Map card': 'ম্যাপ কার্ড',
+  'Full-width card with a map, place name and details':
+      'ম্যাপ, জায়গার নাম আর বিবরণসহ পুরো চওড়া কার্ড',
+  'Round map': 'গোল ম্যাপ',
+  'Full-width card with a round map': 'গোল ম্যাপসহ পুরো চওড়া কার্ড',
+  'Map right': 'ডানে ম্যাপ',
+  'Full-width card with the map on the right':
+      'ডান পাশে ম্যাপসহ পুরো চওড়া কার্ড',
+  'Banner': 'ব্যানার',
+  'Full-width card without a map': 'ম্যাপ ছাড়া পুরো চওড়া কার্ড',
+  'Alt @value': 'উচ্চতা @value',
+  'ALT': 'উচ্চতা',
+  'No altitude above sea level was recorded for this photo':
+      'এই ছবিতে সমুদ্রপৃষ্ঠ থেকে উচ্চতা রেকর্ড হয়নি',
+  'This template spans the full width of the photo.':
+      'এই টেমপ্লেট ছবির পুরো চওড়া জুড়ে থাকে।',
+  'Templates': 'টেমপ্লেট',
   '@name template. @description': '@name টেমপ্লেট। @description',
 
   // Watermark editor.

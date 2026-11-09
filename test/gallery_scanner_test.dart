@@ -58,7 +58,7 @@ void main() {
       'IMG_1_wm_1.jpg',
     });
     expect(index.sourceOf(copy), same(original));
-    expect(copy.record!.config.template.name, 'classic');
+    expect(copy.record!.config.template.name, 'mapCard');
     expect(index.variantsOf(index.byId('original/IMG_2.jpg')!), isEmpty);
   });
 

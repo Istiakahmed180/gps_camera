@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:gps_camera/features/camera/models/photo_metadata.dart';
 import 'package:gps_camera/features/location/models/gps_accuracy_level.dart';
+import 'package:gps_camera/features/location/models/location_fix.dart';
 import 'package:gps_camera/features/location/models/location_snapshot.dart';
 import 'package:gps_camera/features/location/utils/location_formatter.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
@@ -12,8 +13,8 @@ enum WatermarkLocationState { current, lastKnown, unavailable }
 /// The text a watermark may show, derived only from a photo's metadata and
 /// the user's visibility settings. Template-independent.
 ///
-/// Altitude is intentionally never included: on Android it is ellipsoid
-/// height, not height above sea level.
+/// Altitude is shown only above mean sea level: an ellipsoid height (what
+/// older Android phones report) can be tens of meters off.
 class WatermarkContent {
   const WatermarkContent({
     this.date,
@@ -33,6 +34,7 @@ class WatermarkContent {
     this.customText,
     this.note,
     this.direction,
+    this.altitude,
   });
 
   factory WatermarkContent.from(
@@ -99,6 +101,13 @@ class WatermarkContent {
       customText: config.customText.isEmpty ? null : config.customText,
       note: config.showNote ? metadata.note : null,
       direction: config.showDirection ? metadata.direction?.label : null,
+      altitude:
+          hasFix &&
+              config.showAltitude &&
+              fix.altitude != null &&
+              fix.altitudeReference == AltitudeReference.meanSeaLevel
+          ? LocationFormatter.length(fix.altitude!)
+          : null,
     );
   }
 
@@ -138,6 +147,13 @@ class WatermarkContent {
   /// `45° NE`: which way the camera faced.
   final String? direction;
 
+  /// `34 m`: height above mean sea level.
+  final String? altitude;
+
+  /// `Alt 34 m`, translated.
+  String? get altitudeLine =>
+      altitude == null ? null : 'Alt @value'.trParams({'value': altitude!});
+
   /// Everything the stamp shows, so two moments of a video that would look
   /// the same can share one image.
   String get signature => [
@@ -158,6 +174,7 @@ class WatermarkContent {
     customText,
     note,
     direction,
+    altitude,
   ].join('\u0000');
 
   /// True when a map of the capture location may be shown.

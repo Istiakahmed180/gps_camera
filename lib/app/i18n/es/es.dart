@@ -518,6 +518,24 @@ const Map<String, String> es = {
   'Skip': 'Omitir',
   'Small': 'Pequeño',
   'Small, unobtrusive text': 'Texto pequeño y discreto',
+  'Map card': 'Tarjeta con mapa',
+  'Full-width card with a map, place name and details':
+      'Tarjeta a todo el ancho con mapa, lugar y detalles',
+  'Round map': 'Mapa redondo',
+  'Full-width card with a round map':
+      'Tarjeta a todo el ancho con mapa redondo',
+  'Map right': 'Mapa a la derecha',
+  'Full-width card with the map on the right':
+      'Tarjeta a todo el ancho con el mapa a la derecha',
+  'Banner': 'Banda',
+  'Full-width card without a map': 'Tarjeta a todo el ancho sin mapa',
+  'Alt @value': 'Alt. @value',
+  'ALT': 'ALT',
+  'No altitude above sea level was recorded for this photo':
+      'No se registró la altitud sobre el nivel del mar para esta foto',
+  'This template spans the full width of the photo.':
+      'Esta plantilla ocupa todo el ancho de la foto.',
+  'Templates': 'Plantillas',
   'Some files were not deleted': 'Algunos archivos no se eliminaron',
   'Something went wrong while capturing.': 'Algo salió mal al tomar la foto.',
   'Something went wrong.': 'Algo salió mal.',

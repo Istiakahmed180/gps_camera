@@ -53,7 +53,7 @@ void main() {
         'IMG_a_wm_1.jpg',
         'IMG_a_wm.jpg',
       ]);
-      expect(first.watermarks.first.config!.template.label, 'Classic');
+      expect(first.watermarks.first.config!.template.label, 'Map card');
       expect(entries.last.watermarks, isEmpty);
     });
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,11 +15,11 @@ import 'package:gps_camera/features/location/controllers/place_controller.dart';
 import 'package:gps_camera/features/location/utils/plus_code.dart';
 import 'package:gps_camera/features/watermark/models/watermark_config.dart';
 import 'package:gps_camera/features/watermark/models/watermark_content.dart';
-import 'package:gps_camera/features/watermark/models/watermark_template.dart';
 import 'package:gps_camera/features/watermark/services/logo_service.dart';
 import 'package:gps_camera/features/watermark/services/watermark_painter.dart';
 import 'package:gps_camera/features/watermark/services/watermark_settings_store.dart';
 import 'package:gps_camera/features/watermark/widgets/watermark_preview.dart';
+import 'package:gps_camera/features/watermark/widgets/watermark_template_list.dart';
 
 /// The watermark drawn live over the camera preview, exactly as the
 /// automatic copy will look, with a live Google Map in the map square.
@@ -132,6 +133,7 @@ class _LiveWatermarkOverlayState extends State<LiveWatermarkOverlay> {
                   width: mapRect.width * scale,
                   height: mapRect.height * scale,
                   child: _MapPlaceholder(
+                    round: layout.mapIsRound,
                     text: widget.map.available.value
                         ? 'Loading map…'.tr
                         : 'Map unavailable'.tr,
@@ -192,20 +194,30 @@ class _LiveWatermarkOverlayState extends State<LiveWatermarkOverlay> {
   Future<void> _openSheet() async {
     await showModalBottomSheet<void>(
       context: context,
-      builder: (sheet) => _WatermarkSheet(settings: widget.settings),
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheet) => _WatermarkSheet(
+        settings: widget.settings,
+        content: _liveContent(),
+        mapImage: widget.map.image.value,
+        logoImage: Get.isRegistered<LogoService>()
+            ? Get.find<LogoService>().image.value
+            : null,
+      ),
     );
     if (mounted) setState(_reloadSettings);
   }
 }
 
 class _MapPlaceholder extends StatelessWidget {
-  const _MapPlaceholder({required this.text});
+  const _MapPlaceholder({required this.text, this.round = false});
 
   final String text;
+  final bool round;
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
+    final box = ColoredBox(
       color: const Color(0x33FFFFFF),
       child: Center(
         child: Padding(
@@ -220,14 +232,25 @@ class _MapPlaceholder extends StatelessWidget {
         ),
       ),
     );
+    return round ? ClipOval(child: box) : box;
   }
 }
 
 /// Template choice and the automatic-copy switch.
 class _WatermarkSheet extends StatefulWidget {
-  const _WatermarkSheet({required this.settings});
+  const _WatermarkSheet({
+    required this.settings,
+    required this.content,
+    this.mapImage,
+    this.logoImage,
+  });
 
   final WatermarkSettingsStore settings;
+
+  /// What a photo taken now would show, for the template previews.
+  final WatermarkContent content;
+  final ui.Image? mapImage;
+  final ui.Image? logoImage;
 
   @override
   State<_WatermarkSheet> createState() => _WatermarkSheetState();
@@ -239,56 +262,49 @@ class _WatermarkSheetState extends State<_WatermarkSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      minChildSize: 0.4,
+      builder: (context, scroll) => ListView(
+        controller: scroll,
         padding: const EdgeInsets.fromLTRB(
-          AppSpacing.xl,
+          AppSpacing.lg,
           0,
-          AppSpacing.xl,
+          AppSpacing.lg,
           AppSpacing.lg,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Watermark'.tr, style: context.text.titleLarge),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              value: _auto,
-              title: Text('Save a watermarked copy on capture'.tr),
-              subtitle: Text('The original photo is always kept'.tr),
-              onChanged: (value) async {
-                setState(() => _auto = value);
-                await widget.settings.saveAutoWatermark(value);
-              },
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                for (final template in WatermarkTemplate.values)
-                  ChoiceChip(
-                    label: Text(template.label.tr),
-                    selected: _config.template == template,
-                    onSelected: (_) async {
-                      setState(
-                        () => _config = _config.copyWith(template: template),
-                      );
-                      await widget.settings.save(_config);
-                    },
-                  ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              ('More options (details, size, position) are in the watermark '
-                      'editor.')
-                  .tr,
-              style: context.text.bodySmall,
-            ),
-          ],
-        ),
+        children: [
+          Text('Templates'.tr, style: context.text.titleLarge),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            value: _auto,
+            title: Text('Save a watermarked copy on capture'.tr),
+            subtitle: Text('The original photo is always kept'.tr),
+            onChanged: (value) async {
+              setState(() => _auto = value);
+              await widget.settings.saveAutoWatermark(value);
+            },
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          WatermarkTemplateList(
+            selected: _config.template,
+            content: widget.content,
+            config: _config,
+            mapImage: widget.mapImage,
+            logoImage: widget.logoImage,
+            onSelected: (template) async {
+              setState(() => _config = _config.copyWith(template: template));
+              await widget.settings.save(_config);
+            },
+          ),
+          Text(
+            ('More options (details, size, position) are in the watermark '
+                    'editor.')
+                .tr,
+            style: context.text.bodySmall,
+          ),
+        ],
       ),
     );
   }

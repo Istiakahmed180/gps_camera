@@ -513,6 +513,23 @@ const Map<String, String> ar = {
   'Skip': 'تخطٍّ',
   'Small': 'صغير',
   'Small, unobtrusive text': 'نص صغير وغير لافت',
+  'Map card': 'بطاقة بخريطة',
+  'Full-width card with a map, place name and details':
+      'بطاقة بعرض الصورة مع خريطة واسم المكان والتفاصيل',
+  'Round map': 'خريطة دائرية',
+  'Full-width card with a round map': 'بطاقة بعرض الصورة مع خريطة دائرية',
+  'Map right': 'الخريطة على الجانب الآخر',
+  'Full-width card with the map on the right':
+      'بطاقة بعرض الصورة والخريطة على الجانب الآخر',
+  'Banner': 'شريط',
+  'Full-width card without a map': 'بطاقة بعرض الصورة بدون خريطة',
+  'Alt @value': 'الارتفاع @value',
+  'ALT': 'الارتفاع',
+  'No altitude above sea level was recorded for this photo':
+      'لم يُسجَّل الارتفاع فوق مستوى سطح البحر لهذه الصورة',
+  'This template spans the full width of the photo.':
+      'يمتد هذا القالب على كامل عرض الصورة.',
+  'Templates': 'القوالب',
   'Some files were not deleted': 'لم يتم حذف بعض الملفات',
   'Something went wrong while capturing.': 'حدث خطأ أثناء الالتقاط.',
   'Something went wrong.': 'حدث خطأ ما.',

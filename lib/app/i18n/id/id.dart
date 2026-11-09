@@ -519,6 +519,23 @@ const Map<String, String> id = {
   'Skip': 'Lewati',
   'Small': 'Kecil',
   'Small, unobtrusive text': 'Teks kecil yang tidak mencolok',
+  'Map card': 'Kartu peta',
+  'Full-width card with a map, place name and details':
+      'Kartu selebar foto dengan peta, nama tempat, dan detail',
+  'Round map': 'Peta bulat',
+  'Full-width card with a round map': 'Kartu selebar foto dengan peta bulat',
+  'Map right': 'Peta di kanan',
+  'Full-width card with the map on the right':
+      'Kartu selebar foto dengan peta di kanan',
+  'Banner': 'Spanduk',
+  'Full-width card without a map': 'Kartu selebar foto tanpa peta',
+  'Alt @value': 'Ketinggian @value',
+  'ALT': 'KTG',
+  'No altitude above sea level was recorded for this photo':
+      'Ketinggian di atas permukaan laut tidak tercatat untuk foto ini',
+  'This template spans the full width of the photo.':
+      'Template ini memenuhi seluruh lebar foto.',
+  'Templates': 'Template',
   'Some files were not deleted': 'Beberapa file tidak dihapus',
   'Something went wrong while capturing.':
       'Terjadi kesalahan saat mengambil foto.',

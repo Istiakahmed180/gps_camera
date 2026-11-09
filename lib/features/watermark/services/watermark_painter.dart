@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart' show IconData, Icons;
 import 'package:flutter/painting.dart';
 import 'package:get/get.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
@@ -13,30 +14,61 @@ import 'package:gps_camera/features/watermark/models/watermark_template.dart';
 enum _Role { brand, custom, primary, secondary, note, notice, poor }
 
 class _Line {
-  const _Line(this.text, this.role, {this.label, this.withLogo = false});
+  const _Line(
+    this.text,
+    this.role, {
+    this.label,
+    this.withLogo = false,
+    this.icon,
+  });
 
   final String text;
   final _Role role;
   final String? label;
+
+  /// Small symbol drawn before the text (card templates).
+  final IconData? icon;
 
   /// The logo is drawn at the start of this line.
   final bool withLogo;
 }
 
 class _Row {
-  _Row(this.value, this.label, {this.logoSide = 0, this.logoGap = 0});
+  _Row(
+    this.value,
+    this.label, {
+    this.logoSide = 0,
+    this.logoGap = 0,
+    this.icon,
+  });
 
   final TextPainter value;
   final TextPainter? label;
 
   /// Size of the logo square at the start of the row; 0 for none.
   final double logoSide;
+
+  /// Space after the logo or icon.
   final double logoGap;
 
-  double get logoWidth => logoSide == 0 ? 0 : logoSide + logoGap;
+  /// The line's icon, drawn where a logo would be.
+  final TextPainter? icon;
+
+  /// Width taken before the text by the logo or icon.
+  double get logoWidth => logoSide > 0
+      ? logoSide + logoGap
+      : icon == null
+      ? 0
+      : icon!.width + logoGap;
 
   double get height =>
       math.max(math.max(value.height, label?.height ?? 0), logoSide);
+
+  void dispose() {
+    value.dispose();
+    label?.dispose();
+    icon?.dispose();
+  }
 }
 
 /// Lays out and paints a watermark in image pixel coordinates.
@@ -82,6 +114,9 @@ class WatermarkPainter {
 
   /// Where the map square is, in image pixels; null when there is none.
   Rect? mapRect;
+
+  /// The map is drawn as a circle inside [mapRect].
+  bool get mapIsRound => config.template.roundMapShape;
 
   final WatermarkContent content;
   final WatermarkConfig config;
@@ -134,10 +169,15 @@ class WatermarkPainter {
 
     final map = mapRect;
     if (map != null) {
-      final clip = RRect.fromRectAndRadius(map, Radius.circular(_radius * 0.6));
       final image = mapImage;
       canvas.save();
-      canvas.clipRRect(clip);
+      if (mapIsRound) {
+        canvas.clipPath(Path()..addOval(map));
+      } else {
+        canvas.clipRRect(
+          RRect.fromRectAndRadius(map, Radius.circular(_radius * 0.6)),
+        );
+      }
       if (image != null) {
         final src = _coverSquare(
           image.width.toDouble(),
@@ -157,7 +197,10 @@ class WatermarkPainter {
 
     // Positions are worked out left to right, then mirrored by [_x].
     final textLeft =
-        bounds.left + _bar + _padH + (map == null ? 0 : _mapSide + _mapGap);
+        bounds.left +
+        _bar +
+        _padH +
+        (map == null || _template.mapAtEnd ? 0 : _mapSide + _mapGap);
     var y = bounds.top + _padV;
     for (final (index, row) in _rows.indexed) {
       if (index > 0) y += _gap;
@@ -175,6 +218,18 @@ class WatermarkPainter {
           ),
         );
       } else {
+        final icon = row.icon;
+        if (icon != null) {
+          // Centred on the first line, so it stays put when text wraps.
+          final lineHeight = row.value.preferredLineHeight;
+          icon.paint(
+            canvas,
+            Offset(
+              _x(textLeft, icon.width),
+              y + math.max(0.0, (lineHeight - icon.height) / 2),
+            ),
+          );
+        }
         final logo = logoImage;
         if (row.logoSide > 0 && logo != null) {
           final box = Rect.fromLTWH(
@@ -194,7 +249,7 @@ class WatermarkPainter {
           canvas,
           Offset(
             _x(textLeft + row.logoWidth, row.value.width),
-            y + (row.height - row.value.height) / 2,
+            icon == null ? y + (row.height - row.value.height) / 2 : y,
           ),
         );
       }
@@ -206,8 +261,7 @@ class WatermarkPainter {
 
   void dispose() {
     for (final row in _rows) {
-      row.value.dispose();
-      row.label?.dispose();
+      row.dispose();
     }
     _rows.clear();
   }
@@ -245,9 +299,18 @@ class WatermarkPainter {
         _gap = 4 * _unit;
         _radius = 12 * _unit;
         _background = const Color(0xB3000000);
+      case WatermarkTemplate.mapCard ||
+          WatermarkTemplate.roundMap ||
+          WatermarkTemplate.mapRight ||
+          WatermarkTemplate.banner:
+        _padH = 18 * _unit;
+        _padV = 16 * _unit;
+        _gap = 5 * _unit;
+        _radius = 14 * _unit;
+        _background = const Color(0xD90B0F14);
     }
     final withMap =
-        _template == WatermarkTemplate.map &&
+        _template.showsMap &&
         content.canShowMap &&
         (mapImage != null || reserveMapSlot);
     if (withMap) {
@@ -256,6 +319,46 @@ class WatermarkPainter {
     }
 
     final maxBlockWidth = imageSize.width - margin * 2;
+    var size = _buildRows(lines, maxBlockWidth, withMap);
+    if (withMap && _template.isCard) {
+      // The map is as tall as the text beside it, within limits.
+      final side = size.height.clamp(150 * _unit, 240 * _unit).toDouble();
+      if ((side - _mapSide).abs() > _unit) {
+        _mapSide = side;
+        dispose();
+        size = _buildRows(lines, maxBlockWidth, withMap);
+      }
+    }
+
+    final chrome = _bar + _padH * 2 + (withMap ? _mapSide + _mapGap : 0);
+    final width = _template.isCard
+        ? maxBlockWidth
+        : math.min(size.width + chrome, maxBlockWidth);
+    final height = math.max(size.height, withMap ? _mapSide : 0) + _padV * 2;
+    final left = _template.isCard
+        ? margin
+        : switch (config.position) {
+            WatermarkPosition.bottomLeft => margin,
+            WatermarkPosition.bottomCenter => (imageSize.width - width) / 2,
+            WatermarkPosition.bottomRight => imageSize.width - margin - width,
+          };
+    final top = math.max(0.0, imageSize.height - margin - height);
+    bounds = Rect.fromLTWH(left, top, width, height);
+    if (withMap) {
+      final mapLeft = _template.mapAtEnd
+          ? left + width - _padH - _mapSide
+          : left + _padH;
+      mapRect = Rect.fromLTWH(
+        _x(mapLeft, _mapSide),
+        top + (height - _mapSide) / 2,
+        _mapSide,
+        _mapSide,
+      );
+    }
+  }
+
+  /// Lays out every line; returns the text block's size.
+  Size _buildRows(List<_Line> lines, double maxBlockWidth, bool withMap) {
     final labels = [
       for (final line in lines)
         if (line.label != null)
@@ -276,18 +379,26 @@ class WatermarkPainter {
         1.0,
         maxBlockWidth - chrome - (label == null ? 0 : labelColumn),
       );
+      final style = _style(line.role);
+      final icon = line.icon == null
+          ? null
+          : _icon(line.icon!, style.fontSize! * 0.95, style.color!);
       final logoSide = line.withLogo ? 36 * _unit : 0.0;
-      final logoGap = line.withLogo && line.text.isNotEmpty ? 10 * _unit : 0.0;
+      final logoGap = (line.withLogo && line.text.isNotEmpty) || icon != null
+          ? 10 * _unit
+          : 0.0;
+      final lead = logoSide > 0 ? logoSide : icon?.width ?? 0;
       _rows.add(
         _Row(
           _text(
             line.text,
-            _spaced(_style(line.role), line.text),
-            math.max(1.0, maxValueWidth - logoSide - logoGap),
+            _spaced(style, line.text),
+            math.max(1.0, maxValueWidth - lead - logoGap),
           ),
           label,
           logoSide: logoSide,
           logoGap: logoGap,
+          icon: icon,
         ),
       );
     }
@@ -301,24 +412,7 @@ class WatermarkPainter {
       contentWidth = math.max(contentWidth, width);
       contentHeight += row.height + (index > 0 ? _gap : 0);
     }
-
-    final width = math.min(contentWidth + chrome, maxBlockWidth);
-    final height = math.max(contentHeight, withMap ? _mapSide : 0) + _padV * 2;
-    final left = switch (config.position) {
-      WatermarkPosition.bottomLeft => margin,
-      WatermarkPosition.bottomCenter => (imageSize.width - width) / 2,
-      WatermarkPosition.bottomRight => imageSize.width - margin - width,
-    };
-    final top = math.max(0.0, imageSize.height - margin - height);
-    bounds = Rect.fromLTWH(left, top, width, height);
-    if (withMap) {
-      mapRect = Rect.fromLTWH(
-        _x(left + _padH, _mapSide),
-        top + (height - _mapSide) / 2,
-        _mapSide,
-        _mapSide,
-      );
-    }
+    return Size(contentWidth, contentHeight);
   }
 
   List<_Line> _lines() {
@@ -330,8 +424,8 @@ class WatermarkPainter {
         ..._header(),
         if (c.dateTimeLine != null) _Line(c.dateTimeLine!, _Role.primary),
         if (c.locationNotice != null) _Line(c.locationNotice!, _Role.notice),
-        if (c.coordinatesLine != null)
-          _Line(c.coordinatesLine!, _Role.secondary),
+        if (_coordinatesAndAltitude != null)
+          _Line(_coordinatesAndAltitude!, _Role.secondary),
         if (c.accuracyValue != null)
           _Line(
             'GPS Accuracy: @value'.trParams({'value': '${c.accuracyValue}'}),
@@ -356,6 +450,8 @@ class WatermarkPainter {
           _Line(c.latitude!, _Role.secondary, label: 'LAT'.tr),
         if (c.longitude != null)
           _Line(c.longitude!, _Role.secondary, label: 'LON'.tr),
+        if (c.altitude != null)
+          _Line(c.altitude!, _Role.secondary, label: 'ALT'.tr),
         if (c.accuracy != null)
           _Line(
             '${c.accuracy}  ·  ${_levelLabel(c.accuracyLevel)}',
@@ -377,8 +473,8 @@ class WatermarkPainter {
           ),
         if (c.locationNotice != null) _Line(c.locationNotice!, _Role.notice),
         if (c.address != null) _Line(c.address!, _Role.secondary),
-        if (c.coordinatesLine != null)
-          _Line(c.coordinatesLine!, _Role.secondary),
+        if (_coordinatesAndAltitude != null)
+          _Line(_coordinatesAndAltitude!, _Role.secondary),
         if (c.dateTimeLine != null)
           _Line(c.dateTimeLine!.replaceAll('  |  ', '  ·  '), _Role.secondary),
         if (c.accuracyValue != null)
@@ -404,9 +500,9 @@ class WatermarkPainter {
         if (c.dateTimeLine != null)
           _Line(c.dateTimeLine!.replaceAll('  |  ', '  ·  '), _Role.primary),
         if (c.locationNotice != null) _Line(c.locationNotice!, _Role.notice),
-        if (c.coordinatesLine != null || c.accuracyValue != null)
+        if (_coordinatesAndAltitude != null || c.accuracyValue != null)
           _Line(
-            [?c.coordinatesLine, ?c.accuracyValue].join('  ·  '),
+            [?_coordinatesAndAltitude, ?c.accuracyValue].join('  ·  '),
             _accuracyRole == _Role.poor && c.coordinatesLine == null
                 ? _Role.poor
                 : _Role.secondary,
@@ -419,7 +515,77 @@ class WatermarkPainter {
         if (c.address != null) _Line(c.address!, _Role.secondary),
         if (c.note != null) _Line(c.note!, _Role.note),
       ],
+      WatermarkTemplate.mapCard ||
+      WatermarkTemplate.roundMap ||
+      WatermarkTemplate.mapRight ||
+      WatermarkTemplate.banner => _cardLines(),
     };
+  }
+
+  /// Place name as the title, then one detail per line with an icon.
+  List<_Line> _cardLines() {
+    final c = content;
+    final facing = c.direction == null
+        ? null
+        : 'Facing @direction'.trParams({'direction': '${c.direction}'});
+    final accuracy = c.accuracyValue == null
+        ? null
+        : 'GPS Accuracy: @value'.trParams({'value': '${c.accuracyValue}'});
+    return [
+      ..._header(),
+      if (c.placeTitle != null)
+        _Line(
+          c.flag == null ? c.placeTitle! : '${c.placeTitle}  ${c.flag}',
+          _Role.primary,
+        ),
+      if (c.locationNotice != null) _Line(c.locationNotice!, _Role.notice),
+      if (c.address != null)
+        _Line(c.address!, _Role.secondary, icon: Icons.place_outlined),
+      if (c.dateTimeLine != null)
+        _Line(
+          c.dateTimeLine!.replaceAll('  |  ', '  ·  '),
+          _Role.secondary,
+          icon: Icons.schedule_rounded,
+        ),
+      if (_coordinatesAndAltitude != null)
+        _Line(
+          _coordinatesAndAltitude!,
+          _Role.secondary,
+          icon: Icons.my_location_rounded,
+        ),
+      if (accuracy != null || facing != null)
+        _Line(
+          [?accuracy, ?facing].join('  ·  '),
+          accuracy == null ? _Role.secondary : _accuracyRole,
+          icon: Icons.explore_outlined,
+        ),
+      if (c.note != null)
+        _Line(c.note!, _Role.note, icon: Icons.sticky_note_2_outlined),
+    ];
+  }
+
+  /// `23.910908° N, 90.401005° E  ·  Alt 34 m`
+  String? get _coordinatesAndAltitude {
+    final parts = [?content.coordinatesLine, ?content.altitudeLine];
+    return parts.isEmpty ? null : parts.join('  ·  ');
+  }
+
+  /// [icon] as text, so it scales and colours like the line beside it.
+  TextPainter _icon(IconData icon, double size, Color color) {
+    return TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(icon.codePoint),
+        style: TextStyle(
+          fontFamily: icon.fontFamily,
+          package: icon.fontPackage,
+          fontSize: size,
+          color: color.withValues(alpha: color.a * 0.85),
+          height: 1,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      textScaler: TextScaler.noScaling,
+    )..layout();
   }
 
   /// Heading (with logo) and the user's extra line.
@@ -455,6 +621,11 @@ class WatermarkPainter {
       (WatermarkTemplate.professional, _Role.primary) => (
         27.0,
         FontWeight.w600,
+        AppColors.onViewfinder,
+      ),
+      (final t, _Role.primary) when t.isCard => (
+        27.0,
+        FontWeight.w700,
         AppColors.onViewfinder,
       ),
       (WatermarkTemplate.minimal, _Role.primary) => (

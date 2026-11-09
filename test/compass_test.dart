@@ -178,7 +178,9 @@ void main() {
 
     test('watermark shows it in every template unless hidden', () {
       for (final template in WatermarkTemplate.values) {
-        final config = WatermarkConfig(template: template);
+        // Card templates share a line between accuracy and direction, so
+        // accuracy is hidden to see the direction line come and go.
+        final config = WatermarkConfig(template: template, showAccuracy: false);
         final content = WatermarkContent.from(metadata, config);
         expect(content.direction, '45° NE');
         final on = WatermarkPainter(
