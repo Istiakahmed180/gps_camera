@@ -381,6 +381,9 @@ const Map<String, String> ar = {
   'Open an original and choose Add watermark to create a watermarked copy.':
       'افتح صورة أصلية واختر إضافة علامة مائية لإنشاء نسخة بعلامة مائية.',
   'Open camera': 'فتح الكاميرا',
+  'Backing up to Google Drive': 'جارٍ النسخ الاحتياطي إلى Google Drive',
+  'Locaproof is finishing your backup.': 'يُنهي Locaproof نسختك الاحتياطية.',
+  'This phone\'s battery saving stops Locaproof when it is closed, so backup then cannot finish. In settings, open Battery and allow background activity.': 'يوقف توفير البطارية في هذا الهاتف Locaproof عند إغلاقه، فلا يكتمل النسخ الاحتياطي. في الإعدادات، افتح البطارية واسمح بالنشاط في الخلفية.',
   'No Locaproof backup was found in this Google account.':
       'لم يُعثر على نسخة احتياطية لـ Locaproof في حساب Google هذا.',
   'Google sign-in did not finish. Tap Sign in again.':
@@ -408,8 +411,8 @@ const Map<String, String> ar = {
   'Restoring… @done of @total': 'جارٍ الاستعادة… @done من @total',
   'Waiting for Wi-Fi to back up': 'بانتظار Wi-Fi للنسخ الاحتياطي',
   'Back up automatically': 'نسخ احتياطي تلقائي',
-  'When the app opens and after you take photos':
-      'عند فتح التطبيق وبعد التقاط الصور',
+  'Also while the app is closed, often when the phone is charging':
+      'حتى عند إغلاق التطبيق، غالبًا أثناء شحن الهاتف',
   'Only on Wi-Fi': 'عبر Wi-Fi فقط',
   'Saves mobile data; Back up now always works':
       'يوفّر بيانات الجوال؛ «انسخ الآن» يعمل دائمًا',

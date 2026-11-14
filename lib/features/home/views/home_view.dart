@@ -40,6 +40,10 @@ class _HomeViewState extends State<HomeView>
   /// The location is looked up only while the app is in front.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused &&
+        Get.isRegistered<DriveBackupController>()) {
+      unawaited(Get.find<DriveBackupController>().appLeft());
+    }
     final route = ModalRoute.of(context);
     controller.setVisible(
       state == AppLifecycleState.resumed && (route?.isCurrent ?? true),

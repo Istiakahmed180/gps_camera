@@ -126,6 +126,9 @@ const Map<String, String> bnCamera = {
   'Projects': 'প্রজেক্ট',
   'Reports': 'রিপোর্ট',
   'Open camera': 'ক্যামেরা খুলুন',
+  'Backing up to Google Drive': 'Google Drive-এ ব্যাকআপ হচ্ছে',
+  'Locaproof is finishing your backup.': 'Locaproof আপনার ব্যাকআপ শেষ করছে।',
+  'This phone\'s battery saving stops Locaproof when it is closed, so backup then cannot finish. In settings, open Battery and allow background activity.': 'এই ফোনের ব্যাটারি সাশ্রয় অ্যাপ বন্ধ থাকলে Locaproof থামিয়ে দেয়, তাই তখন ব্যাকআপ শেষ হয় না। সেটিংসে Battery খুলে ব্যাকগ্রাউন্ড অ্যাক্টিভিটি চালু করুন।',
   'No Locaproof backup was found in this Google account.':
       'এই Google অ্যাকাউন্টে Locaproof-এর কোনো ব্যাকআপ পাওয়া যায়নি।',
   'Google sign-in did not finish. Tap Sign in again.':
@@ -153,8 +156,8 @@ const Map<String, String> bnCamera = {
   'Restoring… @done of @total': 'রিস্টোর হচ্ছে… @total-এর মধ্যে @done',
   'Waiting for Wi-Fi to back up': 'ব্যাকআপের জন্য Wi-Fi-এর অপেক্ষা',
   'Back up automatically': 'নিজে থেকে ব্যাকআপ',
-  'When the app opens and after you take photos':
-      'অ্যাপ খুললে আর ছবি তোলার পরে',
+  'Also while the app is closed, often when the phone is charging':
+      'অ্যাপ বন্ধ থাকলেও, সাধারণত ফোন চার্জে থাকার সময়',
   'Only on Wi-Fi': 'শুধু Wi-Fi-তে',
   'Saves mobile data; Back up now always works':
       'মোবাইল ডেটা বাঁচায়; "এখনই ব্যাকআপ" সবসময় কাজ করে',

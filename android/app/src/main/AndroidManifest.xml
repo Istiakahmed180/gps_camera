@@ -6,6 +6,11 @@
     <!-- Address lookup, map snapshots and map tiles. Without it release
          builds work fully offline but never show addresses or maps. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Shows "Backing up to Google Drive" while a backup finishes after the
+         app is left; the service keeps phones from freezing it mid-upload. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <!-- Foreground location only, used while the camera screen is open.
          Android 12+ requires coarse alongside fine. -->
@@ -74,6 +79,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <service
+            android:name=".BackupKeepAliveService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

@@ -66,6 +66,24 @@ class MainActivity : FlutterActivity() {
                             call.argument<Double>("altitude") ?: 0.0,
                         ),
                     )
+                    "setBackupKeepAlive" -> {
+                        keepAlive = if (call.argument<Boolean>("wanted") == true) {
+                            Triple(
+                                call.argument<String>("title") ?: "",
+                                call.argument<String>("text") ?: "",
+                                call.argument<String>("channel") ?: "Backup",
+                            )
+                        } else {
+                            null
+                        }
+                        result.success(null)
+                    }
+                    "stopBackupKeepAlive" -> {
+                        BackupKeepAliveService.stop(applicationContext)
+                        result.success(null)
+                    }
+                    "backgroundAllowed" -> result.success(backgroundAllowed())
+                    "openBackgroundSettings" -> result.success(openBackgroundSettings())
                     "seaLevelAltitude" -> altitudeIo.execute {
                         val value = seaLevelAltitude(
                             call.argument<Double>("latitude") ?: 0.0,
@@ -110,10 +128,56 @@ class MainActivity : FlutterActivity() {
     private fun isVolumeKey(keyCode: Int) =
         keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
 
+    /** Notification texts while Drive backup is on; null when it is off. */
+    private var keepAlive: Triple<String, String, String>? = null
+
+    /**
+     * Leaving the app: start the service now, while the app is still in
+     * front (Android refuses it a moment later), so a backup in progress
+     * can finish. Dart stops it when the backup is done.
+     */
+    override fun onPause() {
+        keepAlive?.let { (title, text, channel) ->
+            BackupKeepAliveService.start(applicationContext, title, text, channel)
+        }
+        super.onPause()
+    }
+
+    /** Back in the app: it runs anyway, no need for the service. */
+    override fun onResume() {
+        super.onResume()
+        BackupKeepAliveService.stop(applicationContext)
+    }
+
     override fun onDestroy() {
         io.shutdown()
         altitudeIo.shutdown()
         super.onDestroy()
+    }
+
+    /**
+     * Whether battery saving leaves the app alone in the background. When
+     * it does not, phones such as OPPO, Realme and OnePlus freeze the app
+     * soon after the screen goes off, and backup with the app closed fails.
+     */
+    private fun backgroundAllowed(): Boolean {
+        val power = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+        return power.isIgnoringBatteryOptimizations(packageName)
+    }
+
+    /**
+     * Opens this app's page in system settings, where "Battery" holds the
+     * background setting on every phone maker's Android.
+     */
+    private fun openBackgroundSettings(): Boolean = try {
+        startActivity(
+            Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                .setData(android.net.Uri.fromParts("package", packageName, null))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
+        true
+    } catch (e: ActivityNotFoundException) {
+        false
     }
 
     /** Reused: it keeps the geoid tiles it has read. */

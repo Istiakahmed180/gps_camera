@@ -380,6 +380,9 @@ const Map<String, String> es = {
   'Open': 'Abrir',
   'Open an original and choose Add watermark to create a watermarked copy.': 'Abre un original y elige Agregar marca de agua para crear una copia con marca de agua.',
   'Open camera': 'Abrir cámara',
+  'Backing up to Google Drive': 'Copiando a Google Drive',
+  'Locaproof is finishing your backup.': 'Locaproof está terminando tu copia.',
+  'This phone\'s battery saving stops Locaproof when it is closed, so backup then cannot finish. In settings, open Battery and allow background activity.': 'El ahorro de batería de este teléfono detiene Locaproof cuando está cerrada, así que la copia no puede terminar. En ajustes, abre Batería y permite la actividad en segundo plano.',
   'No Locaproof backup was found in this Google account.':
       'No se encontró ninguna copia de Locaproof en esta cuenta de Google.',
   'Google sign-in did not finish. Tap Sign in again.': 'El inicio de sesión con Google no terminó. Toca Iniciar sesión de nuevo.',
@@ -406,8 +409,8 @@ const Map<String, String> es = {
   'Restoring… @done of @total': 'Restaurando… @done de @total',
   'Waiting for Wi-Fi to back up': 'Esperando Wi-Fi para la copia',
   'Back up automatically': 'Copia automática',
-  'When the app opens and after you take photos':
-      'Al abrir la app y después de tomar fotos',
+  'Also while the app is closed, often when the phone is charging':
+      'También con la app cerrada, a menudo mientras el teléfono carga',
   'Only on Wi-Fi': 'Solo con Wi-Fi',
   'Saves mobile data; Back up now always works':
       'Ahorra datos móviles; Copiar ahora siempre funciona',

@@ -379,6 +379,9 @@ const Map<String, String> hi = {
   'Open': 'खोलें',
   'Open an original and choose Add watermark to create a watermarked copy.': 'वॉटरमार्क वाली कॉपी बनाने के लिए कोई ओरिजिनल खोलें और "वॉटरमार्क जोड़ें" चुनें।',
   'Open camera': 'कैमरा खोलें',
+  'Backing up to Google Drive': 'Google Drive पर बैकअप हो रहा है',
+  'Locaproof is finishing your backup.': 'Locaproof आपका बैकअप पूरा कर रहा है।',
+  'This phone\'s battery saving stops Locaproof when it is closed, so backup then cannot finish. In settings, open Battery and allow background activity.': 'इस फ़ोन की बैटरी बचत ऐप बंद होने पर Locaproof को रोक देती है, इसलिए तब बैकअप पूरा नहीं होता। सेटिंग्स में Battery खोलकर बैकग्राउंड गतिविधि की अनुमति दें।',
   'No Locaproof backup was found in this Google account.':
       'इस Google खाते में Locaproof का कोई बैकअप नहीं मिला।',
   'Google sign-in did not finish. Tap Sign in again.':
@@ -406,8 +409,8 @@ const Map<String, String> hi = {
   'Restoring… @done of @total': 'रीस्टोर हो रहा है… @total में से @done',
   'Waiting for Wi-Fi to back up': 'बैकअप के लिए Wi-Fi का इंतज़ार',
   'Back up automatically': 'अपने-आप बैकअप',
-  'When the app opens and after you take photos':
-      'ऐप खुलने पर और फ़ोटो लेने के बाद',
+  'Also while the app is closed, often when the phone is charging':
+      'ऐप बंद होने पर भी, अक्सर फ़ोन चार्ज होते समय',
   'Only on Wi-Fi': 'सिर्फ़ Wi-Fi पर',
   'Saves mobile data; Back up now always works':
       'मोबाइल डेटा बचाता है; "अभी बैकअप लें" हमेशा काम करता है',

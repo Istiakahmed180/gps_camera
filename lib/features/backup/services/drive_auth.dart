@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:gps_camera/core/config/google_config.dart';
 import 'package:gps_camera/features/backup/services/drive_store.dart';
@@ -39,9 +40,8 @@ abstract interface class DriveConnector {
   /// Shows Google's sign-in; returns the account's email.
   Future<String> signIn();
 
-  /// Drive for the signed-in user; shows Google screens only when
-  /// [interactive].
-  Future<DriveStore> open({bool interactive = false});
+  /// Drive for [email]; shows Google screens only when [interactive].
+  Future<DriveStore> open(String email, {bool interactive = false});
 
   /// The email of a user who already allowed Drive access, without showing
   /// anything; null when there is none. Finishes a sign-in that Android
@@ -61,6 +61,9 @@ class DriveAuth implements DriveConnector {
       defaultTargetPlatform == TargetPlatform.android;
 
   static const List<String> scopes = [drive.DriveApi.driveFileScope];
+
+  /// The plugin is set up once per isolate.
+  static Future<void>? _platformReady;
 
   Future<void>? _ready;
 
@@ -108,30 +111,58 @@ class DriveAuth implements DriveConnector {
     }
   }
 
-  /// Drive for the signed-in user. Without [interactive] nothing is shown
-  /// to the user, so it can run on its own; it then fails with
+  /// Drive for [email]. Without [interactive] nothing is shown to the
+  /// user, so it can run on its own; it then fails with
   /// [DriveAuthProblem.signedOut] when Google wants the user to confirm.
+  /// Asks Google for that account's token directly: no sign-in check, which
+  /// would briefly open Google's own screen and take over the phone.
   @override
-  Future<DriveStore> open({bool interactive = false}) async {
-    await _init();
+  Future<DriveStore> open(String email, {bool interactive = false}) =>
+      openForAccount(email, interactive: interactive);
+
+  /// Drive for [email] with no screen at all, for the background job:
+  /// works only while that user's permission is still in place.
+  static Future<DriveStore> openForAccount(
+    String email, {
+    bool interactive = false,
+  }) async {
+    if (!GoogleConfig.isConfigured) {
+      throw const DriveAuthException(DriveAuthProblem.notConfigured);
+    }
+    final platform = GoogleSignInPlatform.instance;
+    await (_platformReady ??= platform.init(
+      const InitParameters(serverClientId: GoogleConfig.serverClientId),
+    ));
+    Future<String?> token({bool prompt = false}) async =>
+        (await platform.clientAuthorizationTokensForScopes(
+          ClientAuthorizationTokensForScopesParameters(
+            request: AuthorizationRequestDetails(
+              scopes: scopes,
+              userId: null,
+              email: email,
+              promptIfUnauthorized: prompt,
+            ),
+          ),
+        ))?.accessToken;
+    final String? first;
     try {
-      final account = await GoogleSignIn.instance
-          .attemptLightweightAuthentication();
-      final client =
-          account?.authorizationClient ??
-          GoogleSignIn.instance.authorizationClient;
-      final authorization =
-          await client.authorizationForScopes(scopes) ??
-          (interactive ? await client.authorizeScopes(scopes) : null);
-      if (authorization == null) {
-        throw const DriveAuthException(DriveAuthProblem.signedOut);
-      }
-      return GoogleDriveStore(
-        _FreshTokenClient(client, authorization.accessToken),
-      );
+      first = await token(prompt: interactive);
     } on GoogleSignInException catch (e) {
       throw _problem(e);
     }
+    if (first == null) {
+      throw const DriveAuthException(DriveAuthProblem.signedOut);
+    }
+    return GoogleDriveStore(
+      _FreshTokenClient(first, (stale) async {
+        try {
+          await platform.clearAuthorizationToken(
+            ClearAuthorizationTokenParams(accessToken: stale),
+          );
+        } catch (_) {}
+        return token();
+      }),
+    );
   }
 
   /// Signs out and withdraws Drive access. Files already in Drive stay.
@@ -158,23 +189,20 @@ class DriveAuth implements DriveConnector {
 /// when Google says it expired (tokens last about an hour, a first backup
 /// can take longer) and repeating that request once.
 class _FreshTokenClient extends http.BaseClient {
-  _FreshTokenClient(this._authorization, this._token);
+  _FreshTokenClient(this._token, this._renewWith);
 
-  final GoogleSignInAuthorizationClient _authorization;
+  /// Gets a new token, given the one that stopped working; null when the
+  /// user's permission is gone.
+  final Future<String?> Function(String stale) _renewWith;
   final http.Client _inner = http.Client();
   String _token;
 
   Future<String> _renew() async {
-    try {
-      await _authorization.clearAuthorizationToken(accessToken: _token);
-    } catch (_) {
-      // Asking again below is what matters.
-    }
-    final next = await _authorization.authorizationForScopes(DriveAuth.scopes);
+    final next = await _renewWith(_token);
     if (next == null) {
       throw const DriveAuthException(DriveAuthProblem.signedOut);
     }
-    return _token = next.accessToken;
+    return _token = next;
   }
 
   @override

@@ -382,6 +382,10 @@ const Map<String, String> id = {
   'Open': 'Buka',
   'Open an original and choose Add watermark to create a watermarked copy.': 'Buka foto asli lalu pilih Tambahkan tanda air untuk membuat salinan bertanda air.',
   'Open camera': 'Buka kamera',
+  'Backing up to Google Drive': 'Mencadangkan ke Google Drive',
+  'Locaproof is finishing your backup.':
+      'Locaproof sedang menyelesaikan cadangan Anda.',
+  'This phone\'s battery saving stops Locaproof when it is closed, so backup then cannot finish. In settings, open Battery and allow background activity.': 'Penghemat baterai ponsel ini menghentikan Locaproof saat ditutup, sehingga pencadangan tidak bisa selesai. Di setelan, buka Baterai dan izinkan aktivitas latar belakang.',
   'No Locaproof backup was found in this Google account.':
       'Tidak ada cadangan Locaproof di akun Google ini.',
   'Google sign-in did not finish. Tap Sign in again.':
@@ -409,8 +413,8 @@ const Map<String, String> id = {
   'Restoring… @done of @total': 'Memulihkan… @done dari @total',
   'Waiting for Wi-Fi to back up': 'Menunggu Wi-Fi untuk mencadangkan',
   'Back up automatically': 'Cadangkan otomatis',
-  'When the app opens and after you take photos':
-      'Saat aplikasi dibuka dan setelah Anda memotret',
+  'Also while the app is closed, often when the phone is charging':
+      'Juga saat aplikasi ditutup, sering saat ponsel diisi daya',
   'Only on Wi-Fi': 'Hanya lewat Wi-Fi',
   'Saves mobile data; Back up now always works':
       'Menghemat data seluler; Cadangkan sekarang selalu berfungsi',

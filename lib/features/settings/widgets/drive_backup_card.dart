@@ -138,8 +138,65 @@ class DriveBackupCard extends StatelessWidget {
             value: drive.auto.value,
             onChanged: (v) => unawaited(drive.setAuto(v)),
             title: Text('Back up automatically'.tr),
-            subtitle: Text('When the app opens and after you take photos'.tr),
+            subtitle: Text(
+              'Also while the app is closed, often when the phone is charging'
+                  .tr,
+            ),
           ),
+          if (drive.auto.value && !drive.backgroundAllowed.value)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                0,
+                AppSpacing.lg,
+                AppSpacing.sm,
+              ),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.tertiaryContainer,
+                  borderRadius: AppRadius.mdAll,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.battery_alert_rounded,
+                            color: colors.onTertiaryContainer,
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(
+                              ('This phone\'s battery saving stops '
+                                      'Locaproof when it is closed, so '
+                                      'backup then cannot finish. In '
+                                      'settings, open Battery and allow '
+                                      'background activity.')
+                                  .tr,
+                              style: context.text.bodySmall?.copyWith(
+                                color: colors.onTertiaryContainer,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: TextButton(
+                          onPressed: () =>
+                              unawaited(drive.openBackgroundSettings()),
+                          child: Text('Open settings'.tr),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           SwitchListTile(
             value: drive.wifiOnly.value,
             onChanged: (v) => unawaited(drive.setWifiOnly(v)),

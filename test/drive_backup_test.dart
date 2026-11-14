@@ -9,10 +9,12 @@ import 'package:gps_camera/core/constants/storage_keys.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/core/services/storage_service.dart';
 import 'package:gps_camera/features/backup/controllers/drive_backup_controller.dart';
+import 'package:gps_camera/features/backup/services/background_backup.dart';
 import 'package:gps_camera/features/backup/services/backup_service.dart';
 import 'package:gps_camera/features/backup/services/drive_auth.dart';
 import 'package:gps_camera/features/backup/services/drive_backup_service.dart';
 import 'package:gps_camera/features/backup/services/drive_store.dart';
+import 'package:gps_camera/features/backup/services/drive_sync_state.dart';
 
 import 'helpers/db_fixtures.dart';
 import 'helpers/test_env.dart';
@@ -114,7 +116,7 @@ class FakeConnector implements DriveConnector {
   }
 
   @override
-  Future<DriveStore> open({bool interactive = false}) async {
+  Future<DriveStore> open(String email, {bool interactive = false}) async {
     opens.add(interactive);
     if (openError != null) throw openError!;
     return drive;
@@ -127,6 +129,34 @@ class FakeConnector implements DriveConnector {
 
   @override
   Future<void> signOut() async {}
+}
+
+class FakeKeepAlive implements BackupKeepAlive {
+  final List<String> calls = [];
+
+  @override
+  Future<void> setWanted(bool wanted) async => calls.add('wanted:$wanted');
+
+  @override
+  Future<void> stop() async => calls.add('stop');
+
+  @override
+  Future<void> askToNotify() async => calls.add('ask');
+}
+
+class FakeScheduler implements BackgroundBackupScheduler {
+  final List<String> calls = [];
+
+  @override
+  Future<void> schedule({required bool wifiOnly}) async =>
+      calls.add(wifiOnly ? 'wifi' : 'any');
+
+  @override
+  Future<void> cancel() async => calls.add('cancel');
+
+  @override
+  Future<void> runSoon({required bool wifiOnly}) async =>
+      calls.add(wifiOnly ? 'soon-wifi' : 'soon-any');
 }
 
 void main() {
@@ -300,11 +330,103 @@ void main() {
     });
   });
 
+  group('background job', () {
+    late DriveSyncState state;
+    setUp(() {
+      final dir = temp;
+      state = DriveSyncState(directory: () async => dir);
+    });
+
+    Future<void> run(FakeDrive drive, {bool wifi = true}) =>
+        runBackgroundBackup(
+          openDrive: (_) async => drive,
+          onWifi: () async => wifi,
+          database: db.db,
+          settings: settings,
+          state: state,
+        );
+
+    test('backs up for the signed-in account and records it', () async {
+      write('Photos/IMG_1.jpg', 'photo one');
+      await settings.write(StorageKeys.driveAccount, 'me@example.com');
+      final drive = FakeDrive();
+      await run(drive);
+      expect(drive.tree, contains('Photos/IMG_1.jpg'));
+      expect(await state.lastBackup(), isNotNull);
+      expect(await state.lock(), isTrue, reason: 'lock released');
+    });
+
+    test('does nothing when signed out, off, or off Wi-Fi', () async {
+      write('Photos/IMG_1.jpg', 'photo one');
+      final drive = FakeDrive();
+      await run(drive);
+      await settings.write(StorageKeys.driveAccount, 'me@example.com');
+      await run(drive, wifi: false);
+      await settings.write(StorageKeys.driveAuto, false);
+      await run(drive);
+      expect(drive.uploads, 0);
+      expect(await state.lastBackup(), isNull);
+    });
+
+    test(
+      'waits for the app to finish its backup, then sends the rest',
+      () async {
+        write('Photos/IMG_1.jpg', 'photo one');
+        await settings.write(StorageKeys.driveAccount, 'me@example.com');
+        final drive = FakeDrive();
+        // The app is still backing up.
+        expect(await state.lock(), isTrue);
+        final job = runBackgroundBackup(
+          openDrive: (_) async => drive,
+          onWifi: () async => true,
+          database: db.db,
+          settings: settings,
+          state: state,
+          lockRetry: const Duration(milliseconds: 10),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(drive.uploads, 0, reason: 'still waiting');
+        await state.unlock();
+        await job;
+        expect(drive.tree, contains('Photos/IMG_1.jpg'));
+      },
+    );
+
+    test('gives up when the lock stays taken', () async {
+      write('Photos/IMG_1.jpg', 'photo one');
+      await settings.write(StorageKeys.driveAccount, 'me@example.com');
+      final drive = FakeDrive();
+      expect(await state.lock(), isTrue);
+      await runBackgroundBackup(
+        openDrive: (_) async => drive,
+        onWifi: () async => true,
+        database: db.db,
+        settings: settings,
+        state: state,
+        lockWait: const Duration(milliseconds: 30),
+        lockRetry: const Duration(milliseconds: 10),
+      );
+      expect(drive.uploads, 0);
+    });
+
+    test('leaves the settings file alone', () async {
+      write('Photos/IMG_1.jpg', 'photo one');
+      await settings.write(StorageKeys.driveAccount, 'me@example.com');
+      final before = settings.read<String>(StorageKeys.driveLastBackup);
+      await run(FakeDrive());
+      expect(settings.read<String>(StorageKeys.driveLastBackup), before);
+    });
+  });
+
   group('controller', () {
     late FakeDrive drive;
     late FakeConnector connector;
     late bool wifi;
     late DateTime now;
+
+    late FakeScheduler scheduler;
+    late DriveSyncState state;
+    late FakeKeepAlive keepAlive;
 
     DriveBackupController controller() => DriveBackupController(
       service,
@@ -312,6 +434,9 @@ void main() {
       connector: connector,
       onWifi: () async => wifi,
       clock: () => now,
+      scheduler: scheduler,
+      state: state,
+      keepAlive: keepAlive,
     );
 
     setUp(() {
@@ -319,6 +444,133 @@ void main() {
       connector = FakeConnector(drive);
       wifi = true;
       now = DateTime(2026, 11, 14, 10);
+      scheduler = FakeScheduler();
+      keepAlive = FakeKeepAlive();
+      // This test's folder, not whatever `temp` is when a late run reads it.
+      final dir = temp;
+      state = DriveSyncState(directory: () async => dir, clock: () => now);
+    });
+
+    test('the background job follows sign-in and the switches', () async {
+      final c = controller();
+      await c.signIn();
+      expect(scheduler.calls.last, 'wifi');
+      await c.setWifiOnly(false);
+      expect(scheduler.calls.last, 'any');
+      await c.setAuto(false);
+      expect(scheduler.calls.last, 'cancel');
+      await c.setAuto(true);
+      expect(scheduler.calls.last, 'any');
+      // Turning it back on starts a run; let it finish.
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      while (c.isBusy) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      await c.signOut();
+      expect(scheduler.calls.last, 'cancel');
+    });
+
+    test(
+      'says when battery saving blocks backup with the app closed',
+      () async {
+        var allowed = false;
+        final c = DriveBackupController(
+          service,
+          settings,
+          connector: connector,
+          scheduler: scheduler,
+          state: state,
+          backgroundAllowedCheck: () async => allowed,
+        );
+        await c.refreshBackgroundAllowed();
+        expect(c.backgroundAllowed.value, isFalse);
+        allowed = true;
+        await c.refreshBackgroundAllowed();
+        expect(c.backgroundAllowed.value, isTrue);
+      },
+    );
+
+    test(
+      'leaving the app finishes the backup, then stops the service',
+      () async {
+        write('Photos/IMG_1.jpg', 'photo one');
+        await settings.write(StorageKeys.driveAccount, 'me@example.com');
+        final c = controller();
+        await c.appLeft();
+        expect(drive.tree, contains('Photos/IMG_1.jpg'));
+        expect(keepAlive.calls.last, 'stop');
+
+        await c.signOut();
+        expect(keepAlive.calls, contains('wanted:false'));
+      },
+    );
+
+    test('signing in turns the service on and asks to notify', () async {
+      final c = controller();
+      await c.signIn();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(keepAlive.calls, containsAll(['wanted:true', 'ask']));
+    });
+
+    test('leaving the app asks for a background run soon', () async {
+      final c = controller();
+      await c.appLeft();
+      expect(scheduler.calls, isEmpty, reason: 'not signed in');
+      await settings.write(StorageKeys.driveAccount, 'me@example.com');
+      await controller().appLeft();
+      expect(scheduler.calls.last, 'soon-wifi');
+    });
+
+    test('never backs up while the background job holds the lock', () async {
+      await settings.write(StorageKeys.driveAccount, 'me@example.com');
+      final c = controller();
+      expect(await state.lock(), isTrue);
+
+      await c.autoBackUp(force: true);
+      expect(connector.opens, isEmpty);
+      expect(c.problem.value, isNull, reason: 'automatic runs stay quiet');
+
+      expect(await c.backUpNow(), isNull);
+      expect(c.problem.value, 'A backup is already in progress.');
+
+      await state.unlock();
+      expect(await c.backUpNow(), isNotNull);
+    });
+
+    test('a lock left by a killed run expires', () async {
+      expect(await state.lock(), isTrue);
+      expect(await state.lock(), isFalse);
+      now = now.add(DriveSyncState.staleLock + const Duration(minutes: 1));
+      expect(await state.lock(), isTrue);
+    });
+
+    test('a lock from an app process that died is taken over', () async {
+      // Android closed the app in the middle of its backup.
+      final dir = temp;
+      final killed = DriveSyncState(
+        directory: () async => dir,
+        clock: () => now,
+        isAlive: (_) => false,
+      );
+      await File('${temp.path}/drive_backup.lock').writeAsString(
+        jsonEncode({'pid': 99999, 'at': now.toUtc().toIso8601String()}),
+      );
+      expect(await killed.lock(), isTrue);
+
+      final alive = DriveSyncState(
+        directory: () async => dir,
+        clock: () => now,
+        isAlive: (_) => true,
+      );
+      expect(await alive.lock(), isFalse, reason: 'its owner still runs');
+    });
+
+    test('shows a backup the background job made', () async {
+      await settings.write(StorageKeys.driveAccount, 'me@example.com');
+      final c = controller();
+      await state.setLastBackup(DateTime.utc(2026, 11, 15, 2));
+      await c.refreshLastBackup();
+      expect(c.lastBackup.value, DateTime.utc(2026, 11, 15, 2).toLocal());
     });
 
     test('signing in remembers the account and backs up', () async {
