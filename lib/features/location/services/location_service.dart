@@ -124,6 +124,18 @@ class LocationService extends GetxService {
     }
   }
 
+  /// The phone's most recent fix from any app, without waiting for GPS.
+  /// Null when there is none or it cannot be read. May be old.
+  Future<LocationFix?> lastKnownFix() async {
+    try {
+      final position = await Geolocator.getLastKnownPosition();
+      final fix = position == null ? null : toFix(position);
+      return fix == null ? null : await withSeaLevel(fix);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Continuous fixes while subscribed. Invalid fixes are dropped and
   /// platform errors are converted to [LocationException].
   Stream<LocationFix> fixes() {

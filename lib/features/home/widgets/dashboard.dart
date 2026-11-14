@@ -5,27 +5,27 @@ import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
 import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
+import 'package:gps_camera/features/home/controllers/current_place_controller.dart';
+import 'package:gps_camera/features/location/models/location_fix.dart';
+import 'package:gps_camera/features/location/utils/location_formatter.dart';
 import 'package:gps_camera/features/projects/models/project.dart';
 import 'package:gps_camera/features/projects/widgets/project_cover.dart';
-import 'package:gps_camera/features/watermark/utils/capture_time_formatter.dart';
 import 'package:gps_camera/shared/widgets/media_thumbnail.dart';
 import 'package:gps_camera/shared/widgets/soft_surface.dart';
 import 'package:gps_camera/app/theme/soft_theme.dart';
 
 /// The big camera card: what the app is for, one tap away, with where the
-/// last capture was taken.
+/// phone is right now.
 class CaptureCard extends StatelessWidget {
-  const CaptureCard({super.key, required this.onTap, this.last});
+  const CaptureCard({super.key, required this.onTap, required this.here});
 
   final VoidCallback onTap;
 
-  /// The most recent capture, if any.
-  final GalleryPhoto? last;
+  /// The phone's current location.
+  final CurrentPlaceController here;
 
   @override
   Widget build(BuildContext context) {
-    final last = _last();
-
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: AppRadius.xlAll,
@@ -99,71 +99,7 @@ class CaptureCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.14),
-                      borderRadius: AppRadius.mdAll,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.sm,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            last == null
-                                ? Icons.my_location_rounded
-                                : Icons.place_rounded,
-                            size: AppSizes.iconSm,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Expanded(
-                            child: last == null
-                                ? Text(
-                                    'Tap to open the camera'.tr,
-                                    style: context.text.labelLarge?.copyWith(
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Last capture · @date'.trParams({
-                                          'date': last.$2,
-                                        }),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: context.text.labelSmall
-                                            ?.copyWith(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.75,
-                                              ),
-                                            ),
-                                      ),
-                                      if (last.$1 != null)
-                                        Text(
-                                          last.$1!,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: context.text.labelLarge
-                                              ?.copyWith(color: Colors.white),
-                                        ),
-                                    ],
-                                  ),
-                          ),
-                          const Icon(
-                            Icons.arrow_forward_rounded,
-                            size: AppSizes.iconSm,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  _HereStrip(here: here),
                 ],
               ),
             ),
@@ -172,21 +108,154 @@ class CaptureCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  /// Where (if known) and when the last capture was taken:
-  /// (`Tongi, Dhaka Division, Bangladesh`, `07 Nov 2026`).
-  (String?, String)? _last() {
-    final metadata = last?.metadata;
-    if (metadata == null) return null;
-    final place =
-        metadata.place?.title ?? metadata.location.fix?.address?.trim();
-    final date = CaptureTimeFormatter.date(
-      CaptureTimeFormatter.wallClock(
-        metadata.capturedAt,
-        metadata.timeZoneOffset,
-      ),
+/// The current location inside the camera card: the place name, its
+/// address or coordinates, and how precise it is. Without location access
+/// it says so, and a tap asks for it.
+class _HereStrip extends StatelessWidget {
+  const _HereStrip({required this.here});
+
+  final CurrentPlaceController here;
+
+  /// A fix older than this is labelled as the last known location.
+  static const Duration _fresh = Duration(minutes: 2);
+
+  @override
+  Widget build(BuildContext context) {
+    final small = context.text.labelSmall?.copyWith(
+      color: Colors.white.withValues(alpha: 0.78),
     );
-    return (place == null || place.isEmpty ? null : place, date);
+    final big = context.text.labelLarge?.copyWith(color: Colors.white);
+
+    return Obx(() {
+      final status = here.status.value;
+      final fix = here.fix.value;
+      final place = here.place.value;
+      final needsAction =
+          status == CurrentPlaceStatus.noPermission ||
+          status == CurrentPlaceStatus.blocked ||
+          status == CurrentPlaceStatus.off;
+
+      final (IconData icon, String top, String main) = switch (status) {
+        CurrentPlaceStatus.found when fix != null => (
+          Icons.my_location_rounded,
+          _caption(fix),
+          place?.title ??
+              place?.addressLine ??
+              '${LocationFormatter.latitude(fix.latitude)}, '
+                  '${LocationFormatter.longitude(fix.longitude)}',
+        ),
+        CurrentPlaceStatus.noPermission => (
+          Icons.location_off_outlined,
+          'Location access needed'.tr,
+          'Tap to allow location'.tr,
+        ),
+        CurrentPlaceStatus.blocked => (
+          Icons.location_off_outlined,
+          'Location access is off for Locaproof'.tr,
+          'Tap to open settings'.tr,
+        ),
+        CurrentPlaceStatus.off => (
+          Icons.location_disabled_rounded,
+          'Phone location is off'.tr,
+          'Tap to turn it on'.tr,
+        ),
+        CurrentPlaceStatus.unavailable => (
+          Icons.gps_not_fixed_rounded,
+          'Current location'.tr,
+          'Location not found yet. Tap to try again.'.tr,
+        ),
+        _ => (
+          Icons.gps_not_fixed_rounded,
+          'Current location'.tr,
+          'Finding your location…'.tr,
+        ),
+      };
+      // The address line, when the title above is only the town.
+      final detail = status == CurrentPlaceStatus.found
+          ? place?.addressLine
+          : null;
+
+      return Material(
+        color: Colors.white.withValues(alpha: 0.14),
+        borderRadius: AppRadius.mdAll,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          // Taps on the strip fix access or retry; the rest of the card
+          // opens the camera.
+          onTap: needsAction || status == CurrentPlaceStatus.unavailable
+              ? () => here.fixAccess()
+              : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                if (status == CurrentPlaceStatus.locating)
+                  const SizedBox.square(
+                    dimension: AppSizes.iconSm,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                else
+                  Icon(icon, size: AppSizes.iconSm, color: Colors.white),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        top,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: small,
+                      ),
+                      Text(
+                        main,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: big,
+                      ),
+                      if (detail != null && detail != main)
+                        Text(
+                          detail,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: small,
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Icon(
+                  needsAction
+                      ? Icons.chevron_right_rounded
+                      : status == CurrentPlaceStatus.unavailable
+                      ? Icons.refresh_rounded
+                      : Icons.arrow_forward_rounded,
+                  size: AppSizes.iconSm,
+                  color: Colors.white,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  /// `Current location · ±8 m`, or the last known location when old.
+  static String _caption(LocationFix fix) {
+    final accuracy = LocationFormatter.accuracy(fix.accuracy);
+    final old = fix.ageAt(DateTime.now()) > _fresh;
+    return old
+        ? 'Last known location · @accuracy'.trParams({'accuracy': accuracy})
+        : 'Current location · @accuracy'.trParams({'accuracy': accuracy});
   }
 }
 

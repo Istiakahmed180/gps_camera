@@ -139,6 +139,8 @@ class GlossyButton extends StatelessWidget {
             child: InkWell(
               onTap: onPressed,
               child: Stack(
+                // Centred when the button is wider than its label.
+                alignment: Alignment.center,
                 children: [
                   // The shine across the top half.
                   Positioned(

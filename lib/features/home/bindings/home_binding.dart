@@ -1,4 +1,8 @@
 import 'package:get/get.dart';
+import 'package:gps_camera/core/services/permission_service.dart';
+import 'package:gps_camera/features/home/controllers/current_place_controller.dart';
+import 'package:gps_camera/features/location/services/location_service.dart';
+import 'package:gps_camera/features/location/services/place_service.dart';
 import 'package:gps_camera/core/services/photo_storage_service.dart';
 import 'package:gps_camera/features/gallery/controllers/gallery_controller.dart';
 import 'package:gps_camera/features/gallery/services/gallery_service.dart';
@@ -27,12 +31,21 @@ class HomeBinding extends Bindings {
     final reports = Get.isRegistered<ReportsController>()
         ? Get.find<ReportsController>()
         : Get.put(ReportsController(Get.find<ReportService>()));
+    final here = Get.put(
+      CurrentPlaceController(
+        Get.isRegistered<LocationService>()
+            ? Get.find<LocationService>()
+            : LocationService(Get.find<PermissionService>()),
+        PlaceService(),
+      ),
+    );
     Get.put(
       HomeController(
         gallery: gallery,
         projects: projects,
         reports: reports,
         repository: repository,
+        here: here,
       ),
     );
   }

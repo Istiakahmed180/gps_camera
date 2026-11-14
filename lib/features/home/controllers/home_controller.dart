@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:gps_camera/app/routes/app_routes.dart';
 import 'package:gps_camera/features/gallery/controllers/gallery_controller.dart';
 import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
+import 'package:gps_camera/features/home/controllers/current_place_controller.dart';
 import 'package:gps_camera/features/projects/controllers/projects_controller.dart';
 import 'package:gps_camera/features/projects/models/project.dart';
 import 'package:gps_camera/features/projects/services/project_repository.dart';
@@ -20,7 +21,14 @@ class HomeController extends GetxController {
     required this.projects,
     required this.reports,
     required this._repository,
+    required this.here,
   });
+
+  /// Where the phone is now, for the camera card.
+  final CurrentPlaceController here;
+
+  /// The main screen is on top and the app is in the foreground.
+  bool _visible = true;
 
   final ProjectRepository _repository;
 
@@ -38,6 +46,23 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     unawaited(_loadProjects());
+    _syncLocation();
+  }
+
+  /// Called when the main screen is covered or uncovered, or the app goes
+  /// to the background or comes back.
+  void setVisible(bool visible) {
+    _visible = visible;
+    _syncLocation();
+  }
+
+  /// The location is looked up only while the dashboard can be seen.
+  void _syncLocation() {
+    if (_visible && tab.value == HomeTab.home) {
+      here.resume();
+    } else {
+      here.pause();
+    }
   }
 
   Future<void> _loadProjects() async {
@@ -57,6 +82,7 @@ class HomeController extends GetxController {
   void select(HomeTab value) {
     if (tab.value == value) return;
     tab.value = value;
+    _syncLocation();
     unawaited(refreshTab(value));
   }
 
@@ -66,6 +92,7 @@ class HomeController extends GetxController {
       gallery.reload(),
       _loadProjects(),
       reports.load(),
+      here.locate(),
     ]),
     HomeTab.gallery => gallery.reload(),
     HomeTab.projects => projects.load(),

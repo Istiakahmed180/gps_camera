@@ -26,8 +26,28 @@ class HomeView extends StatefulWidget {
   State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> with RouteAware {
+class _HomeViewState extends State<HomeView>
+    with RouteAware, WidgetsBindingObserver {
   HomeController get controller => Get.find<HomeController>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  /// The location is looked up only while the app is in front.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final route = ModalRoute.of(context);
+    controller.setVisible(
+      state == AppLifecycleState.resumed && (route?.isCurrent ?? true),
+    );
+  }
+
+  /// Another screen (camera, settings...) now covers this one.
+  @override
+  void didPushNext() => controller.setVisible(false);
 
   @override
   void didChangeDependencies() {
@@ -38,6 +58,9 @@ class _HomeViewState extends State<HomeView> with RouteAware {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    // The controller may already be gone when the whole stack is replaced.
+    if (Get.isRegistered<HomeController>()) controller.setVisible(false);
     appRouteObserver.unsubscribe(this);
     super.dispose();
   }
@@ -45,7 +68,10 @@ class _HomeViewState extends State<HomeView> with RouteAware {
   /// Back from a screen opened on top (camera, a photo, settings...):
   /// what it changed shows at once.
   @override
-  void didPopNext() => unawaited(controller.refreshCurrent());
+  void didPopNext() {
+    controller.setVisible(true);
+    unawaited(controller.refreshCurrent());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +194,7 @@ class _Dashboard extends GetView<HomeController> {
                   children: [
                     CaptureCard(
                       onTap: controller.openCamera,
-                      last: captures.firstOrNull,
+                      here: controller.here,
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     Row(

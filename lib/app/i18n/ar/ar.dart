@@ -381,12 +381,22 @@ const Map<String, String> ar = {
   'Open an original and choose Add watermark to create a watermarked copy.':
       'افتح صورة أصلية واختر إضافة علامة مائية لإنشاء نسخة بعلامة مائية.',
   'Open camera': 'فتح الكاميرا',
+  'Location access needed': 'يلزم الوصول إلى الموقع',
+  'Tap to allow location': 'انقر للسماح بالموقع',
+  'Location access is off for Locaproof':
+      'الوصول إلى الموقع متوقف لـ Locaproof',
+  'Tap to open settings': 'انقر لفتح الإعدادات',
+  'Phone location is off': 'موقع الهاتف متوقف',
+  'Tap to turn it on': 'انقر لتشغيله',
+  'Location not found yet. Tap to try again.':
+      'لم يُعثر على الموقع بعد. انقر للمحاولة مرة أخرى.',
+  'Finding your location…': 'جارٍ تحديد موقعك…',
+  'Last known location · @accuracy': 'آخر موقع معروف · @accuracy',
+  'Current location · @accuracy': 'الموقع الحالي · @accuracy',
   'Home': 'الرئيسية',
   'Capture proof': 'التقط بإثبات',
   'Photos and videos stamped with location, date and time.':
       'صور وفيديوهات مختومة بالموقع والتاريخ والوقت.',
-  'Tap to open the camera': 'انقر لفتح الكاميرا',
-  'Last capture · @date': 'آخر لقطة · @date',
   'Recent captures': 'اللقطات الأخيرة',
   'See all': 'عرض الكل',
   'Active projects': 'المشاريع النشطة',
