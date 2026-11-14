@@ -12,4 +12,9 @@ abstract final class StorageKeys {
   static const String captureNote = 'camera.note';
   static const String onboardingDone = 'app.onboarding_done';
   static const String gallerySaveMode = 'export.gallery_save_mode';
+  static const String driveAccount = 'drive.account';
+  static const String driveAuto = 'drive.auto';
+  static const String driveWifiOnly = 'drive.wifi_only';
+  static const String driveLastBackup = 'drive.last_backup';
+  static const String driveSignInPending = 'drive.sign_in_pending';
 }

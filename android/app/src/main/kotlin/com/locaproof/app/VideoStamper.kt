@@ -1,4 +1,4 @@
-package co.tdevs.gps_camera
+package com.locaproof.app
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -304,7 +304,7 @@ class VideoStamper(private val context: Context, messenger: BinaryMessenger) {
     }
 
     companion object {
-        const val CHANNEL = "co.tdevs.gps_camera/video"
+        const val CHANNEL = "com.locaproof.app/video"
         private const val TEMP_PREFIX = "stamp_out_"
     }
 }

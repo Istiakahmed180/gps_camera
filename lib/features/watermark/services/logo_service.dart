@@ -19,7 +19,7 @@ class LogoException implements Exception {
 /// `GPSCamera/Branding/` and drawn by every watermark that enables it.
 class LogoService extends GetxService {
   LogoService(this._storage, {MethodChannel? channel})
-    : _channel = channel ?? const MethodChannel('co.tdevs.gps_camera/native');
+    : _channel = channel ?? const MethodChannel('com.locaproof.app/native');
 
   /// Longest side kept. Larger logos are scaled down; the watermark draws
   /// it at most a few hundred pixels tall even on full-resolution photos.

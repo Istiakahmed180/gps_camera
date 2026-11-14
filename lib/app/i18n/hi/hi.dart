@@ -379,6 +379,59 @@ const Map<String, String> hi = {
   'Open': 'खोलें',
   'Open an original and choose Add watermark to create a watermarked copy.': 'वॉटरमार्क वाली कॉपी बनाने के लिए कोई ओरिजिनल खोलें और "वॉटरमार्क जोड़ें" चुनें।',
   'Open camera': 'कैमरा खोलें',
+  'No Locaproof backup was found in this Google account.':
+      'इस Google खाते में Locaproof का कोई बैकअप नहीं मिला।',
+  'Google sign-in did not finish. Tap Sign in again.':
+      'Google साइन-इन पूरा नहीं हुआ। फिर से साइन इन दबाएँ।',
+  'Google Drive backup is not set up in this version of the app.':
+      'इस वर्ज़न में Google Drive बैकअप सेट नहीं है।',
+  'Google sign-in was cancelled.': 'Google साइन-इन रद्द किया गया।',
+  'Sign in to Google again to keep backing up.':
+      'बैकअप जारी रखने के लिए फिर से Google में साइन इन करें।',
+  'Google sign-in failed. Try again later.':
+      'Google साइन-इन नहीं हुआ। बाद में फिर कोशिश करें।',
+  'Your Google Drive is full.': 'आपका Google Drive भर गया है।',
+  'Google Drive could not be reached. Check the internet connection.':
+      'Google Drive तक नहीं पहुँच सके। इंटरनेट कनेक्शन देखें।',
+  'A file could not be read or written on this phone.':
+      'इस फ़ोन पर कोई फ़ाइल पढ़ी या लिखी नहीं जा सकी।',
+  'The backup could not be completed. Try again later.':
+      'बैकअप पूरा नहीं हो सका। बाद में फिर कोशिश करें।',
+  'Google Drive backup': 'Google Drive बैकअप',
+  'Photos, videos, projects and reports are copied to your Google Drive by themselves, so they are safe if the app is removed or the phone is lost.': 'फ़ोटो, वीडियो, प्रोजेक्ट और रिपोर्ट अपने-आप आपके Google Drive में कॉपी होते हैं, ताकि ऐप हटने या फ़ोन खोने पर भी सुरक्षित रहें।',
+  'Sign in with Google': 'Google से साइन इन करें',
+  'Backing up…': 'बैकअप हो रहा है…',
+  'Backing up… @done of @total': 'बैकअप हो रहा है… @total में से @done',
+  'Restoring…': 'रीस्टोर हो रहा है…',
+  'Restoring… @done of @total': 'रीस्टोर हो रहा है… @total में से @done',
+  'Waiting for Wi-Fi to back up': 'बैकअप के लिए Wi-Fi का इंतज़ार',
+  'Back up automatically': 'अपने-आप बैकअप',
+  'When the app opens and after you take photos':
+      'ऐप खुलने पर और फ़ोटो लेने के बाद',
+  'Only on Wi-Fi': 'सिर्फ़ Wi-Fi पर',
+  'Saves mobile data; Back up now always works':
+      'मोबाइल डेटा बचाता है; "अभी बैकअप लें" हमेशा काम करता है',
+  'Back up now': 'अभी बैकअप लें',
+  'Sign out': 'साइन आउट',
+  'Not backed up yet': 'अभी तक बैकअप नहीं हुआ',
+  'Last backup: @date, @time': 'पिछला बैकअप: @date, @time',
+  'Everything is already in Google Drive': 'सब कुछ पहले से Google Drive में है',
+  '@n file backed up': '@n फ़ाइल का बैकअप हुआ',
+  '@n files backed up': '@n फ़ाइलों का बैकअप हुआ',
+  'Restore from Google Drive?': 'Google Drive से रीस्टोर करें?',
+  'Adds the photos, videos and projects in your Drive backup that this phone does not have. Nothing on this phone is replaced or deleted.': 'Drive बैकअप की जो फ़ोटो, वीडियो और प्रोजेक्ट इस फ़ोन पर नहीं हैं, वे जोड़ दिए जाएँगे। इस फ़ोन पर कुछ भी बदला या हटाया नहीं जाएगा।',
+  'This phone already has everything in the backup':
+      'बैकअप की हर चीज़ इस फ़ोन पर पहले से है',
+  'Restored @n photo (@files files)': '@n फ़ोटो वापस लाई गई (@files फ़ाइलें)',
+  'Restored @n photos (@files files)': '@n फ़ोटो वापस लाई गईं (@files फ़ाइलें)',
+  'Stop Google Drive backup?': 'Google Drive बैकअप बंद करें?',
+  'New photos will no longer be backed up. What is already in your Drive stays there.':
+      'नई फ़ोटो का बैकअप नहीं होगा। Drive में जो है वह वहीं रहेगा।',
+  'Backup stopped': 'बैकअप रुका हुआ है',
+  'Your photos are only on this phone': 'आपकी फ़ोटो सिर्फ़ इसी फ़ोन पर हैं',
+  'If the app is removed they are lost. Back them up to Google Drive.':
+      'ऐप हटने पर ये खो जाएँगी। Google Drive में बैकअप रखें।',
+  'Fix': 'ठीक करें',
   'Location access needed': 'लोकेशन की अनुमति चाहिए',
   'Tap to allow location': 'लोकेशन की अनुमति देने के लिए टैप करें',
   'Location access is off for Locaproof': 'Locaproof के लिए लोकेशन बंद है',

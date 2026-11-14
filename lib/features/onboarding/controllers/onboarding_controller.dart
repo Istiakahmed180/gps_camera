@@ -86,7 +86,9 @@ class OnboardingController extends GetxController with WidgetsBindingObserver {
   /// Never shown again after this, whether finished or skipped.
   Future<void> finish({bool openCamera = false}) async {
     await _storage.write(StorageKeys.onboardingDone, true);
-    await Get.offAllNamed<void>(AppRoutes.home);
+    // Not awaited: the future only completes when home is closed, so the
+    // camera would never open.
+    unawaited(Get.offAllNamed<void>(AppRoutes.home));
     if (openCamera) unawaited(Get.toNamed<void>(AppRoutes.camera));
   }
 }

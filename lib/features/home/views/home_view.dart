@@ -7,6 +7,7 @@ import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/constants/app_constants.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
+import 'package:gps_camera/features/backup/controllers/drive_backup_controller.dart';
 import 'package:gps_camera/features/gallery/views/gallery_view.dart';
 import 'package:gps_camera/features/home/controllers/home_controller.dart';
 import 'package:gps_camera/features/home/widgets/dashboard.dart';
@@ -240,6 +241,12 @@ class _Dashboard extends GetView<HomeController> {
                         ),
                       ],
                     ),
+                    if (Get.isRegistered<DriveBackupController>())
+                      BackupReminder(
+                        drive: Get.find<DriveBackupController>(),
+                        captureCount: captures.length,
+                        onOpenSettings: controller.openSettings,
+                      ),
                     const SizedBox(height: AppSpacing.xl),
                     DashboardSection(
                       title: 'Recent captures'.tr,

@@ -382,6 +382,58 @@ const Map<String, String> id = {
   'Open': 'Buka',
   'Open an original and choose Add watermark to create a watermarked copy.': 'Buka foto asli lalu pilih Tambahkan tanda air untuk membuat salinan bertanda air.',
   'Open camera': 'Buka kamera',
+  'No Locaproof backup was found in this Google account.':
+      'Tidak ada cadangan Locaproof di akun Google ini.',
+  'Google sign-in did not finish. Tap Sign in again.':
+      'Masuk Google belum selesai. Ketuk Masuk lagi.',
+  'Google Drive backup is not set up in this version of the app.':
+      'Cadangan Google Drive belum disiapkan di versi aplikasi ini.',
+  'Google sign-in was cancelled.': 'Masuk Google dibatalkan.',
+  'Sign in to Google again to keep backing up.':
+      'Masuk ke Google lagi agar pencadangan tetap berjalan.',
+  'Google sign-in failed. Try again later.':
+      'Gagal masuk ke Google. Coba lagi nanti.',
+  'Your Google Drive is full.': 'Google Drive Anda penuh.',
+  'Google Drive could not be reached. Check the internet connection.':
+      'Google Drive tidak dapat dijangkau. Periksa koneksi internet.',
+  'A file could not be read or written on this phone.':
+      'Sebuah file tidak dapat dibaca atau ditulis di ponsel ini.',
+  'The backup could not be completed. Try again later.':
+      'Pencadangan tidak dapat diselesaikan. Coba lagi nanti.',
+  'Google Drive backup': 'Cadangan Google Drive',
+  'Photos, videos, projects and reports are copied to your Google Drive by themselves, so they are safe if the app is removed or the phone is lost.': 'Foto, video, proyek, dan laporan disalin ke Google Drive Anda secara otomatis, sehingga tetap aman jika aplikasi dihapus atau ponsel hilang.',
+  'Sign in with Google': 'Masuk dengan Google',
+  'Backing up…': 'Mencadangkan…',
+  'Backing up… @done of @total': 'Mencadangkan… @done dari @total',
+  'Restoring…': 'Memulihkan…',
+  'Restoring… @done of @total': 'Memulihkan… @done dari @total',
+  'Waiting for Wi-Fi to back up': 'Menunggu Wi-Fi untuk mencadangkan',
+  'Back up automatically': 'Cadangkan otomatis',
+  'When the app opens and after you take photos':
+      'Saat aplikasi dibuka dan setelah Anda memotret',
+  'Only on Wi-Fi': 'Hanya lewat Wi-Fi',
+  'Saves mobile data; Back up now always works':
+      'Menghemat data seluler; Cadangkan sekarang selalu berfungsi',
+  'Back up now': 'Cadangkan sekarang',
+  'Sign out': 'Keluar',
+  'Not backed up yet': 'Belum dicadangkan',
+  'Last backup: @date, @time': 'Cadangan terakhir: @date, @time',
+  'Everything is already in Google Drive': 'Semuanya sudah ada di Google Drive',
+  '@n file backed up': '@n file dicadangkan',
+  '@n files backed up': '@n file dicadangkan',
+  'Restore from Google Drive?': 'Pulihkan dari Google Drive?',
+  'Adds the photos, videos and projects in your Drive backup that this phone does not have. Nothing on this phone is replaced or deleted.': 'Menambahkan foto, video, dan proyek di cadangan Drive yang tidak ada di ponsel ini. Tidak ada yang diganti atau dihapus di ponsel ini.',
+  'This phone already has everything in the backup':
+      'Ponsel ini sudah memiliki semua isi cadangan',
+  'Restored @n photo (@files files)': '@n foto dipulihkan (@files file)',
+  'Restored @n photos (@files files)': '@n foto dipulihkan (@files file)',
+  'Stop Google Drive backup?': 'Hentikan cadangan Google Drive?',
+  'New photos will no longer be backed up. What is already in your Drive stays there.': 'Foto baru tidak akan dicadangkan lagi. Yang sudah ada di Drive tetap di sana.',
+  'Backup stopped': 'Pencadangan berhenti',
+  'Your photos are only on this phone': 'Foto Anda hanya ada di ponsel ini',
+  'If the app is removed they are lost. Back them up to Google Drive.':
+      'Jika aplikasi dihapus, foto akan hilang. Cadangkan ke Google Drive.',
+  'Fix': 'Perbaiki',
   'Location access needed': 'Perlu akses lokasi',
   'Tap to allow location': 'Ketuk untuk mengizinkan lokasi',
   'Location access is off for Locaproof':

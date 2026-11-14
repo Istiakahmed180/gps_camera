@@ -16,7 +16,7 @@ typedef MapServiceFactory = StaticMapService Function(String apiKey);
 class LiveMapController extends GetxController {
   LiveMapController(
     this._location, {
-    this._channel = const MethodChannel('co.tdevs.gps_camera/native'),
+    this._channel = const MethodChannel('com.locaproof.app/native'),
     this._serviceFor = StaticMapService.new,
     this.minMove = 25,
   });

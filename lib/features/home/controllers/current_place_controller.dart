@@ -106,8 +106,13 @@ class CurrentPlaceController extends GetxController {
     try {
       await _show(await _location.currentFix(timeLimit: fixTimeout));
     } catch (_) {
-      // Keep what is shown; say so only when there is nothing.
-      if (fix.value == null) status.value = CurrentPlaceStatus.unavailable;
+      // Keep what is shown; say so only when there is nothing. Shown again
+      // so its age is rechecked: an old fix then reads "Last known".
+      if (fix.value == null) {
+        status.value = CurrentPlaceStatus.unavailable;
+      } else {
+        fix.refresh();
+      }
     }
   }
 

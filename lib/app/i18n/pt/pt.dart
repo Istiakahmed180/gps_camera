@@ -388,6 +388,57 @@ const Map<String, String> pt = {
   'Open': 'Abrir',
   'Open an original and choose Add watermark to create a watermarked copy.': 'Abra um original e escolha Adicionar marca d\'água para criar uma cópia com marca d\'água.',
   'Open camera': 'Abrir câmera',
+  'No Locaproof backup was found in this Google account.':
+      'Nenhum backup do Locaproof foi encontrado nesta conta do Google.',
+  'Google sign-in did not finish. Tap Sign in again.':
+      'O login com o Google não terminou. Toque em Entrar de novo.',
+  'Google Drive backup is not set up in this version of the app.':
+      'O backup no Google Drive não está configurado nesta versão do app.',
+  'Google sign-in was cancelled.': 'O login com o Google foi cancelado.',
+  'Sign in to Google again to keep backing up.':
+      'Entre no Google de novo para continuar fazendo backup.',
+  'Google sign-in failed. Try again later.':
+      'Não foi possível entrar com o Google. Tente mais tarde.',
+  'Your Google Drive is full.': 'Seu Google Drive está cheio.',
+  'Google Drive could not be reached. Check the internet connection.': 'Não foi possível acessar o Google Drive. Verifique a conexão com a internet.',
+  'A file could not be read or written on this phone.':
+      'Um arquivo não pôde ser lido ou gravado neste celular.',
+  'The backup could not be completed. Try again later.':
+      'Não foi possível concluir o backup. Tente mais tarde.',
+  'Google Drive backup': 'Backup no Google Drive',
+  'Photos, videos, projects and reports are copied to your Google Drive by themselves, so they are safe if the app is removed or the phone is lost.': 'Fotos, vídeos, projetos e relatórios são copiados sozinhos para o seu Google Drive, assim ficam seguros se o app for removido ou o celular for perdido.',
+  'Sign in with Google': 'Entrar com o Google',
+  'Backing up…': 'Fazendo backup…',
+  'Backing up… @done of @total': 'Fazendo backup… @done de @total',
+  'Restoring…': 'Restaurando…',
+  'Restoring… @done of @total': 'Restaurando… @done de @total',
+  'Waiting for Wi-Fi to back up': 'Aguardando Wi-Fi para o backup',
+  'Back up automatically': 'Backup automático',
+  'When the app opens and after you take photos':
+      'Ao abrir o app e depois de tirar fotos',
+  'Only on Wi-Fi': 'Só no Wi-Fi',
+  'Saves mobile data; Back up now always works':
+      'Economiza dados móveis; Fazer backup agora sempre funciona',
+  'Back up now': 'Fazer backup agora',
+  'Sign out': 'Sair',
+  'Not backed up yet': 'Ainda sem backup',
+  'Last backup: @date, @time': 'Último backup: @date, @time',
+  'Everything is already in Google Drive': 'Tudo já está no Google Drive',
+  '@n file backed up': '@n arquivo no backup',
+  '@n files backed up': '@n arquivos no backup',
+  'Restore from Google Drive?': 'Restaurar do Google Drive?',
+  'Adds the photos, videos and projects in your Drive backup that this phone does not have. Nothing on this phone is replaced or deleted.': 'Adiciona as fotos, vídeos e projetos do seu backup no Drive que este celular não tem. Nada neste celular é substituído ou apagado.',
+  'This phone already has everything in the backup':
+      'Este celular já tem tudo o que está no backup',
+  'Restored @n photo (@files files)': '@n foto restaurada (@files arquivos)',
+  'Restored @n photos (@files files)': '@n fotos restauradas (@files arquivos)',
+  'Stop Google Drive backup?': 'Parar o backup no Google Drive?',
+  'New photos will no longer be backed up. What is already in your Drive stays there.': 'Fotos novas não serão mais copiadas. O que já está no seu Drive continua lá.',
+  'Backup stopped': 'Backup parado',
+  'Your photos are only on this phone': 'Suas fotos estão só neste celular',
+  'If the app is removed they are lost. Back them up to Google Drive.':
+      'Se o app for removido, elas se perdem. Faça backup no Google Drive.',
+  'Fix': 'Corrigir',
   'Location access needed': 'Acesso à localização necessário',
   'Tap to allow location': 'Toque para permitir a localização',
   'Location access is off for Locaproof':

@@ -381,6 +381,60 @@ const Map<String, String> ar = {
   'Open an original and choose Add watermark to create a watermarked copy.':
       'افتح صورة أصلية واختر إضافة علامة مائية لإنشاء نسخة بعلامة مائية.',
   'Open camera': 'فتح الكاميرا',
+  'No Locaproof backup was found in this Google account.':
+      'لم يُعثر على نسخة احتياطية لـ Locaproof في حساب Google هذا.',
+  'Google sign-in did not finish. Tap Sign in again.':
+      'لم يكتمل تسجيل الدخول إلى Google. انقر تسجيل الدخول مرة أخرى.',
+  'Google Drive backup is not set up in this version of the app.':
+      'النسخ الاحتياطي على Google Drive غير مُعدّ في هذا الإصدار من التطبيق.',
+  'Google sign-in was cancelled.': 'تم إلغاء تسجيل الدخول إلى Google.',
+  'Sign in to Google again to keep backing up.':
+      'سجّل الدخول إلى Google مرة أخرى لمتابعة النسخ الاحتياطي.',
+  'Google sign-in failed. Try again later.':
+      'تعذّر تسجيل الدخول إلى Google. حاول لاحقًا.',
+  'Your Google Drive is full.': 'مساحة Google Drive لديك ممتلئة.',
+  'Google Drive could not be reached. Check the internet connection.':
+      'تعذّر الوصول إلى Google Drive. تحقّق من الاتصال بالإنترنت.',
+  'A file could not be read or written on this phone.':
+      'تعذّرت قراءة ملف أو كتابته على هذا الهاتف.',
+  'The backup could not be completed. Try again later.':
+      'تعذّر إكمال النسخ الاحتياطي. حاول لاحقًا.',
+  'Google Drive backup': 'النسخ الاحتياطي على Google Drive',
+  'Photos, videos, projects and reports are copied to your Google Drive by themselves, so they are safe if the app is removed or the phone is lost.': 'تُنسخ الصور والفيديوهات والمشاريع والتقارير تلقائيًا إلى Google Drive، فتبقى آمنة إذا حُذف التطبيق أو ضاع الهاتف.',
+  'Sign in with Google': 'تسجيل الدخول باستخدام Google',
+  'Backing up…': 'جارٍ النسخ الاحتياطي…',
+  'Backing up… @done of @total': 'جارٍ النسخ الاحتياطي… @done من @total',
+  'Restoring…': 'جارٍ الاستعادة…',
+  'Restoring… @done of @total': 'جارٍ الاستعادة… @done من @total',
+  'Waiting for Wi-Fi to back up': 'بانتظار Wi-Fi للنسخ الاحتياطي',
+  'Back up automatically': 'نسخ احتياطي تلقائي',
+  'When the app opens and after you take photos':
+      'عند فتح التطبيق وبعد التقاط الصور',
+  'Only on Wi-Fi': 'عبر Wi-Fi فقط',
+  'Saves mobile data; Back up now always works':
+      'يوفّر بيانات الجوال؛ «انسخ الآن» يعمل دائمًا',
+  'Back up now': 'انسخ الآن',
+  'Sign out': 'تسجيل الخروج',
+  'Not backed up yet': 'لم يُنسخ احتياطيًا بعد',
+  'Last backup: @date, @time': 'آخر نسخة احتياطية: @date، @time',
+  'Everything is already in Google Drive':
+      'كل شيء موجود في Google Drive بالفعل',
+  '@n file backed up': 'تم نسخ @n ملف',
+  '@n files backed up': 'تم نسخ @n ملفات',
+  'Restore from Google Drive?': 'الاستعادة من Google Drive؟',
+  'Adds the photos, videos and projects in your Drive backup that this phone does not have. Nothing on this phone is replaced or deleted.': 'تُضاف الصور والفيديوهات والمشاريع الموجودة في نسختك على Drive وغير الموجودة على هذا الهاتف. لا يُستبدل أو يُحذف أي شيء على هذا الهاتف.',
+  'This phone already has everything in the backup':
+      'هذا الهاتف يحتوي بالفعل على كل ما في النسخة الاحتياطية',
+  'Restored @n photo (@files files)': 'تمت استعادة @n صورة (@files ملفات)',
+  'Restored @n photos (@files files)': 'تمت استعادة @n صور (@files ملفات)',
+  'Stop Google Drive backup?': 'إيقاف النسخ الاحتياطي على Google Drive؟',
+  'New photos will no longer be backed up. What is already in your Drive stays there.':
+      'لن تُنسخ الصور الجديدة بعد الآن. ما هو موجود في Drive يبقى هناك.',
+  'Backup stopped': 'توقّف النسخ الاحتياطي',
+  'Your photos are only on this phone': 'صورك موجودة على هذا الهاتف فقط',
+  'If the app is removed they are lost. Back them up to Google Drive.':
+      'إذا حُذف التطبيق فستضيع. انسخها احتياطيًا إلى Google Drive.',
+  'Fix': 'إصلاح',
   'Location access needed': 'يلزم الوصول إلى الموقع',
   'Tap to allow location': 'انقر للسماح بالموقع',
   'Location access is off for Locaproof':

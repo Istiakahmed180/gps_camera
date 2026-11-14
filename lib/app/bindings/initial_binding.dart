@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:get/get.dart';
+import 'package:gps_camera/features/backup/controllers/drive_backup_controller.dart';
+import 'package:gps_camera/features/backup/services/drive_backup_service.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gps_camera/core/database/database_service.dart';
 import 'package:gps_camera/core/services/permission_service.dart';
@@ -73,6 +75,18 @@ class InitialBinding extends Bindings {
     Get.lazyPut(
       () =>
           BackupService(Get.find<PhotoStorageService>(), database.db, storage),
+      fenix: true,
+    );
+    // A service: kept for the whole app life, so a backup keeps running
+    // while screens open and close.
+    Get.lazyPut(
+      () => DriveBackupController(
+        DriveBackupService(
+          Get.find<BackupService>(),
+          Get.find<PhotoStorageService>(),
+        ),
+        storage,
+      ),
       fenix: true,
     );
     Get.lazyPut(

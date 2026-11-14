@@ -380,6 +380,57 @@ const Map<String, String> es = {
   'Open': 'Abrir',
   'Open an original and choose Add watermark to create a watermarked copy.': 'Abre un original y elige Agregar marca de agua para crear una copia con marca de agua.',
   'Open camera': 'Abrir cámara',
+  'No Locaproof backup was found in this Google account.':
+      'No se encontró ninguna copia de Locaproof en esta cuenta de Google.',
+  'Google sign-in did not finish. Tap Sign in again.': 'El inicio de sesión con Google no terminó. Toca Iniciar sesión de nuevo.',
+  'Google Drive backup is not set up in this version of the app.':
+      'La copia en Google Drive no está configurada en esta versión de la app.',
+  'Google sign-in was cancelled.': 'Se canceló el inicio de sesión con Google.',
+  'Sign in to Google again to keep backing up.':
+      'Vuelve a iniciar sesión en Google para seguir haciendo copias.',
+  'Google sign-in failed. Try again later.':
+      'No se pudo iniciar sesión con Google. Inténtalo más tarde.',
+  'Your Google Drive is full.': 'Tu Google Drive está lleno.',
+  'Google Drive could not be reached. Check the internet connection.':
+      'No se pudo conectar con Google Drive. Revisa la conexión a internet.',
+  'A file could not be read or written on this phone.':
+      'No se pudo leer o escribir un archivo en este teléfono.',
+  'The backup could not be completed. Try again later.':
+      'No se pudo completar la copia. Inténtalo más tarde.',
+  'Google Drive backup': 'Copia en Google Drive',
+  'Photos, videos, projects and reports are copied to your Google Drive by themselves, so they are safe if the app is removed or the phone is lost.': 'Las fotos, vídeos, proyectos e informes se copian solos en tu Google Drive, así están a salvo si se elimina la app o pierdes el teléfono.',
+  'Sign in with Google': 'Iniciar sesión con Google',
+  'Backing up…': 'Haciendo copia…',
+  'Backing up… @done of @total': 'Haciendo copia… @done de @total',
+  'Restoring…': 'Restaurando…',
+  'Restoring… @done of @total': 'Restaurando… @done de @total',
+  'Waiting for Wi-Fi to back up': 'Esperando Wi-Fi para la copia',
+  'Back up automatically': 'Copia automática',
+  'When the app opens and after you take photos':
+      'Al abrir la app y después de tomar fotos',
+  'Only on Wi-Fi': 'Solo con Wi-Fi',
+  'Saves mobile data; Back up now always works':
+      'Ahorra datos móviles; Copiar ahora siempre funciona',
+  'Back up now': 'Copiar ahora',
+  'Sign out': 'Cerrar sesión',
+  'Not backed up yet': 'Aún sin copia',
+  'Last backup: @date, @time': 'Última copia: @date, @time',
+  'Everything is already in Google Drive': 'Todo ya está en Google Drive',
+  '@n file backed up': '@n archivo copiado',
+  '@n files backed up': '@n archivos copiados',
+  'Restore from Google Drive?': '¿Restaurar desde Google Drive?',
+  'Adds the photos, videos and projects in your Drive backup that this phone does not have. Nothing on this phone is replaced or deleted.': 'Añade las fotos, vídeos y proyectos de tu copia en Drive que este teléfono no tiene. No se reemplaza ni se elimina nada en este teléfono.',
+  'This phone already has everything in the backup':
+      'Este teléfono ya tiene todo lo de la copia',
+  'Restored @n photo (@files files)': '@n foto restaurada (@files archivos)',
+  'Restored @n photos (@files files)': '@n fotos restauradas (@files archivos)',
+  'Stop Google Drive backup?': '¿Detener la copia en Google Drive?',
+  'New photos will no longer be backed up. What is already in your Drive stays there.': 'Las fotos nuevas ya no se copiarán. Lo que ya está en tu Drive se queda allí.',
+  'Backup stopped': 'Copia detenida',
+  'Your photos are only on this phone': 'Tus fotos solo están en este teléfono',
+  'If the app is removed they are lost. Back them up to Google Drive.':
+      'Si se elimina la app, se pierden. Haz una copia en Google Drive.',
+  'Fix': 'Arreglar',
   'Location access needed': 'Se necesita acceso a la ubicación',
   'Tap to allow location': 'Toca para permitir la ubicación',
   'Location access is off for Locaproof':

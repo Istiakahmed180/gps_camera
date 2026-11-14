@@ -46,6 +46,11 @@ dependencies:
   flutter_map: ^8.3.2
   latlong2: ^0.10.1
   video_player: ^2.14.1
+  google_sign_in: ^7.2.0
+  googleapis: ^19.0.0
+  crypto: ^3.0.8
+  http: ^1.6.0
+  connectivity_plus: ^7.3.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

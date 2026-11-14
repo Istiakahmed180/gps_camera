@@ -106,6 +106,37 @@ void main() {
     });
   });
 
+  test('altitude alone still shows, with the last-known caveat', () {
+    const config = WatermarkConfig(
+      showCoordinates: false,
+      showAccuracy: false,
+      showAddress: false,
+    );
+    final current = WatermarkContent.from(
+      fixtureMetadata(
+        location: LocationSnapshot.current(
+          _seaLevelFix(),
+          const Duration(seconds: 2),
+        ),
+      ),
+      config,
+    );
+    expect(current.altitude, '32 m');
+    expect(current.locationNotice, isNull);
+
+    final stale = WatermarkContent.from(
+      fixtureMetadata(
+        location: LocationSnapshot.stale(
+          _seaLevelFix(),
+          const Duration(minutes: 5),
+        ),
+      ),
+      config,
+    );
+    expect(stale.altitude, '32 m');
+    expect(stale.locationNotice, isNotNull);
+  });
+
   group('card templates', () {
     const photo = Size(1080, 1920);
     final content = WatermarkContent.from(

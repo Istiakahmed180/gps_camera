@@ -1,4 +1,4 @@
-package co.tdevs.gps_camera
+package com.locaproof.app
 
 import android.content.Context
 import android.hardware.GeomagneticField

@@ -20,7 +20,7 @@ import 'helpers/test_env.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const channel = MethodChannel('co.tdevs.gps_camera/volume');
+  const channel = MethodChannel('com.locaproof.app/volume');
   final volumeCalls = <bool>[];
 
   setUp(() {

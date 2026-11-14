@@ -86,6 +86,8 @@ class _TemplateCard extends StatelessWidget {
         'description': template.description.tr,
       }),
       excludeSemantics: true,
+      // The InkWell's own tap action is excluded with it.
+      onTap: onTap,
       child: Material(
         color: colors.surface,
         shape: RoundedRectangleBorder(

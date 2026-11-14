@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gps_camera/features/backup/controllers/drive_backup_controller.dart';
+import 'package:gps_camera/features/settings/widgets/drive_backup_card.dart';
 import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/i18n/app_language.dart';
 import 'package:gps_camera/app/routes/app_routes.dart';
@@ -43,6 +45,14 @@ class SettingsView extends GetView<SettingsController> {
               Card(child: StorageSettings(controller: controller)),
               const SizedBox(height: AppSpacing.xl),
               SectionHeader('Backup'.tr),
+              if (Get.isRegistered<DriveBackupController>()) ...[
+                Card(
+                  child: DriveBackupCard(
+                    drive: Get.find<DriveBackupController>(),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
               Card(child: BackupActions(service: controller.backup)),
               const SizedBox(height: AppSpacing.xl),
               SectionHeader('Appearance'.tr),

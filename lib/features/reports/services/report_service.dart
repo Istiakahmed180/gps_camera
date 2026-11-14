@@ -61,7 +61,7 @@ class ReportService extends GetxService {
     this._overviewMap,
   }) : _runner = runner ?? runInIsolate,
        _fonts = fonts ?? loadBundledFonts,
-       _channel = channel ?? const MethodChannel('co.tdevs.gps_camera/native');
+       _channel = channel ?? const MethodChannel('com.locaproof.app/native');
 
   /// Keeps memory and file size reasonable on phones.
   static const int maxPhotos = 300;

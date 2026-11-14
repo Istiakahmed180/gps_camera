@@ -1,4 +1,4 @@
-package co.tdevs.gps_camera
+package com.locaproof.app
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -112,6 +112,7 @@ class MainActivity : FlutterActivity() {
 
     override fun onDestroy() {
         io.shutdown()
+        altitudeIo.shutdown()
         super.onDestroy()
     }
 
@@ -182,7 +183,7 @@ class MainActivity : FlutterActivity() {
     /** The Geoapify key provided at build time, or null. */
     private fun mapKey(): String? {
         val info = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-        return info.metaData?.getString("co.tdevs.gps_camera.GEOAPIFY_API_KEY")
+        return info.metaData?.getString("com.locaproof.app.GEOAPIFY_API_KEY")
             ?.takeIf { it.isNotBlank() }
     }
 
@@ -428,9 +429,9 @@ class MainActivity : FlutterActivity() {
     }
 
     companion object {
-        private const val CHANNEL = "co.tdevs.gps_camera/native"
-        private const val VOLUME_CHANNEL = "co.tdevs.gps_camera/volume"
-        private const val COMPASS_CHANNEL = "co.tdevs.gps_camera/compass"
+        private const val CHANNEL = "com.locaproof.app/native"
+        private const val VOLUME_CHANNEL = "com.locaproof.app/volume"
+        private const val COMPASS_CHANNEL = "com.locaproof.app/compass"
         private const val GALLERY_DIR = "Pictures/Locaproof"
         private const val VIDEO_DIR = "Movies/Locaproof"
         private val GALLERY_SOURCES = setOf("Photos", "Watermarked")

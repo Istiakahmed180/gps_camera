@@ -98,7 +98,7 @@ abstract final class BackgroundServices {
   static Future<void> start() async {
     String? key;
     try {
-      key = await const MethodChannel('co.tdevs.gps_camera/native')
+      key = await const MethodChannel('com.locaproof.app/native')
           .invokeMethod<String>('mapKey');
     } catch (_) {
       key = null;

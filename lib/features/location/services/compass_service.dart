@@ -21,8 +21,8 @@ class CompassReading {
 /// only runs while the camera screen is open.
 class CompassService {
   CompassService({MethodChannel? methods, EventChannel? events})
-    : _methods = methods ?? const MethodChannel('co.tdevs.gps_camera/native'),
-      _events = events ?? const EventChannel('co.tdevs.gps_camera/compass');
+    : _methods = methods ?? const MethodChannel('com.locaproof.app/native'),
+      _events = events ?? const EventChannel('com.locaproof.app/compass');
 
   final MethodChannel _methods;
   final EventChannel _events;

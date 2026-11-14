@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:gps_camera/app/routes/app_routes.dart';
+import 'package:gps_camera/features/backup/controllers/drive_backup_controller.dart';
 import 'package:gps_camera/features/gallery/controllers/gallery_controller.dart';
 import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
 import 'package:gps_camera/features/home/controllers/current_place_controller.dart';
@@ -47,13 +48,23 @@ class HomeController extends GetxController {
     super.onInit();
     unawaited(_loadProjects());
     _syncLocation();
+    _autoBackUp();
+  }
+
+  /// Google Drive backup, when it is turned on; it decides itself whether
+  /// a run is due.
+  void _autoBackUp({bool force = false}) {
+    if (!Get.isRegistered<DriveBackupController>()) return;
+    unawaited(Get.find<DriveBackupController>().autoBackUp(force: force));
   }
 
   /// Called when the main screen is covered or uncovered, or the app goes
   /// to the background or comes back.
   void setVisible(bool visible) {
+    final wasVisible = _visible;
     _visible = visible;
     _syncLocation();
+    if (visible && !wasVisible) _autoBackUp();
   }
 
   /// The location is looked up only while the dashboard can be seen.
@@ -119,6 +130,8 @@ class HomeController extends GetxController {
 
   Future<void> openCamera() async {
     await Get.toNamed<void>(AppRoutes.camera);
+    // New photos go to Drive soon after they are taken.
+    _autoBackUp(force: true);
     await refreshCurrent();
   }
 

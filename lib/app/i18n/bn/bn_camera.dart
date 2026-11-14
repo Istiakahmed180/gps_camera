@@ -126,6 +126,61 @@ const Map<String, String> bnCamera = {
   'Projects': 'প্রজেক্ট',
   'Reports': 'রিপোর্ট',
   'Open camera': 'ক্যামেরা খুলুন',
+  'No Locaproof backup was found in this Google account.':
+      'এই Google অ্যাকাউন্টে Locaproof-এর কোনো ব্যাকআপ পাওয়া যায়নি।',
+  'Google sign-in did not finish. Tap Sign in again.':
+      'Google সাইন-ইন শেষ হয়নি। আবার সাইন ইন চাপুন।',
+  'Google Drive backup is not set up in this version of the app.':
+      'এই ভার্সনে Google Drive ব্যাকআপ সেটআপ করা নেই।',
+  'Google sign-in was cancelled.': 'Google সাইন-ইন বাতিল করা হয়েছে।',
+  'Sign in to Google again to keep backing up.':
+      'ব্যাকআপ চালু রাখতে আবার Google-এ সাইন ইন করুন।',
+  'Google sign-in failed. Try again later.':
+      'Google সাইন-ইন হয়নি। পরে আবার চেষ্টা করুন।',
+  'Your Google Drive is full.': 'আপনার Google Drive ভরে গেছে।',
+  'Google Drive could not be reached. Check the internet connection.':
+      'Google Drive-এ যোগাযোগ করা যায়নি। ইন্টারনেট সংযোগ দেখুন।',
+  'A file could not be read or written on this phone.':
+      'এই ফোনে একটা ফাইল পড়া বা লেখা যায়নি।',
+  'The backup could not be completed. Try again later.':
+      'ব্যাকআপ শেষ করা যায়নি। পরে আবার চেষ্টা করুন।',
+  'Google Drive backup': 'Google Drive ব্যাকআপ',
+  'Photos, videos, projects and reports are copied to your Google Drive by themselves, so they are safe if the app is removed or the phone is lost.': 'ছবি, ভিডিও, প্রজেক্ট আর রিপোর্ট নিজে থেকেই আপনার Google Drive-এ কপি হয়, তাই অ্যাপ মুছে গেলে বা ফোন হারালেও নিরাপদ থাকে।',
+  'Sign in with Google': 'Google দিয়ে সাইন ইন',
+  'Backing up…': 'ব্যাকআপ হচ্ছে…',
+  'Backing up… @done of @total': 'ব্যাকআপ হচ্ছে… @total-এর মধ্যে @done',
+  'Restoring…': 'রিস্টোর হচ্ছে…',
+  'Restoring… @done of @total': 'রিস্টোর হচ্ছে… @total-এর মধ্যে @done',
+  'Waiting for Wi-Fi to back up': 'ব্যাকআপের জন্য Wi-Fi-এর অপেক্ষা',
+  'Back up automatically': 'নিজে থেকে ব্যাকআপ',
+  'When the app opens and after you take photos':
+      'অ্যাপ খুললে আর ছবি তোলার পরে',
+  'Only on Wi-Fi': 'শুধু Wi-Fi-তে',
+  'Saves mobile data; Back up now always works':
+      'মোবাইল ডেটা বাঁচায়; "এখনই ব্যাকআপ" সবসময় কাজ করে',
+  'Back up now': 'এখনই ব্যাকআপ',
+  'Sign out': 'সাইন আউট',
+  'Not backed up yet': 'এখনো ব্যাকআপ হয়নি',
+  'Last backup: @date, @time': 'শেষ ব্যাকআপ: @date, @time',
+  'Everything is already in Google Drive': 'সবকিছু আগেই Google Drive-এ আছে',
+  '@n file backed up': '@nটি ফাইল ব্যাকআপ হয়েছে',
+  '@n files backed up': '@nটি ফাইল ব্যাকআপ হয়েছে',
+  'Restore from Google Drive?': 'Google Drive থেকে রিস্টোর করবেন?',
+  'Adds the photos, videos and projects in your Drive backup that this phone does not have. Nothing on this phone is replaced or deleted.': 'Drive ব্যাকআপে থাকা যে ছবি, ভিডিও আর প্রজেক্ট এই ফোনে নেই সেগুলো যোগ হবে। এই ফোনের কিছুই বদলাবে বা মুছবে না।',
+  'This phone already has everything in the backup':
+      'ব্যাকআপের সবকিছু এই ফোনে আগেই আছে',
+  'Restored @n photo (@files files)':
+      '@nটি ছবি ফিরিয়ে আনা হয়েছে (@filesটি ফাইল)',
+  'Restored @n photos (@files files)':
+      '@nটি ছবি ফিরিয়ে আনা হয়েছে (@filesটি ফাইল)',
+  'Stop Google Drive backup?': 'Google Drive ব্যাকআপ বন্ধ করবেন?',
+  'New photos will no longer be backed up. What is already in your Drive stays there.':
+      'নতুন ছবি আর ব্যাকআপ হবে না। Drive-এ যা আছে তা থেকে যাবে।',
+  'Backup stopped': 'ব্যাকআপ থেমে আছে',
+  'Your photos are only on this phone': 'আপনার ছবি শুধু এই ফোনেই আছে',
+  'If the app is removed they are lost. Back them up to Google Drive.':
+      'অ্যাপ মুছে গেলে ছবিগুলো হারাবে। Google Drive-এ ব্যাকআপ রাখুন।',
+  'Fix': 'ঠিক করুন',
   'Location access needed': 'লোকেশনের অনুমতি দরকার',
   'Tap to allow location': 'লোকেশনের অনুমতি দিতে ট্যাপ করুন',
   'Location access is off for Locaproof': 'Locaproof-এর লোকেশন অনুমতি বন্ধ',

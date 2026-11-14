@@ -87,6 +87,26 @@ void main() {
     expect(OnboardingGate.isDone(storage()), isTrue);
   });
 
+  testWidgets('Open camera on the last page opens the camera over home', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const GpsCameraApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+    expect(find.text('You’re ready'), findsOneWidget);
+
+    await tester.tap(find.text('Open camera'));
+    await tester.pumpAndSettle();
+    expect(find.text('Camera access needed'), findsOneWidget);
+
+    Get.back<void>();
+    await tester.pumpAndSettle();
+    expect(find.text('Capture proof'), findsOneWidget);
+  });
+
   test('existing users with settings or photos skip it', () async {
     final photos = PhotoStorageService();
     await OnboardingGate.skipForExistingUsers(

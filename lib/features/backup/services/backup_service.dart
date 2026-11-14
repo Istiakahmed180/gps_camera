@@ -87,7 +87,7 @@ class BackupService {
     MethodChannel? channel,
     Future<Directory> Function()? tempDirectory,
     DateTime Function()? clock,
-  }) : _channel = channel ?? const MethodChannel('co.tdevs.gps_camera/native'),
+  }) : _channel = channel ?? const MethodChannel('com.locaproof.app/native'),
        _tempDirectory = tempDirectory ?? getTemporaryDirectory,
        _clock = clock ?? DateTime.now;
 
@@ -117,22 +117,7 @@ class BackupService {
   Future<BackupFile> create() => _exclusive(() async {
     final root = (await _storage.rootDirectory()).path;
     final refs = await _listRefs(root);
-    final manifest = jsonEncode({
-      'format': format,
-      'version': version,
-      'createdAt': _clock().toUtc().toIso8601String(),
-      'fileCount': refs.length,
-      'settings': {
-        for (final key in _settingKeys) key: ?_settings.read<Object>(key),
-      },
-      'projects': [
-        for (final row in await _db.select(_db.projects).get()) row.toJson(),
-      ],
-      'projectPhotos': [
-        for (final row in await _db.select(_db.projectPhotos).get())
-          row.toJson(),
-      ],
-    });
+    final manifest = jsonEncode(await buildManifest(fileCount: refs.length));
 
     final dir = await _cacheFolder(clear: true);
     final zip = File('${dir.path}/${_fileName(_clock())}');
@@ -154,6 +139,48 @@ class BackupService {
       photoCount: refs.where(_isOriginalPhoto).length,
     );
   });
+
+  /// Everything a backup holds besides the files themselves: projects,
+  /// which photos are in them, and watermark settings.
+  Future<Map<String, dynamic>> buildManifest({int? fileCount}) async => {
+    'format': format,
+    'version': version,
+    'createdAt': _clock().toUtc().toIso8601String(),
+    'fileCount': ?fileCount,
+    'settings': {
+      for (final key in _settingKeys) key: ?_settings.read<Object>(key),
+    },
+    'projects': [
+      for (final row in await _db.select(_db.projects).get()) row.toJson(),
+    ],
+    'projectPhotos': [
+      for (final row in await _db.select(_db.projectPhotos).get()) row.toJson(),
+    ],
+  };
+
+  /// Every file a backup includes, as `Folder/name`, sorted.
+  Future<List<String>> listFiles() async =>
+      _listRefs((await _storage.rootDirectory()).path);
+
+  /// Merges a manifest's projects and settings into this phone, after its
+  /// files are in place. Nothing that exists is changed. Returns the
+  /// projects and assignments added, and whether settings were taken.
+  Future<(int, int, bool)> mergeManifest(Map<String, dynamic> manifest) async {
+    if (manifest['format'] != format) {
+      throw const BackupException('This file is not a Locaproof backup.');
+    }
+    final version = manifest['version'];
+    if (version is! int || version > BackupService.version) {
+      throw const BackupException(
+        'This backup was made by a newer version of the app. Update the app '
+        'and try again.',
+      );
+    }
+    final root = (await _storage.rootDirectory()).path;
+    final (projects, assignments) = await _mergeProjects(manifest, root);
+    final settings = await _mergeSettings(manifest['settings']);
+    return (projects, assignments, settings);
+  }
 
   /// Asks the user where to save [backup] (Files, Drive, USB, …).
   Future<BackupSaveOutcome> saveToDevice(BackupFile backup) async {
@@ -251,6 +278,11 @@ class BackupService {
     StorageKeys.watermarkConfig,
     StorageKeys.autoWatermark,
   ];
+
+  /// Runs [work] while no other backup or restore (ZIP or Google Drive)
+  /// runs, so two never write the same files. Throws [BackupException]
+  /// when one is already running.
+  Future<T> exclusive<T>(Future<T> Function() work) => _exclusive(work);
 
   Future<T> _exclusive<T>(Future<T> Function() work) async {
     if (isBusy.value) {
@@ -403,6 +435,8 @@ class BackupService {
   }
 
   /// An original photo or video (videos live in `Photos/` too).
+  static bool isOriginalRef(String ref) => _isOriginalPhoto(ref);
+
   static bool _isOriginalPhoto(String ref) =>
       ref.startsWith('Photos/') &&
       (ref.endsWith('.jpg') || ref.endsWith('.mp4'));

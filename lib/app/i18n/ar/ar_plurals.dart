@@ -3,6 +3,16 @@
 /// 3 to 10 and `other` for 0 and 11 and up. A missing form falls back to
 /// the plural text in [ar].
 const Map<String, Map<String, String>> arPlurals = {
+  '@n files backed up': {
+    'two': 'تم نسخ ملفين',
+    'few': 'تم نسخ @n ملفات',
+    'other': 'تم نسخ @n ملفًا',
+  },
+  'Restored @n photos (@files files)': {
+    'two': 'تمت استعادة صورتين (@files ملفات)',
+    'few': 'تمت استعادة @n صور (@files ملفات)',
+    'other': 'تمت استعادة @n صورة (@files ملفات)',
+  },
   '@n photos will be copied to Pictures/Locaproof. The photos in the app are not changed.':
       {
         'two': 'سيتم نسخ صورتين إلى Pictures/Locaproof. لن تتغير الصور داخل التطبيق.',

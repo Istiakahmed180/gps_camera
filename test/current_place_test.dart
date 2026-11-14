@@ -98,6 +98,22 @@ void main() {
     expect(here.status.value, CurrentPlaceStatus.found);
   });
 
+  test(
+    'a failed lookup re-shows the old fix so its age is rechecked',
+    () async {
+      final location = _Location()..current = fixtureFix();
+      final here = CurrentPlaceController(location, _places());
+      await here.locate();
+      var shown = 0;
+      final sub = here.fix.listen((_) => shown++);
+      location.current = null;
+      await here.locate();
+      expect(here.status.value, CurrentPlaceStatus.found);
+      expect(shown, 1);
+      await sub.cancel();
+    },
+  );
+
   test('the address is not looked up again without moving', () async {
     final calls = <String>[];
     final location = _Location()..current = fixtureFix();

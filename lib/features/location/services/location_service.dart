@@ -55,7 +55,7 @@ class LocationService extends GetxService {
     double altitude,
   ) async {
     if (defaultTargetPlatform != TargetPlatform.android) return null;
-    final value = await const MethodChannel('co.tdevs.gps_camera/native')
+    final value = await const MethodChannel('com.locaproof.app/native')
         .invokeMethod<Object?>('seaLevelAltitude', {
           'latitude': latitude,
           'longitude': longitude,

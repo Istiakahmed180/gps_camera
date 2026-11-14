@@ -51,7 +51,11 @@ class WatermarkContent {
         config.showCoordinates ||
         config.showAccuracy ||
         (config.showAddress &&
-            (fix?.address != null || metadata.place?.hasAddress == true));
+            (fix?.address != null || metadata.place?.hasAddress == true)) ||
+        // Altitude alone is still location, with its caveats.
+        (config.showAltitude &&
+            fix?.altitude != null &&
+            fix?.altitudeReference == AltitudeReference.meanSeaLevel);
 
     final state = switch (location.status) {
       _ when !showsLocation => null,

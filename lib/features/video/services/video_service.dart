@@ -60,7 +60,7 @@ class VideoException implements Exception {
 /// the location stamp into a copy. Originals are only ever read.
 class VideoService extends GetxService {
   VideoService(this._storage, {MethodChannel? channel})
-    : _channel = channel ?? const MethodChannel('co.tdevs.gps_camera/video') {
+    : _channel = channel ?? const MethodChannel('com.locaproof.app/video') {
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'progress') {
         _onProgress?.call((call.arguments as num).toDouble().clamp(0, 1));

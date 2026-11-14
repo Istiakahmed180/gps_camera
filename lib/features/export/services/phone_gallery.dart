@@ -17,7 +17,7 @@ enum PhoneGallerySave {
 /// No storage permission is used: Android 10+ lets apps add their own media.
 class PhoneGallery {
   PhoneGallery([MethodChannel? channel])
-    : _channel = channel ?? const MethodChannel('co.tdevs.gps_camera/native');
+    : _channel = channel ?? const MethodChannel('com.locaproof.app/native');
 
   final MethodChannel _channel;
   bool? _available;

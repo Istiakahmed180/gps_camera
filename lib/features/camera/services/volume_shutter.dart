@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 /// everywhere else.
 class VolumeShutter {
   VolumeShutter([MethodChannel? channel])
-    : _channel = channel ?? const MethodChannel('co.tdevs.gps_camera/volume');
+    : _channel = channel ?? const MethodChannel('com.locaproof.app/volume');
 
   final MethodChannel _channel;
 

@@ -36,7 +36,7 @@ class _PhotoMapViewState extends State<PhotoMapView> {
   Future<void> _loadKey() async {
     String? key;
     try {
-      key = await const MethodChannel('co.tdevs.gps_camera/native')
+      key = await const MethodChannel('com.locaproof.app/native')
           .invokeMethod<String>('mapKey');
     } catch (_) {
       key = null;
@@ -183,7 +183,7 @@ class _Map extends StatelessWidget {
           additionalOptions: {'apiKey': apiKey},
           retinaMode: RetinaMode.isHighDensity(context),
           maxNativeZoom: 20,
-          userAgentPackageName: 'co.tdevs.gps_camera',
+          userAgentPackageName: 'com.locaproof.app',
         ),
         MarkerLayer(
           markers: [

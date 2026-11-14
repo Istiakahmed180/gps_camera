@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gps_camera/app/i18n/count_text.dart';
 import 'package:gps_camera/app/theme/app_colors.dart';
 import 'package:gps_camera/app/theme/app_dimens.dart';
 import 'package:gps_camera/core/extensions/context_extensions.dart';
+import 'package:gps_camera/features/backup/controllers/drive_backup_controller.dart';
 import 'package:gps_camera/features/gallery/models/gallery_photo.dart';
 import 'package:gps_camera/features/home/controllers/current_place_controller.dart';
 import 'package:gps_camera/features/location/models/location_fix.dart';
@@ -284,6 +287,8 @@ class StatTile extends StatelessWidget {
       button: true,
       label: '$value $label',
       excludeSemantics: true,
+      // The InkWell's own tap action is excluded with it.
+      onTap: onTap,
       child: SoftSurface(
         radius: 18,
         depth: 4,
@@ -542,5 +547,96 @@ class _EmptyCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Shown on the dashboard while photos exist only on this phone: turns on
+/// Google Drive backup, or says why backup stopped.
+class BackupReminder extends StatelessWidget {
+  const BackupReminder({
+    super.key,
+    required this.drive,
+    required this.captureCount,
+    required this.onOpenSettings,
+  });
+
+  final DriveBackupController drive;
+  final int captureCount;
+  final VoidCallback onOpenSettings;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      // Read first: an Obx must always listen to something.
+      final signedIn = drive.account.value != null;
+      final problem = drive.problem.value;
+      final busy = drive.isBusy;
+      if (!drive.isConfigured || captureCount == 0) {
+        return const SizedBox.shrink();
+      }
+      if (signedIn && (problem == null || busy)) {
+        return const SizedBox.shrink();
+      }
+      final colors = context.colors;
+      final warning = signedIn;
+      return Padding(
+        padding: const EdgeInsets.only(top: AppSpacing.lg),
+        child: SoftSurface(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: (warning ? colors.error : AppColors.accent).withValues(
+                    alpha: 0.15,
+                  ),
+                  borderRadius: AppRadius.mdAll,
+                ),
+                child: Icon(
+                  warning
+                      ? Icons.cloud_off_rounded
+                      : Icons.add_to_drive_rounded,
+                  color: warning ? colors.error : AppColors.accent,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      warning
+                          ? 'Backup stopped'.tr
+                          : 'Your photos are only on this phone'.tr,
+                      style: context.text.titleSmall,
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      warning
+                          ? problem!
+                          : ('If the app is removed they are lost. Back them '
+                                    'up to Google Drive.')
+                                .tr,
+                      style: context.text.bodySmall?.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              TextButton(
+                onPressed: warning
+                    ? onOpenSettings
+                    : () => unawaited(drive.signIn()),
+                child: Text(warning ? 'Fix'.tr : 'Turn on'.tr),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
   }
 }
